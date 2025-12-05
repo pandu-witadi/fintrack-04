@@ -1,4 +1,4 @@
-const { User, Project, Evn, Trx } = require('../../model/index')
+const { User, Project, Budget, Actual, Trx } = require('../../model/index')
 const AppError = require('../../util/appError')
 
 const summary = async (request, reply) => {
@@ -7,7 +7,7 @@ const summary = async (request, reply) => {
         const userCount = await User.countDocuments({})
         
         // Count projects
-        // const projectCount = await Project.countDocuments({})
+        const projectCount = await Project.countDocuments({})
         
         // Count events (Evn)
         // const eventCount = await Evn.countDocuments({})
@@ -20,7 +20,7 @@ const summary = async (request, reply) => {
             success: true,
             pyd: {
                 users: userCount,
-                // projects: projectCount,
+                projects: projectCount,
                 // events: eventCount,
                 // transactions: transactionCount
             }

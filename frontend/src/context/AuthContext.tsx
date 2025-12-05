@@ -1,16 +1,15 @@
-import
-    React, {
-        createContext,
-        useState,
-        useEffect,
-        useContext,
-        ReactNode
-    } from 'react';
+import React, {
+    createContext,
+    useState,
+    useEffect,
+    useContext,
+    ReactNode
+} from 'react';
 import {
-    userService,
     User,
     UpdateProfileData
-} from '../services/userService';
+} from '../services/userService.ts';
+import { useUser } from '../hooks/useUser';
 
 interface AuthContextType {
     user: User | null;
@@ -28,37 +27,38 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [user, setUser] = useState<User | null>(null);
     const [token, setToken] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
+    const { login: userLogin, getMe, logout: userLogout, setToken: setUserToken, getToken: getUserToken, updateUser: updateUserService } = useUser();
 
     useEffect(() => {
         const initAuth = async () => {
-            const storedToken = userService.getToken();
+            const storedToken = getUserToken();
             if (storedToken) {
                 try {
-                    const response = await userService.getMe(storedToken);
+                    const response = await getMe(storedToken);
                     if (response.success) {
                         setUser(response.pyd);
                         setToken(storedToken);
                     } else {
-                        userService.logout();
+                        userLogout();
                     }
                 } catch (error) {
                     console.error('Failed to fetch user data:', error);
-                    userService.logout();
+                    userLogout();
                 }
             }
             setLoading(false);
         };
 
         initAuth();
-    }, []);
+    }, [getMe, userLogout, getUserToken]);
 
     const login = async (email: string, password: string) => {
         try {
-            const response = await userService.login({ email, password });
+            const response = await userLogin({ email, password });
             if (response.success) {
                 setUser(response.pyd);
                 setToken(response.token);
-                userService.setToken(response.token);
+                setUserToken(response.token);
             }
         } catch (error) {
             console.error('Login failed:', error);
@@ -67,11 +67,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     const updateProfile = async (data: UpdateProfileData) => {
-        if (!token)
-            throw new Error('No authentication token found');
+        if (!user?._id)
+            throw new Error('No user found');
 
         try {
-            const response = await userService.updateUser(token, data);
+            const response = await updateUserService(user._id, data);
             if (response.success) {
                 setUser(response.pyd);
             }
@@ -84,7 +84,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const logout = () => {
         setUser(null);
         setToken(null);
-        userService.logout();
+        userLogout();
     };
 
     const isAuthenticated = !!user && !!token;

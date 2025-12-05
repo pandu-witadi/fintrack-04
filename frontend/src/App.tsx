@@ -14,9 +14,9 @@ import Login from './pages/Login'
 import MainLayout from './components/MainLayout'
 import Dashboard from './pages/Dashboard'
 import AllUser from './pages/AllUser'
+import AllProject from './pages/AllProject'   
 
 // import ProfilePage from './pages/ProfilePage'
-// import FinAllProjectPage from './pages/FinAllProjectPage'
 // import ReportsPage from './pages/ReportsPage'
 // import SettingsPage from './pages/SettingsPage'
 // import ProjectDetailPage from './pages/ProjectDetailPage'
@@ -50,13 +50,13 @@ function AppRoutes() {
                     */}
 
                     {/* Finance sub-routes */}
-                    <Route path="/allUser" element={<AllUser />} />
-                    {/* 
+                    <Route path="/allUser" element={<AllUser />} />                   
                     <Route path="/finance/projects" element={
                         <ProtectedRoute roles={['admin', 'finance']}>
-                            <FinAllProjectPage />
+                            <AllProject />
                         </ProtectedRoute>
                     } />
+                    {/* 
                     <Route path="/finance/project/:id" element={
                         <ProtectedRoute roles={['admin', 'finance']}>
                             <ProjectDetailPage />

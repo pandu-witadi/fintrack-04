@@ -20,8 +20,8 @@ import { useAuth } from '@/context/AuthContext';
 import { UserDetailModal } from '@/pages/AllUser/UserDetailModal';
 import AddUserForm from '@/pages/AllUser/AddUserForm';
 import { UsersTable } from '@/pages/AllUser/UserTable';
+import { useUser } from '@/hooks/useUser.ts';
 
-import { userService } from '@/services/userService';
 import { User as AuthUser } from '@/services/userService';
 
 export interface User extends AuthUser {
@@ -38,6 +38,7 @@ export default function AllUser() {
     const [sortField, setSortField] = useState<'active' | 'name' | 'role' | 'lastAccess'>('name');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
     const { token, user: currentUser } = useAuth();
+    const { users: hookUsers, getAllUsers, getUserById, updateUser: updateUserViaHook, deleteUser: deleteUserViaHook, registerUser } = useUser();
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -90,26 +91,30 @@ export default function AllUser() {
         }
     });
 
+    // Hook to fetch users when component mounts
     useEffect(() => {
         const fetchUsers = async () => {
             try {
                 setError(null);
                 if (!token) return;
                 
-                // Fetch real users from backend using userService
-                const users = await userService.getAllUsers();
-                setUsers(users as User[]);
+                // Fetch real users from backend using useUser hook
+                await getAllUsers();
             } catch (error) {
                 console.error('Failed to fetch users:', error);
                 setError('Failed to fetch users. Please try again later.');
-                setUsers([]);
             } finally {
                 setLoading(false);
             }
-          };
+        };
 
         fetchUsers();
-    }, [token]);
+    }, [token, getAllUsers]);
+
+    // Update local users state when hook's users change
+    useEffect(() => {
+        setUsers(hookUsers as User[]);
+    }, [hookUsers]);
 
     const handleSelectAll = (checked: boolean) => {
         if (checked) {
@@ -136,10 +141,10 @@ export default function AllUser() {
                 return;
             }
             
-            // Otherwise fetch full user details from backend using userService
+            // Otherwise fetch full user details from backend using useUser hook
             if (!token) return;
             
-            const fullUser = await userService.getUserById(user._id);
+            const fullUser = await getUserById(user._id);
             setSelectedUser(fullUser as User);
             setIsModalOpen(true);
         } catch (error) {
@@ -159,8 +164,8 @@ export default function AllUser() {
         if (!userToDelete || !token) return;
         
         try {
-            // Delete user using userService
-            const response = await userService.deleteUser(userToDelete._id);
+            // Delete user using useUser hook
+            const response = await deleteUserViaHook(userToDelete._id);
             
             if (response.success) {
                 // Remove the user from the state
@@ -206,13 +211,13 @@ export default function AllUser() {
             if (!token) return;
             
             if (userToEdit) {
-                // Update existing user using userService
-                const response = await userService.updateUser(userToEdit._id, data);
+                // Update existing user using useUser hook
+                const response = await updateUserViaHook(userToEdit._id, data);
                 
                 if (response.success) {
                     // Fetch the updated user from backend to ensure fresh data
                     try {
-                        const freshUser = await userService.getUserById(userToEdit._id);
+                        const freshUser = await getUserById(userToEdit._id);
                         const updatedUser: User = {
                             ...freshUser,
                             updatedAt: new Date().toISOString()
@@ -235,8 +240,8 @@ export default function AllUser() {
                     }
                 }
             } else {
-                // Create new user using userService
-                const response = await userService.registerUser(token, data);
+                // Create new user using useUser hook
+                const response = await registerUser(token, data);
                 if (response.success) {
                     const newUser: User = {
                         ...response.pyd,

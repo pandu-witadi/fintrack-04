@@ -1,0 +1,64 @@
+const { Project } = require('../../model/index')
+const AppError = require('../../util/appError')
+
+const getAllProject = async (request, reply) => {
+    try {
+        const projects = await Project.find({})
+            .sort({ createdAt: -1 })
+            .populate({
+                path: 'updatedBy',
+                select: '_id name email'
+            })
+            .populate({
+                path: 'lBudget',
+                select: '_id name',
+                options: {
+                    transform: (doc) => {
+                        if (doc) {
+                            doc._id = doc._id.toString()
+                        }
+                        return doc
+                    }
+                }
+            })
+            .populate({
+                path: 'lActual',
+                select: '_id name',
+                options: {
+                    transform: (doc) => {
+                        if (doc) {
+                            doc._id = doc._id.toString()
+                        }
+                        return doc
+                    }
+                }
+            })
+            .populate({
+                path: 'lTrx',
+                select: '_id name',
+                options: {
+                    transform: (doc) => {
+                        if (doc) {
+                            doc._id = doc._id.toString()
+                        }
+                        return doc
+                    }
+                }
+            })
+            .lean({ virtuals: true })
+
+        projects.forEach(project => {
+            project._id = project._id.toString()
+        })
+
+        return {
+            success: true,
+            pyd: projects
+        }
+    } catch (error) {
+        console.log(error)
+        throw new AppError('Failed to fetch projects', 500)
+    }
+}
+
+module.exports = getAllProject

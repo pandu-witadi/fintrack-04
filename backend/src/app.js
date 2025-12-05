@@ -142,7 +142,7 @@ app.register(fastifySwaggerUi, {
 app.register(require('./api/health'), { prefix: API_PTH + '/health' })
 app.register(require('./api/user'), { prefix: API_PTH + '/user' })
 app.register(require('./api/dashboard'), { prefix: API_PTH + '/dashboard' })
-// app.register(require('./api/project'), { prefix: API_PTH + '/project' })
+app.register(require('./api/project'), { prefix: API_PTH + '/project' })
 // app.register(require('./api/evn'), { prefix: API_PTH + '/evn' })
 // app.register(require('./api/trx'), { prefix: API_PTH + '/trx' })
 // app.register(require('./api/upload'), { prefix: API_PTH + '/upload' })
