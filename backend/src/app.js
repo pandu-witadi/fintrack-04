@@ -41,10 +41,12 @@ app.register(fastifySwagger, {
             { name: 'health', description: 'Health check endpoints' },
             { name: 'user', description: 'User management endpoints' },
             { name: 'project', description: 'Project management endpoints' },
+            { name: 'budget', description: 'Budget management endpoints' },
+            { name: 'actual', description: 'Actual transaction management endpoints' },
+            { name: 'transaction', description: 'Transaction management endpoints' },
             { name: 'clnt', description: 'Client management endpoints' },
             { name: 'pjev', description: 'Income/Expense management endpoints' },
-            { name: 'dashboard', description: 'Dashboard summary endpoints' }
-        ],
+            { name: 'dashboard', description: 'Dashboard summary endpoints' }        ],
         components: {
             securitySchemes: {
                 bearerAuth: {
@@ -143,12 +145,14 @@ app.register(require('./api/health'), { prefix: API_PTH + '/health' })
 app.register(require('./api/user'), { prefix: API_PTH + '/user' })
 app.register(require('./api/dashboard'), { prefix: API_PTH + '/dashboard' })
 app.register(require('./api/project'), { prefix: API_PTH + '/project' })
+app.register(require('./api/budget'), { prefix: API_PTH + '/budget' })
+app.register(require('./api/actual'), { prefix: API_PTH + '/actual' })
 // app.register(require('./api/evn'), { prefix: API_PTH + '/evn' })
-// app.register(require('./api/trx'), { prefix: API_PTH + '/trx' })
+app.register(require('./api/trx'), { prefix: API_PTH + '/trx' })
 // app.register(require('./api/upload'), { prefix: API_PTH + '/upload' })
 
 // Ensure uploads directory exists
-const uploadsDir = path.join(__dirname, '..','uploads');
+const uploadsDir = path.join(__dirname, '..', 'uploads');
 if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir);
 }

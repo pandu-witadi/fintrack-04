@@ -16,12 +16,16 @@ import Dashboard from './pages/Dashboard'
 import AllUser from './pages/AllUser'
 import AllProject from './pages/AllProject'   
 
+import ProjectDetail from './pages/ProjectDetail'   
+import BudgetDetail from './pages/BudgetDetail'
+import ActualDetail from './pages/ActualDetail'
+import TrxDetail from './pages/TrxDetail'
 // import ProfilePage from './pages/ProfilePage'
 // import ReportsPage from './pages/ReportsPage'
 // import SettingsPage from './pages/SettingsPage'
-// import ProjectDetailPage from './pages/ProjectDetailPage'
-// import EventDetailPage from './pages/EventDetailPage'
-// import TrxDetailPage from './pages/TrxDetailPage'
+
+
+
 // import CurrentUserEventPage from './pages/CurrentUserEventPage'
 // import FinAllEvnPage from './pages/FinAllEvnPage'
 // import FinAllTrxPage from './pages/FinAllTrxPage'
@@ -48,32 +52,45 @@ function AppRoutes() {
                     <Route path="/users" element={<AllUsersPage />} />
                     <Route path="/finance/event" element={<CurrentUserEventPage />} /> 
                     */}
-
+                    
+                        
+                    {/* manage sub-routes */}
+                    <Route path="/manage/allUser" element={
+                        <ProtectedRoute roles={['admin']}>
+                            <AllUser />
+                        </ProtectedRoute>
+                    } />
+                                   
                     {/* Finance sub-routes */}
-                    <Route path="/allUser" element={<AllUser />} />                   
-                    <Route path="/finance/projects" element={
+                    <Route path="/finance/allProject" element={
                         <ProtectedRoute roles={['admin', 'finance']}>
                             <AllProject />
                         </ProtectedRoute>
                     } />
-                    {/* 
                     <Route path="/finance/project/:id" element={
                         <ProtectedRoute roles={['admin', 'finance']}>
-                            <ProjectDetailPage />
+                            <ProjectDetail />
                         </ProtectedRoute>
                     } />
 
-                    <Route path="/finance/event/:id" element={
+                    <Route path="/finance/budget/:id" element={
                         <ProtectedRoute roles={['admin', 'finance']}>
-                            <EventDetailPage />
+                            <BudgetDetail />
                         </ProtectedRoute>
                     } />
-                    <Route path="/finance/transaction/:trxId" element={
+                    
+                    <Route path="/finance/actual/:id" element={
                         <ProtectedRoute roles={['admin', 'finance']}>
-                            <TrxDetailPage />
+                            <ActualDetail />
                         </ProtectedRoute>
                     } />
-
+                    <Route path="/finance/trx/:id" element={
+                        <ProtectedRoute roles={['admin', 'finance']}>
+                            <TrxDetail />
+                        </ProtectedRoute>
+                    } />
+                    {/* 
+                    
                     <Route path="/finance/all-events" element={
                         <ProtectedRoute roles={['admin', 'finance']}>
                             <FinAllEvnPage />

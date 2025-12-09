@@ -16,7 +16,7 @@ import AddProjectDialog from './AddProjectDialog';
 
 export default function FinAllProjectPage() {
     const navigate = useNavigate();
-    const { projects, loading, error, fetchProjects, createProject } = useProject();
+    const { projects, loading, error, fetchAllProject, createProject } = useProject();
     const [isFormModalOpen, setIsFormModalOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -31,7 +31,7 @@ export default function FinAllProjectPage() {
     const handleFormSubmit = async (data: Partial<Project>) => {
         try {
               setIsSubmitting(true);
-              await createProject(data as Omit<Project, '_id' | 'createdAt' | 'updatedAt' | 'updatedBy' | 'levn' | 'ltrx' | 'info'>);
+              await createProject(data as Omit<Project, '_id' | 'createdAt' | 'updatedAt' | 'updatedBy' | 'lBudget' | 'lActual' | 'lTrx' |  'info'>);
               toast.success('Project created successfully');
               setIsFormModalOpen(false);
         } catch (error) {
@@ -56,7 +56,7 @@ export default function FinAllProjectPage() {
                 <div className="text-center">
                     <h3 className="text-lg font-medium text-red-600">Error</h3>
                     <p className="text-muted-foreground">{error}</p>
-                    <Button onClick={fetchProjects} className="mt-4">Retry</Button>
+                    <Button onClick={fetchAllProject} className="mt-4">Retry</Button>
                 </div>
             </div>
         );

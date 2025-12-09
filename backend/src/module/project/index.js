@@ -6,5 +6,5 @@ module.exports = {
     registerProject: require('./registerProject'),
     updateProject: require('./updateProject'),
     deleteProject: require('./deleteProject'),
-    // runFinance: require('./runFinance'),
+    runFinance: require('./runFinance'),
 }

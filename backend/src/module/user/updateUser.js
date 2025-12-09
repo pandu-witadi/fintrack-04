@@ -9,7 +9,6 @@ const updateUser = async (request, reply) => {
             throw new AppError('User not found', 404)
         }
 
-        console.log(request.user.role, user.role)
         if (['admin'].includes(request.user.role) && ['guest', 'user', 'finance', 'admin'].includes(user.role)) {
             let updateData = { ...request.body }
 

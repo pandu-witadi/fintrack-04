@@ -5,7 +5,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5200
 
 interface FinancialInfo {
     budget: number;
-    amount: number;
+    actual: number;
 }
 
 interface ProjectInfo {
@@ -29,11 +29,15 @@ export interface Project {
         name: string;
         email: string;
     };
-    levn?: Array<{
-        
-      name: string;
+    lBudget?: Array<{
+        _id: string;
+        name: string;
     }>;
-    ltrx?: Array<{
+    lActual?: Array<{
+        _id: string;
+        name: string;
+    }>;
+    lTrx?: Array<{
         _id: string;
         name: string;
     }>;
@@ -61,19 +65,15 @@ interface UpdateProjectData {
 }
 
 export const projectService = {
-    async getAllProjects(): Promise<Project[]> {
+
+    async getAllProject(): Promise<Project[]> {
         const token = userService.getToken();
         if (!token) {
             throw new Error('No authentication token found');
         }
 
         try {
-            const response = await axios.get(`${API_BASE_URL}/project/getAll`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            
+            const response = await axios.get(`${API_BASE_URL}/project/getAll`, { headers: { Authorization: `Bearer ${token}` } });
             if (response.data.success) {
                 return response.data.pyd;
             } else {
@@ -92,12 +92,7 @@ export const projectService = {
         }
 
         try {
-            const response = await axios.get(`${API_BASE_URL}/project/${id}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            
+            const response = await axios.get(`${API_BASE_URL}/project/${id}`, { headers: { Authorization: `Bearer ${token}` } });
             if (response.data.success) {
                 return response.data.pyd;
             } else {
@@ -110,96 +105,76 @@ export const projectService = {
     },
 
     async createProject(projectData: CreateProjectData): Promise<Project> {
-      const token = userService.getToken();
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      try {
-        const response = await axios.post(`${API_BASE_URL}/project/register`, projectData, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        
-        if (response.data.success) {
-          return response.data.pyd;
-        } else {
-          throw new Error('Failed to create project');
+        const token = userService.getToken();
+        if (!token) {
+            throw new Error('No authentication token found');
         }
-      } catch (error) {
-        console.error('Error creating project:', error);
-        throw error;
-      }
+
+        try {
+            const response = await axios.post(`${API_BASE_URL}/project/register`, projectData, { headers: { Authorization: `Bearer ${token}` } });
+            if (response.data.success) {
+                return response.data.pyd;
+            } else {
+                throw new Error('Failed to create project');
+            }
+        } catch (error) {
+            console.error('Error creating project:', error);
+            throw error;
+        }
     },
 
     async updateProject(id: string, projectData: UpdateProjectData): Promise<Project> {
-      const token = userService.getToken();
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      try {
-        const response = await axios.patch(`${API_BASE_URL}/project/${id}`, projectData, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        
-        if (response.data.success) {
-          return response.data.pyd;
-        } else {
-          throw new Error('Failed to update project');
+        const token = userService.getToken();
+        if (!token) {
+            throw new Error('No authentication token found');
         }
-      } catch (error) {
-        console.error('Error updating project:', error);
-        throw error;
-      }
+
+        try {
+            const response = await axios.patch(`${API_BASE_URL}/project/${id}`, projectData, { headers: { Authorization: `Bearer ${token}` } });        
+            if (response.data.success) {
+                return response.data.pyd;
+            } else {
+                throw new Error('Failed to update project');
+            }
+        } catch (error) {
+            console.error('Error updating project:', error);
+            throw error;
+        }
     },
 
     async deleteProject(id: string): Promise<void> {
-      const token = userService.getToken();
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      try {
-        const response = await axios.delete(`${API_BASE_URL}/project/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        
-        if (!response.data.success) {
-          throw new Error('Failed to delete project');
+        const token = userService.getToken();
+        if (!token) {
+            throw new Error('No authentication token found');
         }
-      } catch (error) {
-        console.error('Error deleting project:', error);
-        throw error;
-      }
+
+        try {
+            const response = await axios.delete(`${API_BASE_URL}/project/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+            if (!response.data.success) {
+                throw new Error('Failed to delete project');
+            }
+        } catch (error) {
+            console.error('Error deleting project:', error);
+            throw error;
+        }
     },
 
     async runFinance(id: string): Promise<Project> {
-      const token = userService.getToken();
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      try {
-        const response = await axios.get(`${API_BASE_URL}/project/runFinance/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        
-        if (response.data.success) {
-          return response.data.pyd;
-        } else {
-          throw new Error('Failed to calculate finance');
+        const token = userService.getToken();
+        if (!token) {
+            throw new Error('No authentication token found');
         }
-      } catch (error) {
-        console.error('Error calculating finance:', error);
-        throw error;
-      }
+
+        try {
+            const response = await axios.get(`${API_BASE_URL}/project/runFinance/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+            if (response.data.success) {
+                return response.data.pyd;
+            } else {
+                throw new Error('Failed to calculate finance');
+            }
+        } catch (error) {
+            console.error('Error calculating finance:', error);
+          throw error;
+        }
     }
 };

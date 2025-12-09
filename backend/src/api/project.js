@@ -4,7 +4,7 @@ const {
     registerProject,
     deleteProject,
     updateProject,
-    // runFinance
+    runFinance
 } = require('../module/project')
 
 const resp_200 = {
@@ -292,6 +292,36 @@ async function projectApi(fastify, options) {
             }
         }
     });
+
+    // run finance
+    fastify.route({
+        method: 'GET',
+        url: '/runFinance/:id',
+        preHandler: [protect, restrictTo(['finance', 'admin'])],
+        handler: runFinance,
+        schema: {
+            tags: ['project'],
+            summary: 'Calculate project finance by ID',
+            description: 'Calculate project finance by ID',
+            security: [{
+                bearerAuth: []
+            }],
+            params: {
+                type: 'object',
+                properties: {
+                    id: { type: 'string', description: 'Project ID' }
+                },
+                required: ['id']
+            },
+            response: {
+                200: resp_200,
+                400: resp_400,
+                401: resp_400,
+                403: resp_400,
+                404: resp_400
+            }
+        },
+    })
 }
 
 

@@ -33,7 +33,6 @@ const protect = async (request, reply) => {
         currentUser.lastAccess = new Date()
         await currentUser.save()
 
-        // console.log('...currentUser...', currentUser)
         request.user = currentUser
         return currentUser
     } catch (err) {

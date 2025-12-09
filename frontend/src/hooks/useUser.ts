@@ -5,17 +5,18 @@ import {
     LoginCredentials,
     RegisterUserData,
     LoginResponse,
-    RegisterUserResponse
+    RegisterUserResponse,
+    UpdateProfileResponse
 } from '../services/userService.ts';
 
 interface UseUserReturn {
     users: User[];
     loading: boolean;
     error: string | null;
-    getAllUsers: () => Promise<void>;
+    getAllUser: () => Promise<void>;
     getUserById: (userId: string) => Promise<User>;
     registerUser: (token: string, userData: RegisterUserData) => Promise<RegisterUserResponse>;
-    updateUser: (userId: string, userData: Partial<RegisterUserData>) => Promise<RegisterUserResponse>;
+    updateUser: (userId: string, userData: Partial<RegisterUserData>) => Promise<UpdateProfileResponse>;
     deleteUser: (userId: string) => Promise<{ success: boolean; message: string }>;
     login: (credentials: LoginCredentials) => Promise<LoginResponse>;
     getMe: (token: string) => Promise<{ success: boolean; pyd: User }>;
@@ -30,7 +31,7 @@ export const useUser = (): UseUserReturn => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const getAllUsers = useCallback(async () => {
+    const getAllUser = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
@@ -75,7 +76,7 @@ export const useUser = (): UseUserReturn => {
     );
 
     const updateUser = useCallback(
-        async (userId: string, userData: Partial<RegisterUserData>): Promise<RegisterUserResponse> => {
+        async (userId: string, userData: Partial<RegisterUserData>): Promise<UpdateProfileResponse> => {
             try {
                 setError(null);
                 const response = await userService.updateUser(userId, userData);
@@ -154,7 +155,7 @@ export const useUser = (): UseUserReturn => {
         users,
         loading,
         error,
-        getAllUsers,
+        getAllUser,
         getUserById,
         registerUser,
         updateUser,

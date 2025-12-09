@@ -60,11 +60,11 @@ interface MeResponse {
     pyd: User;
 }
 
-// interface UpdateProfileResponse {
-//   success: boolean;
-//   pyd: User;
-//   message: string;
-// }
+export interface UpdateProfileResponse {
+  success: boolean;
+  pyd: User;
+  message: string;
+}
 
 export const userService = {
     async login(credentials: LoginCredentials): Promise<LoginResponse> {
@@ -162,14 +162,14 @@ export const userService = {
       }
     },
 
-    async updateUser(userId: string, userData: Partial<RegisterUserData>): Promise<RegisterUserResponse> {
+    async updateUser(userId: string, userData: Partial<RegisterUserData>): Promise<UpdateProfileResponse> {
         const token = this.getToken();
         if (!token) {
           throw new Error('No authentication token found');
         }
 
         try {
-            const response = await axios.patch<RegisterUserResponse>(
+            const response = await axios.patch<UpdateProfileResponse>(
                 `${API_BASE_URL}/user/${userId}`,
                 userData,
                 { headers: { Authorization: `Bearer ${token}` } }

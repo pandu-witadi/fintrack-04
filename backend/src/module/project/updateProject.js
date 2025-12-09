@@ -11,7 +11,10 @@ const updateProject = async (request, reply) => {
             updateData,
             { new: true, runValidators: true }
         )
-
+        .populate({
+            path: 'updatedBy',
+            select: '-_id name email'
+        })
         if (!project) {
             throw new AppError('Project not found', 404)
         }

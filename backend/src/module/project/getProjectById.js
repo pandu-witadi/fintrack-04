@@ -3,48 +3,54 @@ const AppError = require('../../util/appError')
 
 const getProjectById = async (request, reply) => {
     try {
+        // check if project Id is provided
+        const { id } = request.params
+        if (!id) {
+            throw new AppError('Please provide a project ID', 400)
+        }
+
         const project = await Project.findById(request.params.id)
-            .populate({
-                path: 'updatedBy',
-                select: '_id name email'
-            })
-             .populate({
-                path: 'lBudget',
-                select: '_id name',
-                options: {
-                    transform: (doc) => {
-                        if (doc) {
-                            doc._id = doc._id.toString()
-                        }
-                        return doc
+        .populate({
+            path: 'updatedBy',
+            select: '_id name email'
+        })
+        .populate({
+            path: 'lBudget',
+            select: '_id name amount type done',
+            options: {
+                transform: (doc) => {
+                    if (doc) {
+                        doc._id = doc._id.toString()
                     }
+                    return doc
                 }
-            })
-            .populate({
-                path: 'lActual',
-                select: '_id name',
-                options: {
-                    transform: (doc) => {
-                        if (doc) {
-                            doc._id = doc._id.toString()
-                        }
-                        return doc
+            }
+        })
+        .populate({
+            path: 'lActual',
+            select: '_id name amount type done',
+            options: {
+                transform: (doc) => {
+                    if (doc) {
+                        doc._id = doc._id.toString()
                     }
+                    return doc
                 }
-            })
-            .populate({
-                path: 'lTrx',
-                select: '_id name',
-                options: {
-                    transform: (doc) => {
-                        if (doc) {
-                            doc._id = doc._id.toString()
-                        }
-                        return doc
+            }
+        })
+        .populate({
+            path: 'lTrx',
+            select: '_id name amount type done',
+            options: {
+                transform: (doc) => {
+                    if (doc) {
+                        doc._id = doc._id.toString()
                     }
+                    return doc
                 }
-            })
-            .lean({ virtuals: true })
+            }
+        })
+        .lean({ virtuals: true })
 
         if (!project) {
             throw new AppError('Project not found', 404)

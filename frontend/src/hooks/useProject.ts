@@ -3,23 +3,23 @@ import { useState, useEffect } from 'react';
 import { projectService, Project } from '../services/projectService';
 
 
-
 export const useProject = () => {
-    const [projects, setProjects] = useState<Project[]>([]);
+    const [projects, setAllProject] = useState<Project[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchProjects = async () => {
+    const fetchAllProject = async () => {
         try {
             setLoading(true);
-            const data = await projectService.getAllProjects();
+            const data = await projectService.getAllProject();
             // Add computed counts
             const projectsWithCounts = data.map(project => ({
                 ...project,
-                environmentCount: project.levn?.length || 0,
-                transactionCount: project.ltrx?.length || 0
+                budgetCount: project.lBudget?.length || 0,
+                actualCount: project.lActual?.length || 0,
+                trxCount: project.lTrx?.length || 0
             }));
-            setProjects(projectsWithCounts);
+            setAllProject(projectsWithCounts);
             setError(null);
         } catch (err) {
             setError('Failed to fetch projects');
@@ -37,12 +37,13 @@ export const useProject = () => {
             // Add computed counts
             const projectWithCounts = {
                 ...project,
-                environmentCount: project.levn?.length || 0,
-                transactionCount: project.ltrx?.length || 0
+                budgetCount: project.lBudget?.length || 0,
+                actualCount: project.lActual?.length || 0,
+                trxCount: project.lTrx?.length || 0
             };
 
             // Update the projects array with the fetched project
-            setProjects(prev => {
+            setAllProject(prev => {
                 const existingIndex = prev.findIndex(p => p._id === id);
                 if (existingIndex >= 0) {
                     // Replace existing project
@@ -66,47 +67,49 @@ export const useProject = () => {
         }
     };
 
-    // const runFinance = async (id: string) => {
-    //     try {
-    //         const updatedProject = await projectService.runFinance(id);
-    //         // Add computed counts
-    //         const projectWithCounts = {
-    //             ...updatedProject,
-    //             environmentCount: updatedProject.levn?.length || 0,
-    //             transactionCount: updatedProject.ltrx?.length || 0
-    //         };
+    const runFinance = async (id: string) => {
+        try {
+            const updatedProject = await projectService.runFinance(id);
+            // Add computed counts
+            const projectWithCounts = {
+                ...updatedProject,
+                budgetCount: updatedProject.lBudget?.length || 0,
+                actualCount: updatedProject.lActual?.length || 0,
+                trxCount: updatedProject.lTrx?.length || 0
+            };
 
-    //         // Update the projects array with the updated project
-    //         setProjects(prev => {
-    //             const existingIndex = prev.findIndex(p => p._id === id);
-    //             if (existingIndex >= 0) {
-    //                 // Replace existing project
-    //                 const updated = [...prev];
-    //                 updated[existingIndex] = projectWithCounts;
-    //                 return updated;
-    //             } else {
-    //                 // Add new project
-    //                 return [...prev, projectWithCounts];
-    //             }
-    //         });
+            // Update the projects array with the updated project
+            setAllProject(prev => {
+                const existingIndex = prev.findIndex(p => p._id === id);
+                if (existingIndex >= 0) {
+                    // Replace existing project
+                    const updated = [...prev];
+                    updated[existingIndex] = projectWithCounts;
+                    return updated;
+                } else {
+                    // Add new project
+                    return [...prev, projectWithCounts];
+                }
+            });
 
-    //         return projectWithCounts;
-    //     } catch (err) {
-    //         setError('Failed to calculate finance');
-    //         console.error(err);
-    //         throw err;
-    //     }
-    // };
+            return projectWithCounts;
+        } catch (err) {
+            setError('Failed to calculate finance');
+            console.error(err);
+            throw err;
+        }
+    };
 
-    const createProject = async (projectData: Omit<Project, '_id' | 'createdAt' | 'updatedAt' | 'updatedBy' | 'levn' | 'ltrx' |  'info'>) => {
+    const createProject = async (projectData: Omit<Project, '_id' | 'createdAt' | 'updatedAt' | 'updatedBy' | 'lBudget' | 'lActual' | 'lTrx' |  'info'>) => {
         try {
             const newProject = await projectService.createProject(projectData);
             const projectWithCounts = {
                 ...newProject,
-                environmentCount: newProject.levn?.length || 0,
-                transactionCount: newProject.ltrx?.length || 0
+                budgetCount: newProject.lBudget?.length || 0,
+                actualCount: newProject.lActual?.length || 0,
+                trxCount: newProject.lTrx?.length || 0
             };
-            setProjects(prev => [projectWithCounts, ...prev]);
+            setAllProject(prev => [projectWithCounts, ...prev]);
             return projectWithCounts;
         } catch (err) {
             setError('Failed to create project');
@@ -115,15 +118,16 @@ export const useProject = () => {
         }
     };
 
-    const updateProject = async (id: string, projectData: Partial<Omit<Project, '_id' | 'createdAt' | 'updatedAt' | 'updatedBy' | 'levn' | 'ltrx' | 'info'>>) => {
+    const updateProject = async (id: string, projectData: Partial<Omit<Project, '_id' | 'createdAt' | 'updatedAt' | 'updatedBy' | 'lBudget' | 'lActual' | 'lTrx' |  'info'>>) => {
         try {
             const updatedProject = await projectService.updateProject(id, projectData);
             const projectWithCounts = {
                 ...updatedProject,
-                environmentCount: updatedProject.levn?.length || 0,
-                transactionCount: updatedProject.ltrx?.length || 0
+                budgetCount: updatedProject.lBudget?.length || 0,
+                actualCount: updatedProject.lActual?.length || 0,
+                trxCount: updatedProject.lTrx?.length || 0
             };
-            setProjects(prev => prev.map(project => project._id === id ? projectWithCounts : project));
+            setAllProject(prev => prev.map(project => project._id === id ? projectWithCounts : project));
             return projectWithCounts;
         } catch (err) {
             setError('Failed to update project');
@@ -135,7 +139,7 @@ export const useProject = () => {
     const deleteProject = async (id: string) => {
         try {
             await projectService.deleteProject(id);
-            setProjects(prev => prev.filter(project => project._id !== id));
+            setAllProject(prev => prev.filter(project => project._id !== id));
         } catch (err) {
             setError('Failed to delete project');
             console.error(err);
@@ -144,16 +148,16 @@ export const useProject = () => {
     };
 
     useEffect(() => {
-        fetchProjects();
+        fetchAllProject();
     }, []);
 
     return {
         projects,
         loading,
         error,
-        fetchProjects,
+        fetchAllProject,
         fetchProjectById,
-        // runFinance,
+        runFinance,
         createProject,
         updateProject,
         deleteProject

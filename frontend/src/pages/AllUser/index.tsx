@@ -38,7 +38,14 @@ export default function AllUser() {
     const [sortField, setSortField] = useState<'active' | 'name' | 'role' | 'lastAccess'>('name');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
     const { token, user: currentUser } = useAuth();
-    const { users: hookUsers, getAllUsers, getUserById, updateUser: updateUserViaHook, deleteUser: deleteUserViaHook, registerUser } = useUser();
+    const { 
+        users: hookUsers, 
+        getAllUser, 
+        getUserById, 
+        updateUser: updateUserViaHook, 
+        deleteUser: deleteUserViaHook, 
+        registerUser 
+    } = useUser();
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -48,7 +55,7 @@ export default function AllUser() {
     const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
     // Check if current user has permission to add users
-    const canAddUsers = !!(currentUser && (currentUser.role === 'admin' || currentUser.role === 'root'));
+    const canAddUsers = !!(currentUser && (currentUser.role === 'admin'));
 
     const handleSort = (field: 'active' | 'name' | 'role' | 'lastAccess') => {
         if (sortField === field) {
@@ -93,13 +100,13 @@ export default function AllUser() {
 
     // Hook to fetch users when component mounts
     useEffect(() => {
-        const fetchUsers = async () => {
+        const fetchAllUser = async () => {
             try {
                 setError(null);
                 if (!token) return;
                 
                 // Fetch real users from backend using useUser hook
-                await getAllUsers();
+                await getAllUser();
             } catch (error) {
                 console.error('Failed to fetch users:', error);
                 setError('Failed to fetch users. Please try again later.');
@@ -108,8 +115,8 @@ export default function AllUser() {
             }
         };
 
-        fetchUsers();
-    }, [token, getAllUsers]);
+        fetchAllUser();
+    }, [token, getAllUser]);
 
     // Update local users state when hook's users change
     useEffect(() => {

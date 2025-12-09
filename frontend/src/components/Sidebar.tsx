@@ -61,7 +61,7 @@ export default function Sidebar() {
             roles: ['admin', 'finance'],
             submenu: [
                 { title: 'Time Map', href: '/finance/time-map', icon: <FileText className="h-5 w-5" /> },
-                { title: 'All Projects', href: '/finance/projects', icon: <FileText className="h-5 w-5" /> },
+                { title: 'All Projects', href: '/finance/allProject', icon: <FileText className="h-5 w-5" /> },
                 { title: 'All Events', href: '/finance/all-events', icon: <FileText className="h-5 w-5" /> },
                 { title: 'All Trx', href: '/finance/all-trx', icon: <FileText className="h-5 w-5" /> },
                 
@@ -72,7 +72,7 @@ export default function Sidebar() {
             icon: <Users className="h-5 w-5" />,
             roles: ['admin'],
             submenu: [
-                { title: 'All User', href: '/allUser', icon: <Users className="h-5 w-5" /> },
+                { title: 'All User', href: '/manage/allUser', icon: <Users className="h-5 w-5" /> },
             ]
         },
         { 
