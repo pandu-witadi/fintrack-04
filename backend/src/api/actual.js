@@ -1,6 +1,7 @@
 const {
     getAllActual,
     getAllActualByProjectId,
+    getAllActualByAssignee,
     getActualById,
     updateActual,
     deleteActual,
@@ -154,6 +155,47 @@ async function actualApi(fastify, options) {
                     projectId: { type: 'string', description: 'Project ID' }
                 },
                 required: ['projectId']
+            },
+            response: {
+                200: {
+                    type: 'object',
+                    properties: {
+                        success: { type: 'boolean' },
+                        pyd: {
+                            type: 'array',
+                            items: {
+                                type: 'object',
+                                properties: resp_200.properties.pyd.properties
+                            }
+                        }
+                    }
+                },
+                400: resp_400,
+                401: resp_400,
+                403: resp_400
+            }
+        }
+    });
+
+    // Get all actuals by assignee ID
+    fastify.route({
+        method: 'GET',
+        url: '/assignee/:assigneeId',
+        preHandler: [protect],
+        handler: getAllActualByAssignee,
+        schema: {
+            tags: ['actual'],
+            summary: 'Get all actuals by assignee ID',
+            description: 'Retrieve all actuals assigned to a specific assignee',
+            security: [{
+                bearerAuth: []
+            }],
+            params: {
+                type: 'object',
+                properties: {
+                    assigneeId: { type: 'string', description: 'Assignee ID' }
+                },
+                required: ['assigneeId']
             },
             response: {
                 200: {

@@ -52,7 +52,7 @@ export default function Sidebar() {
             title: 'Work', 
             icon: <Briefcase className="h-5 w-5" />,
             submenu: [
-                { title: 'My Events', href: '/finance/event', icon: <FileText className="h-5 w-5" /> }
+                { title: 'Time Actual', href: '/cu/time-actual', icon: <FileText className="h-5 w-5" /> }
             ]
         },
         { 
@@ -60,10 +60,11 @@ export default function Sidebar() {
             icon: <WalletMinimal className="h-5 w-5" />, 
             roles: ['admin', 'finance'],
             submenu: [
-                { title: 'Time Map', href: '/finance/time-map', icon: <FileText className="h-5 w-5" /> },
+   
                 { title: 'All Projects', href: '/finance/allProject', icon: <FileText className="h-5 w-5" /> },
-                { title: 'All Events', href: '/finance/all-events', icon: <FileText className="h-5 w-5" /> },
-                { title: 'All Trx', href: '/finance/all-trx', icon: <FileText className="h-5 w-5" /> },
+                { title: 'Time Budget', href: '/finance/time-budget', icon: <FileText className="h-5 w-5" /> },
+                { title: 'Time Actual', href: '/finance/time-actual', icon: <FileText className="h-5 w-5" /> },
+                { title: 'Time Trx', href: '/finance/time-trx', icon: <FileText className="h-5 w-5" /> },
                 
             ]
         },

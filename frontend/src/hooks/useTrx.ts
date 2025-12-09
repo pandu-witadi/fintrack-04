@@ -5,6 +5,7 @@ export interface UseTrxReturn {
     trxs: Trx[];
     loading: boolean;
     error: string | null;
+    getAllTrx: () => Promise<Trx[]>;
     getAllTrxByProjectId: (projectId: string) => Promise<Trx[]>;
     getTrxById: (trxId: string) => Promise<Trx>;
     createTrx: (trxData: CreateTrxData) => Promise<Trx>;
@@ -17,6 +18,23 @@ export const useTrx = (): UseTrxReturn => {
     const [trxs, setTrxsState] = useState<Trx[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const getAllTrx = useCallback(async (): Promise<Trx[]> => {
+        try {
+            setLoading(true);
+            setError(null);
+            const data = await trxService.getAllTrx();
+            setTrxsState(data);
+            return data;
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Failed to fetch transactions';
+            setError(errorMessage);
+            console.error(err);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
     const getAllTrxByProjectId = useCallback(async (projectId: string): Promise<Trx[]> => {
         try {
@@ -97,6 +115,7 @@ export const useTrx = (): UseTrxReturn => {
         trxs,
         loading,
         error,
+        getAllTrx,
         getAllTrxByProjectId,
         getTrxById,
         createTrx,

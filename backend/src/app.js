@@ -147,7 +147,6 @@ app.register(require('./api/dashboard'), { prefix: API_PTH + '/dashboard' })
 app.register(require('./api/project'), { prefix: API_PTH + '/project' })
 app.register(require('./api/budget'), { prefix: API_PTH + '/budget' })
 app.register(require('./api/actual'), { prefix: API_PTH + '/actual' })
-// app.register(require('./api/evn'), { prefix: API_PTH + '/evn' })
 app.register(require('./api/trx'), { prefix: API_PTH + '/trx' })
 // app.register(require('./api/upload'), { prefix: API_PTH + '/upload' })
 

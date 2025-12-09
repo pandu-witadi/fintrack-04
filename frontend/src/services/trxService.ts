@@ -94,6 +94,28 @@ export interface CloneTrxFromActualData {
 }
 
 export const trxService = {
+    async getAllTrx(): Promise<Trx[]> {
+        const token = userService.getToken();
+        if (!token) {
+            throw new Error('No authentication token found');
+        }
+
+        try {
+            const response = await axios.get(
+                `${API_BASE_URL}/trx/getAll`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            if (response.data.success) {
+                return response.data.pyd;
+            } else {
+                throw new Error('Failed to fetch transactions');
+            }
+        } catch (error) {
+            console.error('Error fetching transactions:', error);
+            throw error;
+        }
+    },
+
     async getTrxById(id: string): Promise<Trx> {
         const token = userService.getToken();
         if (!token) {

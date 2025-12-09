@@ -56,7 +56,7 @@ export interface UpdateActualData {
     done?: boolean;
     amount?: number;
     detailedAmount?: DetailedAmount;
-    assignee?: string;
+    assignee?: string | null;
     budget?: string;
     trx?: string;
     dateEx?: string;
@@ -78,6 +78,28 @@ export interface CreateActualData {
 }
 
 export const actualService = {
+    async getAllActual(): Promise<Actual[]> {
+        const token = userService.getToken();
+        if (!token) {
+            throw new Error('No authentication token found');
+        }
+
+        try {
+            const response = await axios.get(
+                `${API_BASE_URL}/actual/getAll`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            if (response.data.success) {
+                return response.data.pyd;
+            } else {
+                throw new Error('Failed to fetch actuals');
+            }
+        } catch (error) {
+            console.error('Error fetching actuals:', error);
+            throw error;
+        }
+    },
+
     async getActualById(id: string): Promise<Actual> {
         const token = userService.getToken();
         if (!token) {
@@ -109,6 +131,28 @@ export const actualService = {
         try {
             const response = await axios.get(
                 `${API_BASE_URL}/actual/project/${projectId}`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            if (response.data.success) {
+                return response.data.pyd;
+            } else {
+                throw new Error('Failed to fetch actuals');
+            }
+        } catch (error) {
+            console.error('Error fetching actuals:', error);
+            throw error;
+        }
+    },
+
+    async getAllActualByAssignee(assigneeId: string): Promise<Actual[]> {
+        const token = userService.getToken();
+        if (!token) {
+            throw new Error('No authentication token found');
+        }
+
+        try {
+            const response = await axios.get(
+                `${API_BASE_URL}/actual/assignee/${assigneeId}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             if (response.data.success) {

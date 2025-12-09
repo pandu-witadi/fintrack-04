@@ -9,10 +9,12 @@ import {
 import './assets/App.css'
 import ProtectedRoute from './components/ProtectedRoute'
 import { AuthProvider } from './context/AuthContext'
+import MainLayout from './components/MainLayout'
 
 import Login from './pages/Login'
-import MainLayout from './components/MainLayout'
 import Dashboard from './pages/Dashboard'
+import Profile from './pages/Profile'
+
 import AllUser from './pages/AllUser'
 import AllProject from './pages/AllProject'   
 
@@ -20,18 +22,12 @@ import ProjectDetail from './pages/ProjectDetail'
 import BudgetDetail from './pages/BudgetDetail'
 import ActualDetail from './pages/ActualDetail'
 import TrxDetail from './pages/TrxDetail'
-// import ProfilePage from './pages/ProfilePage'
-// import ReportsPage from './pages/ReportsPage'
-// import SettingsPage from './pages/SettingsPage'
 
+import TimeBudget from './pages/TimeBudget'
+import TimeActual from './pages/TimeActual'
+import TimeTrx from './pages/TimeTrx'
 
-
-// import CurrentUserEventPage from './pages/CurrentUserEventPage'
-// import FinAllEvnPage from './pages/FinAllEvnPage'
-// import FinAllTrxPage from './pages/FinAllTrxPage'
-// import TimeMapPage from './pages/TimeMap'
-
-
+import CurrentUserTimeActual from './pages/CurrentUserTimeActual' // Changed from './pages/CuTimeActual' to './pages/CuTimeActual'
 
 function AppRoutes() {
     return (
@@ -47,12 +43,8 @@ function AppRoutes() {
                     }
                 >
                     <Route path="/dashboard" element={<Dashboard />} />
-                    {/* 
                     <Route path="/profile" element={<Profile />} />
-                    <Route path="/users" element={<AllUsersPage />} />
-                    <Route path="/finance/event" element={<CurrentUserEventPage />} /> 
-                    */}
-                    
+                    <Route path="/cu/time-actual" element={<CurrentUserTimeActual />} />
                         
                     {/* manage sub-routes */}
                     <Route path="/manage/allUser" element={
@@ -89,27 +81,22 @@ function AppRoutes() {
                             <TrxDetail />
                         </ProtectedRoute>
                     } />
-                    {/* 
+                    <Route path="/finance/time-budget" element={
+                        <ProtectedRoute roles={['admin', 'finance']}>
+                            <TimeBudget />
+                        </ProtectedRoute>
+                    } />
+                    <Route path="/finance/time-actual" element={
+                        <ProtectedRoute roles={['admin', 'finance']}>
+                            <TimeActual />
+                        </ProtectedRoute>
+                    } />
+                    <Route path="/finance/time-trx" element={
+                        <ProtectedRoute roles={['admin', 'finance']}>
+                            <TimeTrx />
+                        </ProtectedRoute>
+                    } />
                     
-                    <Route path="/finance/all-events" element={
-                        <ProtectedRoute roles={['admin', 'finance']}>
-                            <FinAllEvnPage />
-                        </ProtectedRoute>
-                    } />
-                    <Route path="/finance/all-trx" element={
-                        <ProtectedRoute roles={['admin', 'finance']}>
-                            <FinAllTrxPage />
-                        </ProtectedRoute>
-                    } />
-                    <Route path="/finance/time-map" element={
-                        <ProtectedRoute roles={['admin', 'finance']}>
-                            <TimeMapPage />
-                        </ProtectedRoute>
-                    } />
-
-                    <Route path="/dashboard/reports" element={<ReportsPage />} />
-                    <Route path="/dashboard/settings" element={<SettingsPage />} /> 
-                    */}
                 </Route>
             </Routes>
         </Suspense>

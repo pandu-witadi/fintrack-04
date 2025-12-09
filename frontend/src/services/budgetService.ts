@@ -72,6 +72,28 @@ export interface BudgetListResponse {
 }
 
 export const budgetService = {
+    async getAllBudget(): Promise<Budget[]> {
+        const token = userService.getToken();
+        if (!token) {
+            throw new Error('No authentication token found');
+        }
+
+        try {
+            const response = await axios.get(
+                `${API_BASE_URL}/budget/getAll`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            if (response.data.success) {
+                return response.data.pyd;
+            } else {
+                throw new Error('Failed to fetch budgets');
+            }
+        } catch (error) {
+            console.error('Error fetching budgets:', error);
+            throw error;
+        }
+    },
+
     async getBudgetsByProject(projectId: string): Promise<Budget[]> {
         const token = userService.getToken();
         if (!token) {

@@ -20,10 +20,16 @@ const updateActual = async (request, reply) => {
             throw new AppError('Actual not found', 404)
         }
 
+        // Handle null assignee - explicitly set to null if provided
+        const dataToUpdate = { ...updateData, updatedBy: request.user._id }
+        if (updateData.hasOwnProperty('assignee') && updateData.assignee === '') {
+            dataToUpdate.assignee = null
+        }
+
         // Update the actual with new data
         const updatedActual = await Actual.findByIdAndUpdate(
             id,
-            { ...updateData, updatedBy: request.user._id },
+            dataToUpdate,
             { new: true, runValidators: true }
         )
             .populate({

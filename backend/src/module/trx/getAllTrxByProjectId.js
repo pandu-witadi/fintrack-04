@@ -41,8 +41,6 @@ const getAllTrxByProjectId = async (request, reply) => {
             trx._id = trx._id.toString()
         })
 
-        console.log(trxs)
-
         return {
             success: true,
             pyd: trxs

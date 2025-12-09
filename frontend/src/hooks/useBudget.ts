@@ -8,6 +8,7 @@ export interface UseBudgetReturn {
     budgets: Budget[];
     loading: boolean;
     error: string | null;
+    getAllBudget: () => Promise<Budget[]>;
     getAllBudgetByProjectId: (projectId: string) => Promise<Budget[]>;
     getBudgetById: (budgetId: string) => Promise<Budget>;
     createBudget: (projectId: string, budgetData: any) => Promise<Budget>;
@@ -20,6 +21,23 @@ export const useBudget = (): UseBudgetReturn => {
     const [budgets, setBudgetsState] = useState<Budget[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const getAllBudget = useCallback(async (): Promise<Budget[]> => {
+        try {
+            setLoading(true);
+            setError(null);
+            const data = await budgetService.getAllBudget();
+            setBudgetsState(data);
+            return data;
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Failed to fetch budgets';
+            setError(errorMessage);
+            console.error(err);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
     const getAllBudgetByProjectId = useCallback(async (projectId: string): Promise<Budget[]> => {
         try {
@@ -100,6 +118,7 @@ export const useBudget = (): UseBudgetReturn => {
         budgets,
         loading,
         error,
+        getAllBudget,
         getAllBudgetByProjectId,
         getBudgetById,
         createBudget,

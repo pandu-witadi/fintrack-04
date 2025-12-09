@@ -5,7 +5,9 @@ export interface UseActualReturn {
     actuals: Actual[];
     loading: boolean;
     error: string | null;
+    getAllActual: () => Promise<Actual[]>;
     getAllActualByProjectId: (projectId: string) => Promise<Actual[]>;
+    getAllActualByAssignee: (assigneeId: string) => Promise<Actual[]>;
     getActualById: (actualId: string) => Promise<Actual>;
     createActual: (actualData: CreateActualData) => Promise<Actual>;
     updateActual: (actualId: string, actualData: Partial<any>) => Promise<Actual>;
@@ -18,11 +20,45 @@ export const useActual = (): UseActualReturn => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    const getAllActual = useCallback(async (): Promise<Actual[]> => {
+        try {
+            setLoading(true);
+            setError(null);
+            const data = await actualService.getAllActual();
+            setActualsState(data);
+            return data;
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Failed to fetch actuals';
+            setError(errorMessage);
+            console.error(err);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     const getAllActualByProjectId = useCallback(async (projectId: string): Promise<Actual[]> => {
         try {
             setLoading(true);
             setError(null);
             const data = await actualService.getAllActualByProjectId(projectId);
+            setActualsState(data);
+            return data;
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Failed to fetch actuals';
+            setError(errorMessage);
+            console.error(err);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const getAllActualByAssignee = useCallback(async (assigneeId: string): Promise<Actual[]> => {
+        try {
+            setLoading(true);
+            setError(null);
+            const data = await actualService.getAllActualByAssignee(assigneeId);
             setActualsState(data);
             return data;
         } catch (err) {
@@ -97,7 +133,9 @@ export const useActual = (): UseActualReturn => {
         actuals,
         loading,
         error,
+        getAllActual,
         getAllActualByProjectId,
+        getAllActualByAssignee,
         getActualById,
         createActual,
         updateActual,
