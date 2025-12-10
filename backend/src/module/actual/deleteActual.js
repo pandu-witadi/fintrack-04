@@ -1,4 +1,4 @@
-const { Actual, Project, Budget } = require('../../model/index')
+const { Actual, Project, Budget, Trx } = require('../../model/index')
 const AppError = require('../../util/appError')
 
 const deleteActual = async (request, reply) => {
@@ -32,8 +32,23 @@ const deleteActual = async (request, reply) => {
         await budget.save()
 
         // remove actual from trx
-        // not yet implemented
+        let trx = await Trx.findById(actual.trx._id.toString())
+        .populate({
+            path: 'lActual',
+            select: '_id name amount'
+        })
+        if (!trx) {
+            throw new AppError('Trx not found', 404)
+        }
 
+        // remove actual from trx.lActual which populated
+        trx.lActual = trx.lActual.filter((a) => a._id.toString() !== id)
+
+        // calculated sum of trx.lActual
+        trx.amount = trx.lActual.reduce((acc, a) => acc + a.amount, 0)
+        await trx.save()
+
+        // delete actual
         await Actual.findByIdAndDelete(id)
 
         return {

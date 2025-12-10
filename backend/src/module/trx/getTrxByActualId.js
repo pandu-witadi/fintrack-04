@@ -39,7 +39,7 @@ const getTrxByActualId = async (request, reply) => {
         })
         .populate({
             path: 'lActual',
-            select: '_id name typ amount done',
+            select: '_id active name typ amount done dateEx',
             options: {
                 transform: (doc) => {
                     if (doc) {

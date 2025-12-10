@@ -11,7 +11,10 @@ import {
     Power,
     ChevronRight,
     CreditCard,
-    User
+    User,
+    Upload,
+    X,
+    Loader2
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -25,13 +28,19 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { trxService, Trx } from '@/services/trxService.ts';
 import { userService, User as UserType } from '@/services/userService.ts';
+import { actualService } from '@/services/actualService';
+import { uploadService } from '@/services/uploadService';
 import formatCurrency from '@/utils/formatCurrency';
 import { IconActive } from '@/components/IconActive';
 import { IconDone } from '@/components/IconDone';
+import ActualTable from './ActualTable';
+import { useUpload } from '@/hooks/useUpload';
+
 
 export default function TrxDetail() {
     const navigate = useNavigate();
     const { id: trxId } = useParams<{ id: string }>();
+    const { uploadImage, removeImage, uploading: isUploadingImage, error: uploadError, clearError } = useUpload();
 
     const [trx, setTrx] = useState<Trx | null>(null);
     const [loading, setLoading] = useState(true);
@@ -95,12 +104,32 @@ export default function TrxDetail() {
     const [expandedAmountDetails, setExpandedAmountDetails] = useState(false);
     const [expandedAmountDetailsView, setExpandedAmountDetailsView] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+    const [previewImage, setPreviewImage] = useState<string | null>(null);
+    const [removingImageId, setRemovingImageId] = useState<string | null>(null);
 
     useEffect(() => {
         if (trxId) {
             fetchTrxDetails(trxId);
         }
     }, [trxId]);
+
+    // Load existing images from trx
+    useEffect(() => {
+        if (trx?.img) {
+            setUploadedImages([trx.img]);
+        } else {
+            setUploadedImages([]);
+        }
+    }, [trx?.img]);
+
+    // Handle upload errors
+    useEffect(() => {
+        if (uploadError) {
+            toast.error(uploadError);
+            clearError();
+        }
+    }, [uploadError, clearError]);
 
     // Add function to fetch all users
     const fetchAllUsers = async () => {
@@ -273,6 +302,16 @@ export default function TrxDetail() {
             });
         }
         setIsEditing(false);
+    };
+
+    const handleDeleteActual = async (actual: any) => {
+        try {
+            await actualService.deleteActual(actual._id);
+            toast.success('Actual deleted successfully');
+        } catch (error) {
+            toast.error('Failed to delete actual');
+            console.error(error);
+        }
     };
 
     const formatDate = (dateString: string) => {
@@ -893,31 +932,116 @@ export default function TrxDetail() {
                             </CardContent>
                         </Card>
 
-                        {/* Related Actuals */}
-                        {trx?.lActual && trx.lActual.length > 0 && (
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Related Actuals</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="space-y-2">
-                                        {trx.lActual.map(actual => (
-                                            <div 
-                                                key={actual._id} 
-                                                className="flex justify-between items-center p-2 hover:bg-muted rounded cursor-pointer"
-                                                onClick={() => navigate(`/finance/actual/${actual._id}`)}
-                                            >
-                                                <div className="font-medium truncate">{actual.name}</div>
-                                                <div className="text-sm text-muted-foreground">{formatCurrency(actual.amount)}</div>
-                                            </div>
-                                        ))}
+                        {/* Images */}
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Images</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                  {/* Image Preview */}
+                                {uploadedImages.length > 0 && (
+                                    <div className="space-y-3">
+                                        <h4 className="text-sm font-medium">Uploaded Images ({uploadedImages.length})</h4>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {uploadedImages.map((imageName: string, idx: number) => (
+                                                <div key={idx} className="relative group">
+                                                    <img
+                                                        src={uploadService.viewImage(imageName)}
+                                                        alt={`Preview ${idx}`}
+                                                        className="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-75"
+                                                        onClick={() => setPreviewImage(uploadService.viewImage(imageName))}
+                                                    />
+                                                    <button
+                                                        onClick={async () => {
+                                                            try {
+                                                                setRemovingImageId(imageName);
+                                                                await removeImage(trxId || '', imageName);
+                                                                setUploadedImages(prev => prev.filter((_, i) => i !== idx));
+                                                                toast.success('Image removed successfully');
+                                                            } catch (err) {
+                                                                toast.error('Failed to remove image');
+                                                                console.error(err);
+                                                            } finally {
+                                                                setRemovingImageId(null);
+                                                            }
+                                                        }}
+                                                        disabled={removingImageId === imageName || isUploadingImage}
+                                                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition disabled:opacity-50"
+                                                    >
+                                                        {removingImageId === imageName ? (
+                                                            <Loader2 className="h-3 w-3 animate-spin" />
+                                                        ) : (
+                                                            <X className="h-3 w-3" />
+                                                        )}
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
-                                </CardContent>
-                            </Card>
-                        )}
+                                )}
+                                
+                                {/* Image Upload */}
+                                <div className="border-2 border-dashed rounded-lg p-6 text-center hover:bg-muted/50 cursor-pointer transition">
+                                    <input
+                                        type="file"
+                                        multiple
+                                        accept="image/*"
+                                        onChange={async (e) => {
+                                            const files = e.target.files;
+                                            if (files && trxId) {
+                                                for (let i = 0; i < files.length; i++) {
+                                                    const file = files[i];
+                                                    try {
+                                                        const filename = await uploadImage(file, trxId);
+                                                        setUploadedImages(prev => [...prev, filename]);
+                                                        toast.success(`Image uploaded successfully`);
+                                                    } catch (err) {
+                                                        toast.error('Failed to upload image');
+                                                        console.error(err);
+                                                    }
+                                                }
+                                                // Reset input
+                                                e.target.value = '';
+                                            }
+                                        }}
+                                        className="hidden"
+                                        id="image-upload"
+                                        disabled={isUploadingImage}
+                                    />
+                                    <label htmlFor="image-upload" className={`cursor-pointer ${isUploadingImage ? 'opacity-50 pointer-events-none' : ''}`}>
+                                        {isUploadingImage ? (
+                                            <Loader2 className="h-8 w-8 text-muted-foreground mx-auto mb-2 animate-spin" />
+                                        ) : (
+                                            <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                                        )}
+                                        <p className="text-sm font-medium">{isUploadingImage ? 'Uploading...' : 'Drop images here or click to upload'}</p>
+                                        <p className="text-xs text-muted-foreground">PNG, JPG, GIF up to 5MB</p>
+                                    </label>
+                                </div>
+                            </CardContent>
+                        </Card>
                     </div>
                 </div>
+                {/* Related Actuals Table */}
+                {trx?.lActual && trx.lActual.length > 0 && (
+                    <ActualTable 
+                        actuals={trx.lActual}
+                        onDelete={handleDeleteActual}
+                    />
+                )}
             </main>
+
+            {/* Image Preview Modal */}
+            {previewImage && (
+                <div 
+                    className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+                    onClick={() => setPreviewImage(null)}
+                >
+                    <div className="bg-white rounded-lg p-4 max-w-2xl max-h-[80vh] flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+                        <img src={previewImage} alt="Full preview" className="max-w-full max-h-full" />
+                    </div>
+                </div>
+            )}
 
             {/* Delete Confirmation Dialog */}
             <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>

@@ -24,17 +24,39 @@ const getTrxById = async (request, reply) => {
         })
         .populate({
             path: 'lActual',
-            select: '_id name typ amount done',
+            select: '_id active name typ amount done dateEx project assignee',
+            populate: [
+                {
+                    path: 'project',
+                    select: '_id name'
+                },
+                {
+                    path: 'assignee',
+                    select: '_id name'
+                }
+            ],
             options: {
                 transform: (doc) => {
                     if (doc) {
                         doc._id = doc._id.toString()
+                        if (doc.project) {
+                            doc.projectId = doc.project._id.toString()
+                            doc.projectName = doc.project.name
+                            delete doc.project
+                        }
+                        if (doc.assignee) {
+                            doc.assigneeId = doc.assignee._id.toString()
+                            doc.assigneeName = doc.assignee.name
+                            delete doc.assignee
+                        }
                     }
                     return doc
                 }
             }
         })
         .lean({ virtuals: true })
+
+        console.log(trx)
 
         if (!trx) {
             throw new AppError('Transaction not found', 404)

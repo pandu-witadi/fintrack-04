@@ -9,6 +9,7 @@ import { IconType } from '../../components/IconType';
 import { useBudget } from '../../hooks/useBudget';
 import { useNavigate } from 'react-router-dom';
 import sortRow from '../../utils/sortRow';
+import { ArrowRight } from 'lucide-react';
 
 const formatYearMonth = (year: number, month: number): string => {
     return `${year}-${String(month).padStart(2, '0')}`;
@@ -291,7 +292,16 @@ export default function TimeBudget() {
                                                             onChange={() => handleRowSelect(key)}
                                                             className="rounded border-gray-300 cursor-pointer"
                                                         />
-                                                        <button onClick={() => navigate(`/finance/budget/${group.budgets[0]._id}`)} className="text-cyan-700 hover:text-blue-800 hover:underline cursor-pointer whitespace-nowrap" title={`View budget: ${group.budgetName}`}>{group.project} {'>>'} {group.budgetName}</button>
+                                                        <button 
+                                                            onClick={() => navigate(`/finance/budget/${group.budgets[0]._id}`)} 
+                                                            className="text-cyan-700 hover:text-blue-800 hover:underline cursor-pointer whitespace-nowrap" 
+                                                            title={`View budget: ${group.budgetName}`}
+                                                        >
+                                                            {group.project} 
+                                                            {/* <ArrowRight className="h-3 w-3 inline" />   */}
+                                                            {" / "}                                                            
+                                                            {group.budgetName}
+                                                        </button>
                                                     </div>
                                                 </td>
                                                 {monthRange.map(month => {

@@ -23,27 +23,54 @@ const getAllTrxByProjectId = async (request, reply) => {
             path: 'assignee',
             select: '_id name email'
         })
-         .populate({
+        .populate({
             path: 'lActual',
-            select: '_id name typ amount done',
-            options: {
-                transform: (doc) => {
-                    if (doc) {
-                        doc._id = doc._id.toString()
-                    }
-                    return doc
+            select: '_id active name typ amount done dateEx project assignee',
+            populate: [
+                {
+                    path: 'project',
+                    select: '_id name'
+                },
+                {
+                    path: 'assignee',
+                    select: '_id name'
                 }
-            }
+            ]
         })
         .lean({ virtuals: true })
 
-        trxs.forEach(trx => {
+        // Transform the data after population (instead of using options.transform which doesn't work with lean)
+        const transformedTrxs = trxs.map(trx => {
+            // Transform lActual items
+            if (trx.lActual && Array.isArray(trx.lActual)) {
+                trx.lActual = trx.lActual.map((actual) => {
+                    const transformed = {
+                        _id: actual._id.toString(),
+                        active: actual.active,
+                        name: actual.name,
+                        typ: actual.typ,
+                        amount: actual.amount,
+                        done: actual.done,
+                        dateEx: actual.dateEx
+                    }
+                    if (actual.project) {
+                        transformed.projectId = actual.project._id.toString()
+                        transformed.projectName = actual.project.name
+                    }
+                    if (actual.assignee) {
+                        transformed.assigneeId = actual.assignee._id.toString()
+                        transformed.assigneeName = actual.assignee.name
+                    }
+                    return transformed
+                })
+            }
             trx._id = trx._id.toString()
+            return trx
         })
 
         return {
             success: true,
-            pyd: trxs
+            pyd: transformedTrxs
         }
     } catch (error) {
         if (error.kind === 'ObjectId') {

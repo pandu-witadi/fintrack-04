@@ -69,7 +69,10 @@ const resp_200 = {
                     properties: {
                         _id: { type: 'string' },
                         name: { type: 'string' },
-                        amount: { type: 'number' }
+                        amount: { type: 'number' },
+                        typ: { type: 'string', enum: ['income', 'expense'] },
+                        done: { type: 'boolean' },
+                        projectName: { type: 'string' }
                     }
                 },
                 dateEx: { type: 'string', format: 'date' },

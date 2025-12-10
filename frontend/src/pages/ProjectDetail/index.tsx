@@ -223,6 +223,7 @@ export default function ProjectDetail() {
             // Use the createTrx function from the hook
             await trxService.registerTrx({
                 ...data,
+                amount: data.amount || 0,
                 projectId,
             });
             toast.success('Transaction created successfully');
@@ -261,12 +262,17 @@ export default function ProjectDetail() {
         try {
             setIsSubmitting(true);
             // Use the createActual function from the hook
-            await createActual(data);
+            await createActual({
+                ...data,
+                amount: data.amount || 0,
+            });
             toast.success('Actual transaction created successfully');
             setIsAddActualDialogOpen(false);
             
             // Refresh actuals after creation
             await getAllActualByProjectId(projectId);
+            // Also refresh transactions in case this actual is linked to any
+            await getAllTrxByProjectId(projectId);
         } catch (error) {
             toast.error('Failed to create actual transaction: ' + (error as Error).message);
             console.error(error);
@@ -315,9 +321,11 @@ export default function ProjectDetail() {
             setIsDeleteActualDialogOpen(false);
             setActualToDelete(null);
             
-            // Refresh actuals after deletion
+            // Refresh actuals and transactions after deletion
+            // This is important because deleting an actual may affect trx.lActual
             if (projectId) {
                 await getAllActualByProjectId(projectId);
+                await getAllTrxByProjectId(projectId);
             }
         } catch (error) {
             toast.error('Failed to delete actual transaction');
@@ -367,6 +375,9 @@ export default function ProjectDetail() {
             
             // Refresh actuals after cloning
             await getAllActualByProjectId(projectId);
+            
+            // Also refresh transactions in case any were linked during cloning
+            await getAllTrxByProjectId(projectId);
         } catch (error) {
             toast.error('Failed to create actual from budget');
             console.error(error);
@@ -394,7 +405,11 @@ export default function ProjectDetail() {
             await actualService.attachToTrx(allActualId, trxId);
             toast.success(`Attached ${allActualId.length} actual(s) to transaction`);
             
-            // Refresh actuals after attachment
+            // Close the dialog immediately after success
+            setIsBatchAttachDialogOpen(false);
+            setSelectedActualsForAttach([]);
+            
+            // Refresh actuals and transactions after attachment
             if (projectId) {
                 await getAllActualByProjectId(projectId);
                 await getAllTrxByProjectId(projectId);
@@ -434,9 +449,12 @@ export default function ProjectDetail() {
             setIsRegisteringActual(true);
             await budgetService.registerActual(budgetId, actualData);
             
-            // Refresh budgets after submission
+            // Refresh budgets and actuals after submission
             if (projectId) {
                 await getAllBudgetByProjectId(projectId);
+                await getAllActualByProjectId(projectId);
+                // Also refresh transactions in case the registered actual is linked
+                await getAllTrxByProjectId(projectId);
                 toast.success('Actual registered successfully');
             }
         } catch (error) {

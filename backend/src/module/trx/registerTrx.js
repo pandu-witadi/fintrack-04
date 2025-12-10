@@ -5,7 +5,7 @@ const registerTrx = async (request, reply) => {
     try {
         // check parameters
         const { name, projectId, amount, dateEx, ...otherKeys } = request.body
-        if (!name || !projectId || !amount || !dateEx) {
+        if (!name || !projectId || amount === undefined || amount === null || !dateEx) {
             throw new AppError('Please provide name, projectId, amount, and dateEx', 400)
         }
 

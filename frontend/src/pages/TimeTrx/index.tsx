@@ -271,7 +271,16 @@ export default function TimeTrx() {
                                                             onChange={() => handleRowSelect(key)}
                                                             className="rounded border-gray-300 cursor-pointer"
                                                         />
-                                                        <button onClick={() => navigate(`/finance/trx/${group.trxs[0]._id}`)} className="text-cyan-700 hover:text-blue-800 hover:underline cursor-pointer whitespace-nowrap" title={`View transaction: ${group.trxName}`}>{group.project} <ArrowRight className="h-3 w-3 inline" /> {group.trxName}</button>
+                                                        <button 
+                                                            onClick={() => navigate(`/finance/trx/${group.trxs[0]._id}`)} 
+                                                            className="text-cyan-700 hover:text-blue-800 hover:underline cursor-pointer whitespace-nowrap" 
+                                                            title={`View transaction: ${group.trxName}`}
+                                                        >
+                                                            {group.project} 
+                                                            {/* <ArrowRight className="h-3 w-3 inline" />  */}
+                                                            {" / "}    
+                                                            {group.trxName}
+                                                        </button>
                                                     </div>
                                                 </td>
                                                 {monthRange.map(month => {

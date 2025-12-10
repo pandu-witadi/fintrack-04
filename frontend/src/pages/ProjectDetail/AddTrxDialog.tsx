@@ -100,12 +100,12 @@ export function AddTrxDialog({ open, onOpenChange, onSubmit, isSubmitting, proje
             <Input
               id="amount"
               type="number"
-              value={formData.amount}
-              onChange={(e) => handleChange('amount', parseFloat(e.target.value) || 0)}
+              value={formData.amount || ''}
+              onChange={(e) => handleChange('amount', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)}
               placeholder="0.00"
-              required
               step="0.01"
               disabled={isSubmitting}
+              min="0"
             />
           </div>
           

@@ -270,7 +270,16 @@ export default function TimeActual() {
                                                             onChange={() => handleRowSelect(key)}
                                                             className="rounded border-gray-300 cursor-pointer"
                                                         />
-                                                        <button onClick={() => navigate(`/finance/actual/${group.actuals[0]._id}`)} className="text-cyan-700 hover:text-blue-800 hover:underline cursor-pointer whitespace-nowrap" title={`View actual: ${group.actualName}`}>{group.project} <ArrowRight className="h-3 w-3 inline" /> {group.actualName}</button>
+                                                        <button 
+                                                            onClick={() => navigate(`/finance/actual/${group.actuals[0]._id}`)} 
+                                                            className="text-cyan-700 hover:text-blue-800 hover:underline cursor-pointer whitespace-nowrap" 
+                                                            title={`View actual: ${group.actualName}`}
+                                                        >
+                                                            {group.project} 
+                                                            {/* <ArrowRight className="h-3 w-3 inline" />  */}
+                                                            {" / "}    
+                                                            {group.actualName}
+                                                        </button>
                                                     </div>
                                                 </td>
                                                 {monthRange.map(month => {

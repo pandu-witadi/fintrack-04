@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { userService } from './userService';
+import { Actual } from './actualService';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5200/api';
 
@@ -39,16 +40,11 @@ export interface Trx {
         name: string;
         email: string;
     };
-    lActual?: Array<{
-        _id: string;
-        name: string;
-        amount: number;
-        typ?: 'income' | 'expense';
-        done?: boolean;
-    }>;
+    lActual?: Actual[];
     dateEx: string;
     sndr?: BankInfo;
     recv?: BankInfo;
+    img?: string;
     createdAt: string;
     updatedAt: string;
 }

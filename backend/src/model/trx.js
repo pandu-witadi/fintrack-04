@@ -70,7 +70,12 @@ const trxSchema = new mongoose.Schema({
         required: [true, 'Please provide date of execution'],
     },
     sndr: bankInfo,
-    recv: bankInfo
+    recv: bankInfo,
+    img: {
+        type: String,
+        default: '',
+        trim: true      
+    }
 }, {
     strict: false,
     strictPopulate: false,

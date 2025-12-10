@@ -42,6 +42,9 @@ export interface Actual {
         _id: string;
         name: string;
         amount: number;
+        typ?: 'income' | 'expense';
+        done?: boolean;
+        projectName?: string;
     };
     dateEx: string;
     createdAt: string;

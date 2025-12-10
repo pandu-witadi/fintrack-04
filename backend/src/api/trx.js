@@ -77,15 +77,22 @@ const resp_200 = {
                         type: 'object',
                         properties: {
                             _id: { type: 'string' },
+                            active: { type: 'boolean' },
                             name: { type: 'string' },
                             amount: { type: 'number' },
                             typ: { type: 'string', enum: ['income', 'expense'] },
-                            done: { type: 'boolean' }
+                            done: { type: 'boolean' },
+                            dateEx: { type: 'string', format: 'date' },
+                            projectId: { type: 'string' },
+                            projectName: { type: 'string' },
+                            assigneeId: { type: 'string' },
+                            assigneeName: { type: 'string' }
                         }
                     }
                 },
                 createdAt: { type: 'string', format: 'date-time' },
-                updatedAt: { type: 'string', format: 'date-time' }
+                updatedAt: { type: 'string', format: 'date-time' },
+                img: { type: 'string' },
             }
         }
     }
@@ -103,16 +110,16 @@ const resp_400 = {
 async function trxApi(fastify, options) {
     const { protect, restrictTo } = require('../module/auth')
 
-    // Register a new transaction
+    // Register a new trx
     fastify.route({
         method: 'POST',
         url: '/register',
         preHandler: [protect, restrictTo(['finance', 'admin'])],
         handler: registerTrx,
         schema: {
-            tags: ['transaction'],
-            summary: 'Register a new transaction',
-            description: 'Register a new transaction',
+            tags: ['trx'],
+            summary: 'Register a new trx',
+            description: 'Register a new trx',
             security: [{
                 bearerAuth: []
             }],
@@ -125,16 +132,16 @@ async function trxApi(fastify, options) {
         }
     });
 
-    // Clone transaction from actual
+    // Clone trx from actual
     fastify.route({
         method: 'POST',
         url: '/cloneFromActual',
         preHandler: [protect, restrictTo(['finance', 'admin'])],
         handler: cloneFromActual,
         schema: {
-            tags: ['transaction'],
-            summary: 'Clone transaction from actual',
-            description: 'Create a new transaction based on an existing actual record',
+            tags: ['trx'],
+            summary: 'Clone trx from actual',
+            description: 'Create a new trx based on an existing actual record',
             security: [{
                 bearerAuth: []
             }],
@@ -158,16 +165,16 @@ async function trxApi(fastify, options) {
         }
     });
 
-    // Get all transactions by project ID
+    // Get all trxs by project ID
     fastify.route({
         method: 'GET',
         url: '/project/:projectId',
         preHandler: [protect, restrictTo(['admin', 'finance', 'project_manager'])],
         handler: getAllTrxByProjectId,
         schema: {
-            tags: ['transaction'],
-            summary: 'Get all transactions by project ID',
-            description: 'Retrieve all transactions for a specific project',
+            tags: ['trx'],
+            summary: 'Get all trxs by project ID',
+            description: 'Retrieve all trxs for a specific project',
             security: [{
                 bearerAuth: []
             }],
@@ -199,16 +206,16 @@ async function trxApi(fastify, options) {
         }
     });
 
-    // Get all transactions (only accessible by admin/finance)
+    // Get all trxs (only accessible by admin/finance)
     fastify.route({
         method: 'GET',
         url: '/getAll',
         preHandler: [protect, restrictTo(['admin', 'finance'])],
         handler: getAllTrx,
         schema: {
-            tags: ['transaction'],
-            summary: 'Get all transactions',
-            description: 'Retrieve all transactions (admin/finance access only)',
+            tags: ['trx'],
+            summary: 'Get all trxs',
+            description: 'Retrieve all trxs (admin/finance access only)',
             security: [{
                 bearerAuth: []
             }],
@@ -239,9 +246,9 @@ async function trxApi(fastify, options) {
         preHandler: [protect, restrictTo(['finance', 'admin'])],
         handler: getTrxById,
         schema: {
-            tags: ['transaction'],
-            summary: 'Get transaction by ID',
-            description: 'Get a single transaction by ID',
+            tags: ['trx'],
+            summary: 'Get trx by ID',
+            description: 'Get a single trx by ID',
             security: [{
                 bearerAuth: []
             }],
@@ -269,9 +276,9 @@ async function trxApi(fastify, options) {
         preHandler: [protect, restrictTo(['finance', 'admin'])],
         handler: getTrxByActualId,
         schema: {
-            tags: ['transaction'],
-            summary: 'Get transaction by actual ID',
-            description: 'Get a transaction by actual ID',
+            tags: ['trx'],
+            summary: 'Get trx by actual ID',
+            description: 'Get a trx by actual ID',
             security: [{
                 bearerAuth: []
             }],
@@ -299,9 +306,9 @@ async function trxApi(fastify, options) {
         preHandler: [protect, restrictTo(['admin', 'finance'])],
         handler: deleteTrx,
         schema: {
-            tags: ['transaction'],
-            summary: 'Delete transaction',
-            description: 'Delete a transaction by ID',
+            tags: ['trx'],
+            summary: 'Delete trx',
+            description: 'Delete a trx by ID',
             security: [{
                 bearerAuth: []
             }],
@@ -335,9 +342,9 @@ async function trxApi(fastify, options) {
         preHandler: [protect, restrictTo(['finance', 'admin'])],
         handler: updateTrx,
         schema: {
-            tags: ['transaction'],
-            summary: 'Update transaction',
-            description: 'Update transaction information',
+            tags: ['trx'],
+            summary: 'Update trx',
+            description: 'Update trx information',
             security: [{
                 bearerAuth: []
             }],

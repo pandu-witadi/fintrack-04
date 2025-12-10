@@ -113,7 +113,12 @@ export default function BudgetActualTable({ budgets, onDelete, onAddBudget, onSp
     return (
         <div className="rounded-lg border bg-card p-6 shadow-sm">
             <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold flex items-center gap-2">Budget <ArrowRightToLine className="h-4 w-4" /> Actual</h2>
+                <h2 className="text-base font-medium text-muted-foreground flex items-center gap-2">
+                    <span className="text-foreground font-semibold">Budget</span>
+                    <ArrowRightToLine className="h-4 w-4" />
+                    <span className="text-foreground font-semibold">Actual</span>
+                    <span className="text-xs bg-muted px-2 py-1 rounded-full ml-auto">{sortedBudgets.length}</span>
+                </h2>
                 <div className="flex gap-2">
                     {selectedIds.size > 0 && (
                         <>
@@ -154,7 +159,7 @@ export default function BudgetActualTable({ budgets, onDelete, onAddBudget, onSp
             
             <div className="rounded-md border">
                 <div className="text-sm text-muted-foreground">
-                    Total rows: <span className="font-semibold">{budgets.length}</span>
+                    {/* Total rows: <span className="font-semibold">{budgets.length}</span> */}
                     {selectedIds.size > 0 && (
                         <span className="ml-3">Selected: <span className="font-semibold">{selectedIds.size}</span></span>
                     )}
