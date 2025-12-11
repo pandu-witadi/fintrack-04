@@ -23,7 +23,7 @@ const cloneFromBudget = async (request, reply) => {
             project: budget.project._id.toString(),
             amount: budget.amount,
             dateEx: budget.dateEx,
-            type: budget.type,
+            typ: budget.typ,
             updatedBy: request.user._id,
             ...otherKeys
         })

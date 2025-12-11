@@ -1,5 +1,6 @@
-const { Trx } = require('../../model/index')
+const { Trx, Actual } = require('../../model/index')
 const AppError = require('../../util/appError')
+const mongoose = require('mongoose')
 
 const updateTrx = async (request, reply) => {
     try {
@@ -57,17 +58,39 @@ const updateTrx = async (request, reply) => {
         })
         .populate({
             path: 'lActual',
-            select: '_id name typ amount done',
+            select: '_id active name typ amount done dateEx project assignee',
+            populate: [
+                {
+                    path: 'project',
+                    select: '_id name'
+                },
+                {
+                    path: 'assignee',
+                    select: '_id name'
+                }
+            ],
             options: {
                 transform: (doc) => {
                     if (doc) {
                         doc._id = doc._id.toString()
+                        if (doc.project) {
+                            doc.projectId = doc.project._id.toString()
+                            doc.projectName = doc.project.name
+                            delete doc.project
+                        }
+                        if (doc.assignee) {
+                            doc.assigneeId = doc.assignee._id.toString()
+                            doc.assigneeName = doc.assignee.name
+                            delete doc.assignee
+                        }
                     }
                     return doc
                 }
             }
         })
         .lean({ virtuals: true })
+
+        populatedTrx._id = populatedTrx._id.toString()
 
         return {
             success: true,

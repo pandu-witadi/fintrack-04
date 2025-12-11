@@ -6,7 +6,7 @@ const registerBudget = async (request, reply) => {
         // check parameters and body
         const { name, projectId, amount, dateEx, ...otherKeys } = request.body
 
-        if (!name || !projectId || !amount || !dateEx) {
+        if (!name || !projectId || amount === undefined || amount === null || !dateEx) {
             throw new AppError('Please provide name, project, amount, and dateEx', 400)
         }
         

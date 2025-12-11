@@ -27,7 +27,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { trxService, Trx } from '@/services/trxService.ts';
-import { userService, User as UserType } from '@/services/userService.ts';
 import { actualService } from '@/services/actualService';
 import { uploadService } from '@/services/uploadService';
 import formatCurrency from '@/utils/formatCurrency';
@@ -35,6 +34,7 @@ import { IconActive } from '@/components/IconActive';
 import { IconDone } from '@/components/IconDone';
 import ActualTable from './ActualTable';
 import { useUpload } from '@/hooks/useUpload';
+import AssigneeSelector from './AssigneeSelector';
 
 
 export default function TrxDetail() {
@@ -47,9 +47,6 @@ export default function TrxDetail() {
     const [error, setError] = useState<string | null>(null);
     const [isEditing, setIsEditing] = useState(false);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-    const [users, setUsers] = useState<UserType[]>([]);
-    const [filteredUsers, setFilteredUsers] = useState<UserType[]>([]);
-    const [searchTerm, setSearchTerm] = useState('');
     
     // Update the editTrx state to include assignee and bank info
     const [editTrx, setEditTrx] = useState<{
@@ -131,39 +128,6 @@ export default function TrxDetail() {
         }
     }, [uploadError, clearError]);
 
-    // Add function to fetch all users
-    const fetchAllUsers = async () => {
-        try {
-            const usersData = await userService.getAllUsers();
-            setUsers(usersData);
-            setFilteredUsers(usersData);
-        } catch (err) {
-            console.error('Failed to fetch users:', err);
-            toast.error('Failed to load users');
-        }
-    };
-
-    // Filter users based on search term
-    useEffect(() => {
-        if (searchTerm.trim() === '') {
-            setFilteredUsers(users);
-        } else {
-            const term = searchTerm.toLowerCase();
-            const filtered = users.filter(user => 
-                user.name.toLowerCase().includes(term) || 
-                user.email.toLowerCase().includes(term)
-            );
-            setFilteredUsers(filtered);
-        }
-    }, [searchTerm, users]);
-
-    // Fetch users when entering edit mode
-    useEffect(() => {
-        if (isEditing) {
-            fetchAllUsers();
-        }
-    }, [isEditing]);
-
     const fetchTrxDetails = async (trxId: string) => {
         try {
             setLoading(true);
@@ -202,7 +166,7 @@ export default function TrxDetail() {
         }
     };
 
-    const handleEditFormChange = (field: string, value: string | number | boolean | object) => {
+    const handleEditFormChange = (field: string, value: string | number | boolean | object | null) => {
         if (field.includes('.')) {
             const [parent, child] = field.split('.');
             setEditTrx((prev: any) => ({
@@ -502,76 +466,11 @@ export default function TrxDetail() {
                                         </div>
 
                                         {/* Assignee Field */}
-                                        <div className="space-y-2">
-                                            <Label htmlFor="assignee">Assignee</Label>
-                                            <div className="relative">
-                                                <Input
-                                                    id="assignee"
-                                                    placeholder="Search users..."
-                                                    value={searchTerm}
-                                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                                    className="pr-10"
-                                                />
-                                                {searchTerm && (
-                                                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                                                        <button 
-                                                            onClick={() => setSearchTerm('')}
-                                                            className="text-gray-400 hover:text-gray-600"
-                                                        >
-                                                            ×
-                                                        </button>
-                                                    </div>
-                                                )}
-                                                {filteredUsers.length > 0 && (
-                                                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-24 overflow-y-auto">
-                                                        {filteredUsers.map(user => (
-                                                            <div
-                                                                key={user._id}
-                                                                className={`px-4 py-2 cursor-pointer hover:bg-gray-100 flex justify-between items-center ${
-                                                                    editTrx.assignee === user._id ? 'bg-blue-50' : ''
-                                                                }`}
-                                                                onClick={() => {
-                                                                    setEditTrx(prev => ({
-                                                                        ...prev,
-                                                                        assignee: user._id
-                                                                    }));
-                                                                    setSearchTerm('');
-                                                                }}
-                                                            >
-                                                                <div>
-                                                                    <div className="font-medium">{user.name}</div>
-                                                                    <div className="text-sm text-gray-500">{user.email}</div>
-                                                                </div>
-                                                                {editTrx.assignee === user._id && (
-                                                                    <div className="text-green-500 font-bold">✓</div>
-                                                                )}
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                            </div>
-                                            {editTrx.assignee && (
-                                                <div className="flex items-center justify-between bg-gray-50 p-2 rounded">
-                                                    <div className="flex items-center">
-                                                        <div className="font-medium">
-                                                            {users.find(u => u._id === editTrx.assignee)?.name}
-                                                        </div>
-                                                        <div className="text-sm text-gray-500 ml-2">
-                                                            ({users.find(u => u._id === editTrx.assignee)?.email})
-                                                        </div>
-                                                    </div>
-                                                    <button
-                                                        onClick={() => setEditTrx(prev => ({
-                                                            ...prev,
-                                                            assignee: null
-                                                        }))}
-                                                        className="text-gray-400 hover:text-gray-600"
-                                                    >
-                                                        ×
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
+                                        <AssigneeSelector
+                                            selectedAssignee={editTrx.assignee}
+                                            onAssigneeChange={(assigneeId) => handleEditFormChange('assignee', assigneeId)}
+                                            isEditing={isEditing}
+                                        />
 
                                         {/* Amount Information */}
                                         <div className="space-y-6">

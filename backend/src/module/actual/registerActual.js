@@ -23,6 +23,7 @@ const registerActual = async (request, reply) => {
             project: budget.project._id.toString(),
             amount: amount,
             dateEx: dateEx,
+            typ: budget.typ,
             updatedBy: request.user._id,
             ...otherKeys
         })

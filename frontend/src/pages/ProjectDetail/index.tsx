@@ -229,7 +229,9 @@ export default function ProjectDetail() {
             toast.success('Transaction created successfully');
             setIsAddTrxDialogOpen(false);
             
-            // Refresh transactions after creation
+            // Refresh all tables after transaction creation
+            await getAllBudgetByProjectId(projectId);
+            await getAllActualByProjectId(projectId);
             await getAllTrxByProjectId(projectId);
         } catch (error) {
             toast.error('Failed to create transaction: ' + (error as Error).message);
@@ -247,6 +249,11 @@ export default function ProjectDetail() {
             await createBudget(projectId, data);
             toast.success('Budget created successfully');
             setIsFormModalOpen(false);
+            
+            // Refresh all tables after budget creation
+            await getAllBudgetByProjectId(projectId);
+            await getAllActualByProjectId(projectId);
+            await getAllTrxByProjectId(projectId);
         } catch (error) {
             toast.error('Failed to create budget');
             console.error(error);
@@ -294,6 +301,13 @@ export default function ProjectDetail() {
             toast.success('Budget deleted successfully');
             setIsDeleteDialogOpen(false);
             setBudgetToDelete(null);
+            
+            // Refresh all tables after budget deletion
+            if (projectId) {
+                await getAllBudgetByProjectId(projectId);
+                await getAllActualByProjectId(projectId);
+                await getAllTrxByProjectId(projectId);
+            }
         } catch (error) {
             toast.error('Failed to delete budget');
             console.error(error);
@@ -321,9 +335,12 @@ export default function ProjectDetail() {
             setIsDeleteActualDialogOpen(false);
             setActualToDelete(null);
             
-            // Refresh actuals and transactions after deletion
-            // This is important because deleting an actual may affect trx.lActual
+            // Refresh all tables after deletion
+            // This is important because deleting an actual may affect:
+            // - trx.lActual (transactions linked to this actual)
+            // - budget.lActual (budgets that were cloned from actuals)
             if (projectId) {
+                await getAllBudgetByProjectId(projectId);
                 await getAllActualByProjectId(projectId);
                 await getAllTrxByProjectId(projectId);
             }
@@ -342,8 +359,10 @@ export default function ProjectDetail() {
             setIsDeleteTrxDialogOpen(false);
             setTrxToDelete(null);
             
-            // Refresh transactions after deletion
+            // Refresh all tables after transaction deletion
             if (projectId) {
+                await getAllBudgetByProjectId(projectId);
+                await getAllActualByProjectId(projectId);
                 await getAllTrxByProjectId(projectId);
             }
         } catch (error) {
@@ -409,8 +428,9 @@ export default function ProjectDetail() {
             setIsBatchAttachDialogOpen(false);
             setSelectedActualsForAttach([]);
             
-            // Refresh actuals and transactions after attachment
+            // Refresh all tables after attachment
             if (projectId) {
+                await getAllBudgetByProjectId(projectId);
                 await getAllActualByProjectId(projectId);
                 await getAllTrxByProjectId(projectId);
             }
@@ -430,8 +450,10 @@ export default function ProjectDetail() {
                 projectId: projectId || '',
             });
             
-            // Refresh transactions after submission
+            // Refresh all tables after transaction registration
             if (projectId) {
+                await getAllBudgetByProjectId(projectId);
+                await getAllActualByProjectId(projectId);
                 await getAllTrxByProjectId(projectId);
                 toast.success('Transaction registered successfully');
             }
@@ -466,6 +488,20 @@ export default function ProjectDetail() {
         }
     };
 
+    // Calculate statistics
+    const calculateStats = (): { budgetCount: { done: number; total: number }; actualCount: { done: number; total: number }; trxCount: { done: number; total: number } } => {
+        const budgetsDone = budgets.filter(b => b.done).length;
+        const actualsDone = actuals.filter(a => a.done).length;
+        const trxsDone = trxs.filter(t => t.done).length;
+
+        return {
+            budgetCount: { done: budgetsDone, total: budgets.length },
+            actualCount: { done: actualsDone, total: actuals.length },
+            trxCount: { done: trxsDone, total: trxs.length }
+        };
+    };
+
+    const { budgetCount, actualCount, trxCount } = calculateStats();
     const loading = projectLoading || budgetsLoading || actualsLoading || trxsLoading;
     const error = projectError || budgetsError || actualsError || trxsError;
 
@@ -512,6 +548,9 @@ export default function ProjectDetail() {
                 handleEdit={handleEdit}
                 isCalculating={isCalculating}
                 formatCurrency={formatCurrency}
+                budgetCount={budgetCount}
+                actualCount={actualCount}
+                trxCount={trxCount}
             />
 
             {/* Budget Actual Section */}
@@ -521,6 +560,16 @@ export default function ProjectDetail() {
                 onAddBudget={handleAddBudget}
                 onSpawn={handleCloneFromBudgets}
                 onRegisterActual={handleOpenRegisterActualDialog}
+                onRefreshActuals={async () => {
+                    if (projectId) {
+                        await getAllActualByProjectId(projectId);
+                    }
+                }}
+                onRefreshTrx={async () => {
+                    if (projectId) {
+                        await getAllTrxByProjectId(projectId);
+                    }
+                }}
             />
             
             {/* Actual Transactions Section */}
@@ -529,6 +578,16 @@ export default function ProjectDetail() {
                 onDelete={handleDeleteActual}
                 onAddActual={handleAddActual}
                 onBatchAttachToTrx={handleOpenBatchAttachDialog}
+                onRefreshTrx={async () => {
+                    if (projectId) {
+                        await getAllTrxByProjectId(projectId);
+                    }
+                }}
+                onRefreshBudget={async () => {
+                    if (projectId) {
+                        await getAllBudgetByProjectId(projectId);
+                    }
+                }}
             />
             
             {/* Transactions Section */}
@@ -644,6 +703,8 @@ export default function ProjectDetail() {
                         setSelectedBudgetsForActual([]);
                         if (projectId) {
                             getAllBudgetByProjectId(projectId);
+                            getAllActualByProjectId(projectId);
+                            getAllTrxByProjectId(projectId);
                         }
                     }
                 }}
@@ -659,6 +720,8 @@ export default function ProjectDetail() {
                     if (!open) {
                         setSelectedActualsForTrx([]);
                         if (projectId) {
+                            getAllBudgetByProjectId(projectId);
+                            getAllActualByProjectId(projectId);
                             getAllTrxByProjectId(projectId);
                         }
                     }

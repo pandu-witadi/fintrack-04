@@ -37,12 +37,47 @@ interface Project {
     };
 }
 
+interface StatItem {
+    label: string;
+    done: number;
+    total: number;
+}
+
 interface DetailSectionProps {
     project: Project;
     handleCalculateFinance: () => void;
     handleEdit: () => void;
     isCalculating: boolean;
     formatCurrency: (value: number) => string;
+    budgetCount?: { done: number; total: number };
+    actualCount?: { done: number; total: number };
+    trxCount?: { done: number; total: number };
+}
+
+function StatisticsBlock({ stats }: { stats: StatItem[] }) {
+    return (
+        <div className="grid grid-cols-3 gap-4">
+            {stats.map((stat, index) => (
+                <div key={index} className="rounded-lg border bg-card shadow-sm p-6">
+                    <div className="flex flex-col space-y-2">
+                        <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
+                        <div className="flex items-baseline space-x-2">
+                            <span className="text-2xl font-bold text-primary">{stat.done}</span>
+                            <span className="text-sm text-muted-foreground">/ {stat.total}</span>
+                        </div>
+                        <div className="mt-2 w-full bg-secondary rounded-full h-2">
+                            <div
+                                className="bg-primary h-2 rounded-full transition-all"
+                                style={{
+                                    width: stat.total > 0 ? `${(stat.done / stat.total) * 100}%` : '0%'
+                                }}
+                            />
+                        </div>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
 }
 
 export function DetailSection({
@@ -50,10 +85,31 @@ export function DetailSection({
     handleCalculateFinance,
     handleEdit,
     isCalculating,
-    formatCurrency
+    formatCurrency,
+    budgetCount = { done: 0, total: 0 },
+    actualCount = { done: 0, total: 0 },
+    trxCount = { done: 0, total: 0 }
 }: DetailSectionProps) {
     const [isProjectDetailsCollapsed, setIsProjectDetailsCollapsed] = useState(false);
     const [isFinancialSummaryCollapsed, setIsFinancialSummaryCollapsed] = useState(false);
+
+    const stats: StatItem[] = [
+        {
+            label: 'Budgets',
+            done: budgetCount.done,
+            total: budgetCount.total
+        },
+        {
+            label: 'Actuals',
+            done: actualCount.done,
+            total: actualCount.total
+        },
+        {
+            label: 'Transactions',
+            done: trxCount.done,
+            total: trxCount.total
+        }
+    ];
 
     return (
         <>
@@ -75,6 +131,8 @@ export function DetailSection({
                     </Button>
                 </div>
             </div>
+
+           
 
             <div className="grid grid-cols-5 gap-8 mt-8">
                 {/* Left Column - Project Details (2 columns) */}
@@ -154,6 +212,8 @@ export function DetailSection({
 
                 {/* Right Column - Financial Summary (1 column) */}
                 <div className="col-span-2">
+                    {/* Statistics Block */}
+                    <StatisticsBlock stats={stats} />
                     <div className="rounded-lg border bg-card shadow-sm">
                         <div 
                             className="flex justify-between items-center p-4 cursor-pointer"

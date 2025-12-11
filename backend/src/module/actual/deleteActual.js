@@ -31,22 +31,34 @@ const deleteActual = async (request, reply) => {
         budget.lActual = budget.lActual.filter((a) => a.toString() !== id)
         await budget.save()
 
-        // remove actual from trx
-        let trx = await Trx.findById(actual.trx._id.toString())
-        .populate({
-            path: 'lActual',
-            select: '_id name amount'
-        })
-        if (!trx) {
-            throw new AppError('Trx not found', 404)
+        // if actual.trx exists, remove actual from trx
+        if (actual.trx) {
+            let trx = await Trx.findById(actual.trx._id.toString())
+                .populate({
+                path: 'lActual',
+                select: '_id active name typ amount done dateEx',
+                options: {
+                    transform: (doc) => {
+                        if (doc) {
+                            doc._id = doc._id.toString()
+                        }
+                        return doc
+                    }
+                }
+            })
+            console.log(trx)
+
+            if (!trx) {
+                throw new AppError('Trx not found', 404)
+            }
+
+            // remove actual from trx.lActual which populated
+            trx.lActual = trx.lActual.filter((a) => a._id.toString() !== id)
+
+            // calculated sum of trx.lActual
+            trx.amount = trx.lActual.reduce((acc, a) => acc + a.amount, 0)
+            await trx.save()
         }
-
-        // remove actual from trx.lActual which populated
-        trx.lActual = trx.lActual.filter((a) => a._id.toString() !== id)
-
-        // calculated sum of trx.lActual
-        trx.amount = trx.lActual.reduce((acc, a) => acc + a.amount, 0)
-        await trx.save()
 
         // delete actual
         await Actual.findByIdAndDelete(id)

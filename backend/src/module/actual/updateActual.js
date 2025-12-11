@@ -50,8 +50,28 @@ const updateActual = async (request, reply) => {
             })
             .populate({
                 path: 'trx',
-                select: '_id name amount'
+                select: '_id name amount typ done project',
+                populate: {
+                    path: 'project',
+                    select: '_id name'
+                },
+                options: {
+                    transform: (doc) => {
+                        if (doc) {
+                            doc._id = doc._id.toString()
+                            if (doc.project) {
+                                doc.projectId = doc.project._id.toString()
+                                doc.projectName = doc.project.name
+                                delete doc.project
+                            }
+                        }
+                        return doc
+                    }
+                }
             })
+            .lean({ virtuals: true })
+
+        updatedActual._id = updatedActual._id.toString()
 
         return {
             success: true,

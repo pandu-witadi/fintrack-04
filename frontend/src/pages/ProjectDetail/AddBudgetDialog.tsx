@@ -26,7 +26,7 @@ export default function AddBudgetDialog({
         name: '',
         note: '',
         typ: 'expense' as 'income' | 'expense' | 'other',
-        amount: '',
+        amount: 0,
         dateEx: '',
         active: true,
         done: false,
@@ -38,6 +38,11 @@ export default function AddBudgetDialog({
             setFormData(prev => ({
                 ...prev,
                 [name]: (e.target as HTMLInputElement).checked
+            }));
+        } else if (name === 'amount') {
+            setFormData(prev => ({
+                ...prev,
+                [name]: value === '' ? 0 : parseFloat(value) || 0
             }));
         } else {
             setFormData(prev => ({
@@ -63,8 +68,8 @@ export default function AddBudgetDialog({
             return;
         }
 
-        if (!formData.amount || Number(formData.amount) <= 0) {
-            alert('Budget amount must be greater than 0');
+        if (formData.amount === undefined || formData.amount === null || formData.amount < 0) {
+            alert('Budget amount cannot be negative');
             return;
         }
 
@@ -116,13 +121,13 @@ export default function AddBudgetDialog({
                 </div>
 
                 <div className="space-y-2">
-                    <Label htmlFor="amount">Amount *</Label>
+                    <Label htmlFor="amount">Amount </Label>
                     <Input
                         id="amount"
                         name="amount"
                         type="number"
                         placeholder="0"
-                        value={formData.amount}
+                        value={formData.amount || 0}
                         onChange={handleChange}
                         disabled={isSubmitting}
                         step="0.01"

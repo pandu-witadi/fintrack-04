@@ -52,6 +52,14 @@ const projectSchema = new mongoose.Schema({
         type: Number,
         default: new Date().getFullYear(),
     },
+    stDate: {
+        type: Date,
+        default: new Date(),
+    },
+    enDate: {
+        type: Date,
+        default: new Date(),
+    },
     updatedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',

@@ -186,7 +186,7 @@ export default function RegisterActualDialog({
                             onClick={handleSubmit}
                             disabled={!isFormValid() || isSubmitting}
                         >
-                            {isSubmitting ? 'Submitting...' : 'Register All'}
+                            {isSubmitting ? 'Submitting...' : 'Register'}
                         </Button>
                     </div>
                 </DialogFooter>

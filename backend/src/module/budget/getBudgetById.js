@@ -20,7 +20,15 @@ const getBudgetById = async (request, reply) => {
             })
             .populate({
                 path: 'lActual',
-                select: '_id name amount'
+                select: '_id name amount typ done',
+                options: {
+                    transform: (doc) => {
+                        if (doc) {
+                            doc._id = doc._id.toString()
+                        }
+                        return doc
+                    }
+                }
             })
             .lean({ virtuals: true })
 

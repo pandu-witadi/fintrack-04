@@ -22,10 +22,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { actualService, Actual } from '@/services/actualService.ts';
-import { userService, User } from '@/services/userService.ts';
 import formatCurrency from '@/utils/formatCurrency';
 import { IconActive } from '@/components/IconActive';
 import { IconDone } from '@/components/IconDone';
+import AssigneeSelector from './AssigneeSelector';
 
 export default function ActualDetail() {
     const navigate = useNavigate();
@@ -36,10 +36,6 @@ export default function ActualDetail() {
     const [error, setError] = useState<string | null>(null);
     const [isEditing, setIsEditing] = useState(false);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-    const [users, setUsers] = useState<User[]>([]);
-    const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [isAssigneeDropdownOpen, setIsAssigneeDropdownOpen] = useState(false);
     
     // Update the editActual state to include assignee
     const [editActual, setEditActual] = useState<{
@@ -81,59 +77,6 @@ export default function ActualDetail() {
         }
     }, [actualId]);
 
-    // Add function to fetch all users
-    const fetchAllUsers = async () => {
-        try {
-            const usersData = await userService.getAllUsers();
-            setUsers(usersData);
-            setFilteredUsers(usersData);
-        } catch (err) {
-            console.error('Failed to fetch users:', err);
-            toast.error('Failed to load users');
-        }
-    };
-
-    // Filter users based on search term
-    useEffect(() => {
-        if (searchTerm.trim() === '') {
-            setFilteredUsers(users);
-        } else {
-            const term = searchTerm.toLowerCase();
-            const filtered = users.filter(user => 
-                user.name.toLowerCase().includes(term) || 
-                user.email.toLowerCase().includes(term)
-            );
-            setFilteredUsers(filtered);
-        }
-    }, [searchTerm, users]);
-
-    // Close dropdown when clicking outside
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (isAssigneeDropdownOpen) {
-                const target = event.target as HTMLElement;
-                if (!target.closest('[data-assignee-selector]')) {
-                    setIsAssigneeDropdownOpen(false);
-                }
-            }
-        };
-
-        if (isAssigneeDropdownOpen) {
-            document.addEventListener('mousedown', handleClickOutside);
-        }
-
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, [isAssigneeDropdownOpen]);
-
-    // Fetch users when entering edit mode
-    useEffect(() => {
-        if (isEditing) {
-            fetchAllUsers();
-        }
-    }, [isEditing]);
-
     const fetchActualDetails = async (actualId: string) => {
         try {
             setLoading(true);
@@ -162,7 +105,7 @@ export default function ActualDetail() {
         }
     };
 
-    const handleEditFormChange = (field: string, value: string | number | boolean | object) => {
+    const handleEditFormChange = (field: string, value: string | number | boolean | object | null) => {
         if (field.includes('.')) {
             const [parent, child] = field.split('.');
             setEditActual((prev: any) => ({
@@ -440,118 +383,12 @@ export default function ActualDetail() {
                                             />
                                         </div>
 
-                                        {/* Assignee Field - IMPROVED */}
-                                        <div className="space-y-2" data-assignee-selector>
-                                            <Label>Assignee</Label>
-                                            <div className="relative">
-                                                {/* Show selected assignee or search input */}
-                                                {editActual.assignee ? (
-                                                    <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-md p-3 cursor-pointer hover:bg-blue-100"
-                                                        onClick={() => setIsAssigneeDropdownOpen(!isAssigneeDropdownOpen)}
-                                                    >
-                                                        <div className="flex items-center space-x-2 flex-1">
-                                                            <div className="text-green-600 font-bold">✓</div>
-                                                            <div>
-                                                                <div className="font-medium text-sm">
-                                                                    {users.find(u => u._id === editActual.assignee)?.name}
-                                                                </div>
-                                                                <div className="text-xs text-gray-600">
-                                                                    {users.find(u => u._id === editActual.assignee)?.email}
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                setEditActual(prev => ({
-                                                                    ...prev,
-                                                                    assignee: null
-                                                                }));
-                                                                setSearchTerm('');
-                                                                setIsAssigneeDropdownOpen(false);
-                                                            }}
-                                                            className="text-gray-500 hover:text-red-600 font-bold text-lg ml-2"
-                                                            title="Clear assignee"
-                                                        >
-                                                            ×
-                                                        </button>
-                                                    </div>
-                                                ) : (
-                                                    <Input
-                                                        placeholder="Search and select assignee..."
-                                                        value={searchTerm}
-                                                        onChange={(e) => {
-                                                            setSearchTerm(e.target.value);
-                                                            setIsAssigneeDropdownOpen(true);
-                                                        }}
-                                                        onFocus={() => setIsAssigneeDropdownOpen(true)}
-                                                        className="cursor-pointer"
-                                                    />
-                                                )}
-
-                                                {/* Dropdown menu */}
-                                                {isAssigneeDropdownOpen && (
-                                                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg top-full">
-                                                        {/* Clear/None option */}
-                                                        {editActual.assignee && (
-                                                            <div
-                                                                className="px-4 py-3 cursor-pointer hover:bg-red-50 border-b flex items-center justify-between"
-                                                                onClick={() => {
-                                                                    setEditActual(prev => ({
-                                                                        ...prev,
-                                                                        assignee: null
-                                                                    }));
-                                                                    setSearchTerm('');
-                                                                    setIsAssigneeDropdownOpen(false);
-                                                                }}
-                                                            >
-                                                                <div className="text-sm text-gray-600">No assignee</div>
-                                                            </div>
-                                                        )}
-
-                                                        {/* User list - Limited to 3 rows */}
-                                                        <div className="max-h-[9rem] overflow-y-auto">
-                                                            {filteredUsers.length > 0 ? (
-                                                                filteredUsers.map(user => (
-                                                                    <div
-                                                                        key={user._id}
-                                                                        className={`px-4 py-3 cursor-pointer hover:bg-blue-50 flex justify-between items-center border-b last:border-b-0 transition-colors ${
-                                                                            editActual.assignee === user._id ? 'bg-blue-100' : ''
-                                                                        }`}
-                                                                        onClick={() => {
-                                                                            setEditActual(prev => ({
-                                                                                ...prev,
-                                                                                assignee: user._id
-                                                                            }));
-                                                                            setSearchTerm('');
-                                                                            setIsAssigneeDropdownOpen(false);
-                                                                        }}
-                                                                    >
-                                                                        <div>
-                                                                            <div className="font-medium text-sm">{user.name}</div>
-                                                                            <div className="text-xs text-gray-500">{user.email}</div>
-                                                                        </div>
-                                                                        {editActual.assignee === user._id && (
-                                                                            <div className="text-green-600 font-bold text-lg">✓</div>
-                                                                        )}
-                                                                    </div>
-                                                                ))
-                                                            ) : searchTerm.trim() !== '' ? (
-                                                                <div className="px-4 py-3 text-sm text-gray-500 text-center">
-                                                                    No users found
-                                                                </div>
-                                                            ) : (
-                                                                filteredUsers.length === 0 && !searchTerm && (
-                                                                    <div className="px-4 py-3 text-sm text-gray-500 text-center">
-                                                                        No users available
-                                                                    </div>
-                                                                )
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
+                                        {/* Assignee Field */}
+                                        <AssigneeSelector
+                                            selectedAssignee={editActual.assignee}
+                                            onAssigneeChange={(assigneeId) => handleEditFormChange('assignee', assigneeId)}
+                                            isEditing={isEditing}
+                                        />
 
                                         {/* Amount Information */}
                                         <div className="space-y-6">
@@ -688,7 +525,7 @@ export default function ActualDetail() {
                                                         </div>
                                                     </div>
                                                 )}
-                                                {/* Assignee Field - NEW */}
+                                                {/* Assignee Field */}
                                                 {actual?.assignee && (
                                                     <div className="flex items-center gap-3">
                                                         <Tag className="h-5 w-5 text-muted-foreground" />

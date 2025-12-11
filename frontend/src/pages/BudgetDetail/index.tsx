@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-
-
 import { Button } from '../../components/ui/button';
 import { 
     ArrowLeft, 
@@ -11,9 +9,6 @@ import {
     CheckLine, 
     Tag, 
     Type, 
-    Equal,
-    EqualNot ,
-    CircleEqual,
     Power,
     ChevronRight,
 } from 'lucide-react';
@@ -25,14 +20,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-// import { EventTrxTable } from '@/pages/EventDetailPage/EventTrxTable'; // Changed from import EventTrxTable from to import { EventTrxTable } from
 import { toast } from 'sonner';
 import { budgetService, Budget } from '../../services/budgetService';
 import formatCurrency from '../../utils/formatCurrency';
- // Changed from import getActiveIcon from to import { getActiveIcon } from
-// import { useEventRefresh } from '../../hooks/useEventRefresh'; // Changed from import useEventRefresh from to import { useEventRefresh } from
-import { User } from '../../services/userService';
-import { userService } from '../../services/userService';
 import { IconActive } from '@/components/IconActive';
 import { IconDone } from '@/components/IconDone';
 
@@ -45,8 +35,7 @@ export default function BudgetDetail() {
     const [error, setError] = useState<string | null>(null);
     const [isEditing, setIsEditing] = useState(false);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-    const [users, setUsers] = useState<User[]>([]);
-    const [usersLoading, setUsersLoading] = useState(false);
+
     const [editBudget, setEditBudget] = useState<{
         active: boolean;
         done: boolean;
@@ -81,43 +70,12 @@ export default function BudgetDetail() {
     const [expandedBudgetDetailsView, setExpandedBudgetDetailsView] = useState(false);
     const [expandedAmountDetailsView, setExpandedAmountDetailsView] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [refreshTrx, setRefreshTrx] = useState(false); // Add refresh state
-    
-    // // Use the event refresh hook
-    // const { shouldRefresh, resetRefreshFlag } = useEventRefresh({ 
-    //     eventId: eventId || '', 
-    //     refreshInterval: 30000 // Check every 30 seconds
-    // });
 
     useEffect(() => {
         if (budgetId) {
             fetchBudgetDetails(budgetId);
         }
-    }, [budgetId    ]); // Add shouldRefresh to dependencies
-
-    // Fetch users when component mounts or editing starts
-    // useEffect(() => {
-    //     if (isEditing) {
-    //         fetchUsers();
-    //     }
-    // }, [isEditing]);
-
-    // Effect to handle automatic refresh
-    // useEffect(() => {
-    //     if (shouldRefresh) {
-    //         // Refresh the event data
-    //         if (eventId) {
-    //             fetchEventDetails(eventId);
-    //         }
-    //         // Refresh the transaction table
-    //         setRefreshTrx(prev => !prev);
-    //         // Reset the refresh flag
-    //         resetRefreshFlag();
-            
-    //         // Show a toast notification
-    //         toast.info('Event data has been updated');
-    //     }
-    // }, [shouldRefresh, eventId]);
+    }, [budgetId]);
 
     const fetchBudgetDetails = async (budgetId: string) => {
         try {
@@ -147,18 +105,7 @@ export default function BudgetDetail() {
         }
     };
 
-    // const fetchUsers = async () => {
-    //     try {
-    //         setUsersLoading(true);
-    //         const data = await userService.getAllUsers();
-    //         setUsers(data);
-    //     } catch (error) {
-    //         console.error('Failed to fetch users:', error);
-    //         toast.error('Failed to load users for assignment');
-    //     } finally {
-    //         setUsersLoading(false);
-    //     }
-    // };
+
 
     const handleEditFormChange = (field: string, value: string | number | boolean | object) => {
         // Handle nested objects like detailedBudget and detailedAmount
@@ -196,12 +143,10 @@ export default function BudgetDetail() {
             });
             setBudget(updatedBudget);
             
-            toast.success('Event updated successfully');
+            toast.success('Budget updated successfully');
             setIsEditing(false);
-            // Trigger refresh of transaction table
-            setRefreshTrx(prev => !prev);
         } catch (error) {
-            toast.error('Failed to update event');
+            toast.error('Failed to update budget');
             console.error(error);
         } finally {
             setIsSubmitting(false);
@@ -217,15 +162,14 @@ export default function BudgetDetail() {
         
         try {
             setIsSubmitting(true);
-            // Fix: Use event._id if it exists, otherwise use a fallback
-            const eventId = (budget as any)._id || '';
-            await budgetService.deleteBudget(eventId);
+            const budgetId = (budget as any)._id || '';
+            await budgetService.deleteBudget(budgetId);
             
-            toast.success('Event deleted successfully');
+            toast.success('Budget deleted successfully');
             setIsDeleteConfirmOpen(false);
             navigate(-1); // Go back to the previous page
         } catch (error) {
-            toast.error('Failed to delete event');
+            toast.error('Failed to delete budget');
             console.error(error);
         } finally {
             setIsSubmitting(false);
@@ -377,14 +321,14 @@ export default function BudgetDetail() {
                     <div className="lg:col-span-2 space-y-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle>Event Details</CardTitle>
-                                <CardDescription>Complete information about this event</CardDescription>
+                                <CardTitle>Budget Details</CardTitle>
+                                <CardDescription>Complete information about this budget</CardDescription>
                             </CardHeader>
                             <CardContent>
                                 {isEditing ? (
                                     <div className="space-y-6">
                                         {/* Toggle Row: Done and Active */}
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-3 gap-4">
                                             <div className="flex items-center space-x-2">
                                                 <input
                                                     id="done"
@@ -431,7 +375,7 @@ export default function BudgetDetail() {
                                          {/* Type, Group, Amount equals Budget, and Assignee Fields */}
                                         <div className="grid gap-4" style={{ gridTemplateColumns: '2fr 2fr 1fr 3fr' }}>
                                             <div className="space-y-2">
-                                                <Label htmlFor="typ">type</Label>
+                                                <Label htmlFor="typ">Type</Label>
                                                 <Select 
                                                     value={editBudget.typ || 'expense'} 
                                                     onValueChange={(value) => handleEditFormChange('typ', value)}
@@ -442,16 +386,14 @@ export default function BudgetDetail() {
                                                     <SelectContent>
                                                         <SelectItem value="income">Income</SelectItem>
                                                         <SelectItem value="expense">Expense</SelectItem>
+                                                        <SelectItem value="other">Other</SelectItem>
                                                     </SelectContent>
                                                 </Select>
                                             </div>
-                                         
                                         </div>
 
-                                       
-                                        {/* Budget and Amount Information */}
+                                        {/* Amount Information */}
                                         <div className="space-y-6">
-                                          
                                             {/* Amount Block */}
                                             <div className="space-y-2">
                                                 <h3 className="text-lg font-medium">Amount Information</h3>
@@ -511,18 +453,15 @@ export default function BudgetDetail() {
                                             </div>
                                         </div>
 
-                                         {/* Date Fields */}
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                                <Label htmlFor="dateEx">date Ex</Label>
-                                                <Input
-                                                    id="dateEx"
-                                                    type="date"
-                                                    value={editBudget.dateEx || ''}
-                                                    onChange={(e) => handleEditFormChange('dateEx', e.target.value)}
-                                                />
-                                            </div>
-                                        
+                                        {/* Date Fields */}
+                                        <div className="space-y-2">
+                                            <Label htmlFor="dateEx">Date of Execution</Label>
+                                            <Input
+                                                id="dateEx"
+                                                type="date"
+                                                value={editBudget.dateEx || ''}
+                                                onChange={(e) => handleEditFormChange('dateEx', e.target.value)}
+                                            />
                                         </div>
 
                                     </div>
@@ -530,22 +469,22 @@ export default function BudgetDetail() {
                                     <div className="space-y-6">
                                         <div className="grid gap-6 md:grid-cols-2">
                                             <div className="space-y-4">
-                                                 <div className="flex items-center gap-3">
+                                                <div className="flex items-center gap-3">
                                                     <Tag className="h-5 w-5 text-muted-foreground" />
                                                     <div>
                                                         <div className="text-sm text-muted-foreground">Project</div>
                                                         <div className="font-medium">
-                                                          {typeof budget?.project === 'object' && budget?.project !== null && 'name' in (budget?.project || {})
-                                                            ? (
-                                                                <button 
-                                                                    onClick={() => navigate(`/finance/project/${(budget?.project as any)?._id}`)}
-                                                                    className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
-                                                                    title={`View project: ${(budget?.project as any)?.name}`}
-                                                                >
-                                                                    {(budget?.project as any)?.name}
-                                                                </button>
-                                                              )
-                                                            : (typeof budget?.project === 'string' ? budget?.project : 'N/A')
+                                                            {typeof budget?.project === 'object' && budget?.project !== null && 'name' in (budget?.project || {})
+                                                                ? (
+                                                                    <button 
+                                                                        onClick={() => navigate(`/finance/project/${(budget?.project as any)?._id}`)}
+                                                                        className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                                                                        title={`View project: ${(budget?.project as any)?.name}`}
+                                                                    >
+                                                                        {(budget?.project as any)?.name}
+                                                                    </button>
+                                                                )
+                                                                : (typeof budget?.project === 'string' ? budget?.project : 'N/A')
                                                             }
                                                         </div>
                                                     </div>
@@ -570,7 +509,7 @@ export default function BudgetDetail() {
                                                         <div className="text-sm text-muted-foreground">Done</div>
                                                         <div className="font-medium">
                                                             {budget?.done ? 'true' : 'false'}
-                                                         </div> 
+                                                        </div> 
                                                     </div>
                                                 </div>
 
@@ -578,8 +517,6 @@ export default function BudgetDetail() {
                                             </div>
 
                                             <div className="space-y-6">
-                                                            
-
                                                 {/* Amount Information Block */}
                                                 <div className="border rounded-lg p-4">
                                                     <h3 className="text-lg font-medium mb-3">Amount Information</h3>
@@ -664,18 +601,7 @@ export default function BudgetDetail() {
                     </div>
                 </div>
 
-                {/* Linked Transaction - Full Width */}
-                {/* <div className="mt-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Linked Transaction</CardTitle>
-                            <CardDescription>Transaction associated with this event</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <EventTrxTable evn={budget} refresh={refreshTrx} />
-                        </CardContent>
-                    </Card>
-                </div> */}
+
             </main>
 
             {/* Delete Confirmation Dialog */}

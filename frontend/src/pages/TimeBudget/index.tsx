@@ -1,39 +1,31 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
-import { ChevronLeft, ChevronRight, Eye, LayoutGrid, Download } from 'lucide-react';
+import { Card, CardContent } from '../../components/ui/card';
 import { Budget } from '../../services/budgetService';
-import formatCurrency from '../../utils/formatCurrency';
-import { IconDone } from '../../components/IconDone';
-import { IconType } from '../../components/IconType';
 import { useBudget } from '../../hooks/useBudget';
 import { useNavigate } from 'react-router-dom';
 import sortRow from '../../utils/sortRow';
-import { ArrowRight } from 'lucide-react';
-
-const formatYearMonth = (year: number, month: number): string => {
-    return `${year}-${String(month).padStart(2, '0')}`;
-};
-
-const parseYearMonth = (ym: string): { year: number; month: number } => {
-    const [year, month] = ym.split('-').map(Number);
-    return { year, month };
-};
-
-const addMonths = (ym: string, months: number): string => {
-    const { year, month } = parseYearMonth(ym);
-    let newMonth = month + months;
-    let newYear = year;
-    while (newMonth > 12) {
-        newMonth -= 12;
-        newYear++;
-    }
-    while (newMonth < 1) {
-        newMonth += 12;
-        newYear--;
-    }
-    return formatYearMonth(newYear, newMonth);
-};
+import { TimeBudgetHeader } from './TimeBudgetHeader';
+import { MonthNavigation } from './MonthNavigation';
+import { BudgetTable } from './BudgetTable';
+import { TimeBudgetLegend } from './TimeBudgetLegend';
+import {
+    formatYearMonth,
+    addMonths,
+    getCurrentYearMonth,
+    getMonthRange
+} from '../../components/TimeMap';
+import {
+    groupBudgetsByProjectAndName,
+    getBudgetsByMonth,
+    calculateMonthTotals,
+    calculateVariableMonthTotals,
+    filterBudgetsByDateRange
+} from './budgetUtils';
+import {
+    handleRowSelect as handleRowSelectUtil,
+    handleSelectAll as handleSelectAllUtil,
+    initializeSelectedRows
+} from '../../components/TimeMap';
 
 export default function TimeBudget() {
     const navigate = useNavigate();
@@ -41,28 +33,11 @@ export default function TimeBudget() {
     const [budgets, setBudgets] = useState<Budget[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [selectedRows, setSelectedRows] = useState<Record<string, boolean>>({});
-    
-    // Calculate default date range: current month - 2 to current month + 2
-    const getCurrentYearMonth = (): string => {
-        const now = new Date();
-        return formatYearMonth(now.getFullYear(), now.getMonth() + 1);
-    };
+    const [nRangeMonth, setNRangeMonth] = useState<number>(2);
 
     const currentYm = getCurrentYearMonth();
-    const [stYm, setStYm] = useState(addMonths(currentYm, -2));
-    const [enYm, setEnYm] = useState(addMonths(currentYm, 2));
-
-    // Generate month headers
-    const getMonthRange = (start: string, end: string): string[] => {
-        const months: string[] = [];
-        let current = start;
-        while (current <= end) {
-            months.push(current);
-            current = addMonths(current, 1);
-        }
-        return months;
-    };
-
+    const [stYm, setStYm] = useState(addMonths(currentYm, -nRangeMonth));
+    const [enYm, setEnYm] = useState(addMonths(currentYm, nRangeMonth));
     const monthRange = getMonthRange(stYm, enYm);
 
     // Fetch budgets using hook
@@ -70,11 +45,7 @@ export default function TimeBudget() {
         try {
             setError(null);
             const allBudgets = await getAllBudget();
-            // Filter budgets by date range
-            const filtered = allBudgets.filter((budget: Budget) => {
-                const budgetYm = new Date(budget.dateEx).toISOString().substring(0, 7);
-                return budgetYm >= startYm && budgetYm <= endYm;
-            });
+            const filtered = filterBudgetsByDateRange(allBudgets, startYm, endYm);
             setBudgets(sortRow(filtered));
         } catch (err) {
             console.error('Error fetching budgets:', err);
@@ -97,125 +68,40 @@ export default function TimeBudget() {
     };
 
     const handleRowSelect = (key: string) => {
-        setSelectedRows(prev => ({
-            ...prev,
-            [key]: !prev[key]
-        }));
+        setSelectedRows(handleRowSelectUtil(key, selectedRows));
     };
 
     const handleSelectAll = () => {
-        const allSelected = Object.values(selectedRows).every(v => v);
-        const newSelected: Record<string, boolean> = {};
-        Object.keys(selectedRows).forEach(key => {
-            newSelected[key] = !allSelected;
-        });
-        setSelectedRows(newSelected);
+        setSelectedRows(handleSelectAllUtil(selectedRows));
     };
 
-    // Group budgets by project and name
-    const groupedBudgets = budgets.reduce((acc: Record<string, { budgetName: string; project: string; budgets: Budget[] }>, budget) => {
-        const projectId = typeof budget.project === 'string' ? budget.project : (budget.project as any)?._id || 'Unknown';
-        const projectName = typeof budget.project === 'string' ? budget.project : (budget.project as any)?.name || 'Unknown';
-        const key = `${budget.name}-${projectId}`;
-        if (!acc[key]) {
-            acc[key] = {
-                budgetName: budget.name,
-                project: projectName,
-                budgets: []
-            };
-        }
-        acc[key].budgets.push(budget);
-        return acc;
-    }, {});
+    const groupedBudgets = groupBudgetsByProjectAndName(budgets);
 
     // Initialize selected rows when grouped budgets change
     useEffect(() => {
-        const newSelectedRows: Record<string, boolean> = {};
-        Object.keys(groupedBudgets).forEach((key: string) => {
-            if (!(key in selectedRows)) {
-                newSelectedRows[key] = true; // Default to selected
-            } else {
-                newSelectedRows[key] = selectedRows[key];
-            }
-        });
-        setSelectedRows(newSelectedRows);
+        setSelectedRows(initializeSelectedRows(Object.keys(groupedBudgets), selectedRows));
     }, [Object.keys(groupedBudgets).length]);
 
-    // Extract month from dateEx and return amount info
-    const getBudgetsByMonth = (budgetList: Budget[]): { [key: string]: { amount: number; done: boolean; typ: string } } => {
-        const result: { [key: string]: { amount: number; done: boolean; typ: string } } = {};
-        budgetList.forEach((budget: Budget) => {
-            if (budget.dateEx) {
-                const budgetYm = new Date(budget.dateEx).toISOString().substring(0, 7);
-                if (monthRange.includes(budgetYm)) {
-                    result[budgetYm] = {
-                        amount: budget.amount || 0,
-                        done: budget.done || false,
-                        typ: budget.typ || 'expense'
-                    };
-                }
-            }
-        });
-        return result;
+    // Handle month range change
+    const handleRangeMonthChange = (newRange: number) => {
+        setNRangeMonth(newRange);
+        setStYm(addMonths(currentYm, -newRange));
+        setEnYm(addMonths(currentYm, newRange));
     };
 
-    // Calculate total amount for each month (only for selected rows)
-    // Formula: total = total income - total expense
-    const getMonthTotals = (): { [key: string]: number } => {
-        const totals: { [key: string]: number } = {};
-        monthRange.forEach((month: string) => {
-            totals[month] = 0;
-        });
-        Object.entries(groupedBudgets).forEach(([key, group]: [string, { budgetName: string; project: string; budgets: Budget[] }]) => {
-            // Only include this group if selected
-            if (selectedRows[key]) {
-                const monthData = getBudgetsByMonth(group.budgets);
-                Object.entries(monthData).forEach(([month, data]: [string, { amount: number; done: boolean; typ: string }]) => {
-                    if (data.typ === 'income') {
-                        totals[month] += data.amount;
-                    } else {
-                        totals[month] -= data.amount;
-                    }
-                });
-            }
-        });
-        return totals;
+    // Create a wrapper for getBudgetsByMonth that uses monthRange from state
+    const getBudgetsByMonthWrapper = (budgetList: Budget[]) => {
+        return getBudgetsByMonth(budgetList, monthRange);
     };
 
-    const monthTotals = getMonthTotals();
+    const monthTotals = calculateMonthTotals(groupedBudgets, selectedRows, monthRange);
+    const variableMonthTotals = calculateVariableMonthTotals(groupedBudgets, monthRange);
 
     return (
         <div className="flex flex-col gap-6 p-6">
-            <div className="flex justify-between items-start">
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Budget Tracker</h1>
-                    {/* <p className="text-gray-600 mt-2">Track the status of all project budgets across different months.</p> */}
-                </div>
-                {/* <Button className="bg-blue-600 hover:bg-blue-700">
-                    <span className="mr-2">➕</span>
-                    Add Budget
-                </Button> */}
-            </div>
+            <TimeBudgetHeader nRangeMonth={nRangeMonth} onRangeMonthChange={handleRangeMonthChange} />
 
             <Card>
-                {/* <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                    <div>
-                        <CardTitle>Timeline View</CardTitle>
-                        <CardDescription>Month-by-month budget status overview</CardDescription>
-                    </div>
-                    <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
-                            <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button variant="outline" size="sm">
-                            <LayoutGrid className="h-4 w-4" />
-                        </Button>
-                        <Button variant="outline" size="sm">
-                            <Download className="h-4 w-4" />
-                            Export
-                        </Button>
-                    </div>
-                </CardHeader> */}
                 <CardContent>
                     {error || hookError && (
                         <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded text-red-700">
@@ -223,128 +109,34 @@ export default function TimeBudget() {
                         </div>
                     )}
 
-                    {/* Month Navigation */}
-                    <div className="flex items-center justify-between mb-6">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={handlePrevious}
-                            className="flex items-center gap-2"
-                        >
-                            <ChevronLeft className="h-4 w-4" />
-                        </Button>
-                        <span className="text-sm font-medium text-gray-700">
-                            {stYm} to {enYm}
-                        </span>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={handleNext}
-                            className="flex items-center gap-2"
-                        >
-                            <ChevronRight className="h-4 w-4" />
-                        </Button>
-                    </div>
+                    <MonthNavigation
+                        stYm={stYm}
+                        enYm={enYm}
+                        onPrevious={handlePrevious}
+                        onNext={handleNext}
+                    />
 
-                    {/* Table */}
                     {loading ? (
                         <div className="text-center py-8 text-gray-600">Loading budgets...</div>
                     ) : Object.keys(groupedBudgets).length === 0 ? (
                         <div className="text-center py-8 text-gray-600">No budgets found for this period</div>
                     ) : (
-                        <div className="overflow-x-auto">
-                            <table className="w-full border-collapse text-sm">
-                                <thead>
-                                    <tr className="border-b border-gray-200">
-                                        <th className="text-left py-3 px-4 font-semibold text-gray-700 bg-gray-50 sticky left-0 z-10 min-w-[200px]">
-                                            <div className="flex items-center gap-2">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={Object.values(selectedRows).length > 0 && Object.values(selectedRows).every(v => v)}
-                                                    onChange={handleSelectAll}
-                                                    className="rounded border-gray-300 cursor-pointer"
-                                                    title="Select all rows"
-                                                />
-                                                <span>Budget Name</span>
-                                            </div>
-                                        </th>
-                                        {monthRange.map(month => (
-                                            <th
-                                                key={month}
-                                                className="text-right py-3 px-3 font-semibold text-gray-700 bg-gray-50 min-w-[120px]"
-                                            >
-                                                <div className="text-sm">{month}</div>
-                                                <div className="text-xs text-gray-500 font-normal mt-1">{formatCurrency(monthTotals[month])}</div>
-                                            </th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {Object.entries(groupedBudgets).map(([key, group]) => {
-                                        const monthStatus = getBudgetsByMonth(group.budgets);
-                                        return (
-                                            <tr key={key} className={`border-b border-gray-200 ${selectedRows[key] ? 'hover:bg-gray-50' : 'bg-gray-100 opacity-60'}`}>
-                                                <td className="py-2 px-3 font-medium text-gray-900 bg-white sticky left-0 z-10">
-                                                    <div className="flex items-center gap-3">
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={selectedRows[key] || false}
-                                                            onChange={() => handleRowSelect(key)}
-                                                            className="rounded border-gray-300 cursor-pointer"
-                                                        />
-                                                        <button 
-                                                            onClick={() => navigate(`/finance/budget/${group.budgets[0]._id}`)} 
-                                                            className="text-cyan-700 hover:text-blue-800 hover:underline cursor-pointer whitespace-nowrap" 
-                                                            title={`View budget: ${group.budgetName}`}
-                                                        >
-                                                            {group.project} 
-                                                            {/* <ArrowRight className="h-3 w-3 inline" />   */}
-                                                            {" / "}                                                            
-                                                            {group.budgetName}
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                                {monthRange.map(month => {
-                                                    const monthData = monthStatus[month];
-                                                    return (
-                                                        <td key={`${key}-${month}`} className="text-right py-2 px-2">
-                                                            {monthData ? (
-                                                                <div className="flex items-center justify-end gap-1 text-xs">
-                                                                    <span className="font-semibold text-gray-800">{formatCurrency(monthData.amount)}</span>
-                                                                    <div>{IconType(monthData.typ)}</div>
-                                                                    <div>{IconDone(monthData.done)}</div>
-                                                                </div>
-                                                            ) : (
-                                                                <span className="text-gray-300">—</span>
-                                                            )}
-                                                        </td>
-                                                    );
-                                                })}
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
+                        <BudgetTable
+                            groupedBudgets={groupedBudgets}
+                            monthRange={monthRange}
+                            monthTotals={monthTotals}
+                            variableMonthTotals={variableMonthTotals}
+                            selectedRows={selectedRows}
+                            getBudgetsByMonth={getBudgetsByMonthWrapper}
+                            onRowSelect={handleRowSelect}
+                            onSelectAll={handleSelectAll}
+                            onNavigateToBudget={(budgetId: string) => navigate(`/finance/budget/${budgetId}`)}
+                        />
                     )}
                 </CardContent>
             </Card>
 
-            {/* Legend */}
-            <Card>
-                <CardContent className="pt-6">
-                    <div className="flex flex-wrap gap-6">
-                        <div className="flex items-center gap-2">
-                            {IconDone(true)}
-                            <span className="text-sm text-gray-700">Done</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            {IconDone(false)}
-                            <span className="text-sm text-gray-700">On Going</span>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
+            <TimeBudgetLegend />
         </div>
     );
 }

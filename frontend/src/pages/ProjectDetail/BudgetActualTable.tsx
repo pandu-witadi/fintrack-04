@@ -41,9 +41,11 @@ interface BudgetTableProps {
     onAddBudget: () => void;
     onSpawn?: (budgetIds: string[]) => void;
     onRegisterActual?: (selectedBudgets: Budget[]) => void;
+    onRefreshActuals?: () => Promise<void>;
+    onRefreshTrx?: () => Promise<void>;
 }
 
-export default function BudgetActualTable({ budgets, onDelete, onAddBudget, onSpawn, onRegisterActual }: BudgetTableProps) {
+export default function BudgetActualTable({ budgets, onDelete, onAddBudget, onSpawn, onRegisterActual, onRefreshActuals, onRefreshTrx }: BudgetTableProps) {
     const navigate = useNavigate();
 
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -295,11 +297,18 @@ export default function BudgetActualTable({ budgets, onDelete, onAddBudget, onSp
                         </Button>
                         <Button
                             variant="destructive"
-                            onClick={() => {
+                            onClick={async () => {
                                 if (budgetToDelete) {
                                     onDelete(budgetToDelete);
                                     setDeleteDialogOpen(false);
                                     setBudgetToDelete(null);
+                                    // Refresh all related tables after deletion
+                                    if (onRefreshActuals) {
+                                        await onRefreshActuals();
+                                    }
+                                    if (onRefreshTrx) {
+                                        await onRefreshTrx();
+                                    }
                                 }
                             }}
                         >
