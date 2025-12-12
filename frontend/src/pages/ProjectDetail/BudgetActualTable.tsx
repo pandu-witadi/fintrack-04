@@ -52,6 +52,7 @@ export default function BudgetActualTable({ budgets, onDelete, onAddBudget, onSp
     const [isSpawning, setIsSpawning] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [budgetToDelete, setBudgetToDelete] = useState<Budget | null>(null);
+    const [cloneDialogOpen, setCloneDialogOpen] = useState(false);
     
 
      // const sortedBudgets = sortRow(budgets);
@@ -75,7 +76,12 @@ export default function BudgetActualTable({ budgets, onDelete, onAddBudget, onSp
         setSelectedIds(newSelected);
     };
 
-    const handleCloneFromBudgets = async () => {
+    const handleCloneFromBudgets = () => {
+        if (selectedIds.size === 0) return;
+        setCloneDialogOpen(true);
+    };
+
+    const confirmCloneFromBudgets = async () => {
         if (selectedIds.size === 0) return;
         
         try {
@@ -87,6 +93,7 @@ export default function BudgetActualTable({ budgets, onDelete, onAddBudget, onSp
             setSelectedIds(new Set());
         } finally {
             setIsSpawning(false);
+            setCloneDialogOpen(false);
         }
     };
 
@@ -145,8 +152,7 @@ export default function BudgetActualTable({ budgets, onDelete, onAddBudget, onSp
                                     </>
                                 ) : (
                                     <>
-                                        <Power className="h-4 w-4 mr-2" />
-                                        Clone Actual ({selectedIds.size})
+                                        Clone Actual
                                     </>
                                 )}
                             </Button>
@@ -313,6 +319,32 @@ export default function BudgetActualTable({ budgets, onDelete, onAddBudget, onSp
                             }}
                         >
                             Delete
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={cloneDialogOpen} onOpenChange={setCloneDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Clone Actual</DialogTitle>
+                        <DialogDescription>
+                            Are you sure you want to clone {selectedIds.size} selected budget(s) as actual records? This will create new actual records from the selected budgets.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => setCloneDialogOpen(false)}
+                            disabled={isSpawning}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={confirmCloneFromBudgets}
+                            disabled={isSpawning}
+                        >
+                            {isSpawning ? 'Cloning...' : 'Clone'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

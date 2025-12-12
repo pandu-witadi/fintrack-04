@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-    ArrowLeft,
+    ArrowLeftFromLine,
     Edit,
     Trash2,
     Calendar,
@@ -30,11 +30,12 @@ import { trxService, Trx } from '@/services/trxService.ts';
 import { actualService } from '@/services/actualService';
 import { uploadService } from '@/services/uploadService';
 import formatCurrency from '@/utils/formatCurrency';
+import { IconType } from '@/components/IconType';
 import { IconActive } from '@/components/IconActive';
 import { IconDone } from '@/components/IconDone';
 import ActualTable from './ActualTable';
 import { useUpload } from '@/hooks/useUpload';
-import AssigneeSelector from './AssigneeSelector';
+import AssigneeSelector from '@/components/AssigneeSelector';
 
 
 export default function TrxDetail() {
@@ -300,7 +301,7 @@ export default function TrxDetail() {
             <div className="container mx-auto py-8">
                 <div className="flex items-center justify-between mb-6">
                     <Button variant="ghost" onClick={() => navigate(-1)}>
-                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        <ArrowLeftFromLine className="h-4 w-4 mr-2" />
                         Back
                     </Button>
                 </div>
@@ -324,7 +325,7 @@ export default function TrxDetail() {
             <div className="container mx-auto py-8">
                 <div className="flex items-center justify-between mb-6">
                     <Button variant="ghost" onClick={() => navigate(-1)}>
-                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        <ArrowLeftFromLine className="h-4 w-4 mr-2" />
                         Back
                     </Button>
                 </div>
@@ -351,16 +352,17 @@ export default function TrxDetail() {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
                             <Button variant="ghost" onClick={() => navigate(-1)} size="sm">
-                                <ArrowLeft className="h-4 w-4" />
+                                <ArrowLeftFromLine className="h-4 w-4" />
                             </Button>
                             <div>
-                                <h1 className="text-2xl font-bold">{trx?.name || 'Unnamed Transaction'}</h1>
+                                <h2 className="text-2xl font-bold">{trx?.name || 'Unnamed Transaction'}</h2>
                                 <div className="flex items-center space-x-2 mt-1">
-                                    <Badge variant="outline">transaction</Badge>
+                                    <Badge variant="outline" className="rounded-none">trx</Badge>
                                     <ChevronRight className="h-4 w-4" />
-                                    <Badge variant="outline">{trx?.typ || 'N/A'}</Badge>
+                                    {IconType(trx?.typ || 'expense')}
                                     {IconDone(trx?.done)}
                                 </div>
+                                
                             </div>
                         </div>
                         <div className="flex items-center space-x-2">
@@ -397,8 +399,8 @@ export default function TrxDetail() {
                     <div className="lg:col-span-2 space-y-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle>Transaction Details</CardTitle>
-                                <CardDescription>Complete information about this transaction</CardDescription>
+                                <CardTitle>Trx Details</CardTitle>
+                                <CardDescription>Complete information about this trx</CardDescription>
                             </CardHeader>
                             <CardContent>
                                 {isEditing ? (
@@ -629,26 +631,7 @@ export default function TrxDetail() {
                                     <div className="space-y-6">
                                         <div className="grid gap-6 md:grid-cols-2">
                                             <div className="space-y-4">
-                                                <div className="flex items-center gap-3">
-                                                    <Tag className="h-5 w-5 text-muted-foreground" />
-                                                    <div>
-                                                        <div className="text-sm text-muted-foreground">Project</div>
-                                                        <div className="font-medium">
-                                                            {typeof trx?.project === 'object' && trx?.project !== null && 'name' in (trx?.project || {})
-                                                                ? (
-                                                                    <button
-                                                                        onClick={() => navigate(`/finance/project/${(trx?.project as any)?._id}`)}
-                                                                        className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
-                                                                        title={`View project: ${(trx?.project as any)?.name}`}
-                                                                    >
-                                                                        {(trx?.project as any)?.name}
-                                                                    </button>
-                                                                )
-                                                                : (typeof trx?.project === 'string' ? trx?.project : 'N/A')
-                                                            }
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                               
                                                 <div className="flex items-center gap-3">
                                                     <Power className="h-5 w-5 text-muted-foreground" />
                                                     <div>
@@ -660,7 +643,7 @@ export default function TrxDetail() {
                                                     <Type className="h-5 w-5 text-muted-foreground" />
                                                     <div>
                                                         <div className="text-sm text-muted-foreground">Type</div>
-                                                        <div className="font-medium">{trx?.typ}</div>
+                                                        {IconType(trx?.typ)}
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-3">
@@ -796,6 +779,26 @@ export default function TrxDetail() {
                                 <CardTitle className="h-3 w-3 text-orange-500">Metadata</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
+                                 <div className="flex items-center gap-3">
+                                    <Tag className="h-5 w-5 text-muted-foreground" />
+                                    <div>
+                                        <div className="text-sm text-muted-foreground">Project</div>
+                                        <div className="font-medium">
+                                            {typeof trx?.project === 'object' && trx?.project !== null && 'name' in (trx?.project || {})
+                                                ? (
+                                                    <button
+                                                        onClick={() => navigate(`/finance/project/${(trx?.project as any)?._id}`)}
+                                                        className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                                                        title={`View project: ${(trx?.project as any)?.name}`}
+                                                    >
+                                                        {(trx?.project as any)?.name}
+                                                    </button>
+                                                )
+                                                : (typeof trx?.project === 'string' ? trx?.project : 'N/A')
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
                                 <div className="flex items-center gap-3">
                                     <Calendar className="h-5 w-5 text-muted-foreground" />
                                     <div>
@@ -811,14 +814,6 @@ export default function TrxDetail() {
                                         <div className="text-sm text-muted-foreground">Updated By</div>
                                         <div className="font-medium">{(trx?.updatedBy as any)?.name || 'N/A'}</div>
                                         <div className="text-sm text-muted-foreground">{(trx?.updatedBy as any)?.email || 'N/A'}</div>
-                                    </div>
-                                )}
-
-                                {trx?.assignee && typeof trx?.assignee === 'object' && trx?.assignee !== null && (
-                                    <div>
-                                        <div className="text-sm text-muted-foreground">Assignee</div>
-                                        <div className="font-medium">{(trx?.assignee as any)?.name || 'N/A'}</div>
-                                        <div className="text-sm text-muted-foreground">{(trx?.assignee as any)?.email || 'N/A'}</div>
                                     </div>
                                 )}
 

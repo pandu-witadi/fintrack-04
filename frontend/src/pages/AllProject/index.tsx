@@ -16,7 +16,7 @@ import AddProjectDialog from './AddProjectDialog';
 
 export default function FinAllProjectPage() {
     const navigate = useNavigate();
-    const { projects, loading, error, fetchAllProject, createProject } = useProject();
+    const { projects, loading, error, fetchAllProject, createProject, deleteProject } = useProject();
     const [isFormModalOpen, setIsFormModalOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -39,6 +39,16 @@ export default function FinAllProjectPage() {
             console.error(error);
         } finally {
             setIsSubmitting(false);
+        }
+    };
+
+    const handleDeleteProject = async (id: string) => {
+        try {
+            await deleteProject(id);
+            toast.success('Project deleted successfully');
+        } catch (error) {
+            toast.error('Failed to delete project');
+            console.error(error);
         }
     };
 
@@ -78,6 +88,7 @@ export default function FinAllProjectPage() {
                 <ProjectTable 
                     projects={projects} 
                     onView={handleView}
+                    onDelete={handleDeleteProject}
                 />
             </div>
 

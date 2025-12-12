@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Actual } from '@/services/actualService';
-import { Trx } from '@/services/trxService';
 import { Project, projectService } from '@/services/projectService';
 
-interface BatchAttachToTrxDialogProps {
+
+interface BatchAttachAllActualToTrxDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     selectedActuals: Actual[];
@@ -17,14 +17,14 @@ interface BatchAttachToTrxDialogProps {
     currentProjectId: string;
 }
 
-export function BatchAttachToTrxDialog({
+export function BatchAttachAllActualToTrxDialog({
     open,
     onOpenChange,
     selectedActuals,
     onSubmit,
     isSubmitting,
     currentProjectId
-}: BatchAttachToTrxDialogProps) {
+}: BatchAttachAllActualToTrxDialogProps) {
     const [projects, setProjects] = useState<Project[]>([]);
     const [projectsLoading, setProjectsLoading] = useState(false);
     const [projectsError, setProjectsError] = useState<string | null>(null);

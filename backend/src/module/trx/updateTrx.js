@@ -35,8 +35,8 @@ const updateTrx = async (request, reply) => {
             throw new AppError('Transaction not found', 404)
         }
 
+        // update all actual.done in lActual array to true
         if (updateData.done) {
-            // update all actual.done in lActual array to true
             await Actual.updateMany(
                 { _id: { $in: trx.lActual } },
                 { $set: { done: true } }

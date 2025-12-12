@@ -4,7 +4,7 @@ const AppError = require('../../util/appError')
 const getAllProject = async (request, reply) => {
     try {
         const projects = await Project.find({})
-            .sort({ createdAt: -1 })
+            .sort({ stDate: 1 })
             .populate({
                 path: 'updatedBy',
                 select: '_id name email'

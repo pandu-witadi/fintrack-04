@@ -42,6 +42,8 @@ export interface Project {
         name: string;
     }>;
     year?: number;
+    stDate?: string;
+    enDate?: string;
     createdAt: string;
     updatedAt: string;
 }
@@ -53,6 +55,8 @@ interface CreateProjectData {
     active?: boolean;
     typ?: 'project' | 'routine' | 'other';
     year?: number;
+    stDate?: string;
+    enDate?: string;
 }
 
 interface UpdateProjectData {
@@ -62,6 +66,8 @@ interface UpdateProjectData {
     active?: boolean;
     typ?: 'project' | 'routine' | 'other';
     year?: number;
+    stDate?: string;
+    enDate?: string;
 }
 
 export const projectService = {

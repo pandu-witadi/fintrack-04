@@ -10,6 +10,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Budget } from '@/services/budgetService.ts';
+import { NumberInput } from '../../components/number-input';
+import formatCurrency from '../../utils/formatCurrency';
+
 
 interface RegisterActualDialogProps {
     open: boolean;
@@ -106,7 +109,7 @@ export default function RegisterActualDialog({
                                 From Budget: {currentBudget.name}
                             </div>
                             <div className="text-xs text-muted-foreground">
-                                Budget Amount: {currentBudget.amount}
+                                Budget Amount: {formatCurrency(currentBudget.amount)}
                             </div>
                         </div>
 
@@ -125,15 +128,16 @@ export default function RegisterActualDialog({
 
                         <div className="space-y-2">
                             <Label htmlFor="amount">Amount</Label>
-                            <Input
+                            <NumberInput
                                 id="amount"
-                                type="number"
                                 value={budgetFormData.amount}
-                                onChange={(e) =>
-                                    handleInputChange('amount', parseFloat(e.target.value) || '')
+                                onValueChange={(value) =>
+                                    handleInputChange('amount', value || '')
                                 }
                                 placeholder="Enter amount"
                                 disabled={isSubmitting}
+                                thousandSeparator=","
+                                decimalScale={0}
                             />
                         </div>
 

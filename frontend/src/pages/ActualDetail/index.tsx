@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-    ArrowLeft,
+    ArrowLeftFromLine,
     Edit,
     Trash2,
     Calendar,
@@ -25,7 +25,8 @@ import { actualService, Actual } from '@/services/actualService.ts';
 import formatCurrency from '@/utils/formatCurrency';
 import { IconActive } from '@/components/IconActive';
 import { IconDone } from '@/components/IconDone';
-import AssigneeSelector from './AssigneeSelector';
+import { IconType } from '@/components/IconType';
+import AssigneeSelector from '@/components/AssigneeSelector';
 
 export default function ActualDetail() {
     const navigate = useNavigate();
@@ -217,7 +218,7 @@ export default function ActualDetail() {
             <div className="container mx-auto py-8">
                 <div className="flex items-center justify-between mb-6">
                     <Button variant="ghost" onClick={() => navigate(-1)}>
-                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        <ArrowLeftFromLine className="h-4 w-4 mr-2" />
                         Back
                     </Button>
                 </div>
@@ -241,7 +242,7 @@ export default function ActualDetail() {
             <div className="container mx-auto py-8">
                 <div className="flex items-center justify-between mb-6">
                     <Button variant="ghost" onClick={() => navigate(-1)}>
-                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        <ArrowLeftFromLine className="h-4 w-4 mr-2" />
                         Back
                     </Button>
                 </div>
@@ -268,16 +269,17 @@ export default function ActualDetail() {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
                             <Button variant="ghost" onClick={() => navigate(-1)} size="sm">
-                                <ArrowLeft className="h-4 w-4" />
+                                <ArrowLeftFromLine className="h-4 w-4" />
                             </Button>
                             <div>
-                                <h1 className="text-2xl font-bold">{actual?.name || 'Unnamed Actual'}</h1>
+                                <h2 className="text-2xl font-bold">{actual?.name || 'Unnamed Actual'}</h2>
                                 <div className="flex items-center space-x-2 mt-1">
-                                    <Badge variant="outline">actual</Badge>
+                                    <Badge variant="outline" className="rounded-none">actual</Badge>
                                     <ChevronRight className="h-4 w-4" />
-                                    <Badge variant="outline">{actual?.typ || 'N/A'}</Badge>
+                                    {IconType(actual?.typ || 'expense')}
                                     {IconDone(actual?.done)}
                                 </div>
+                               
                             </div>
                         </div>
                         <div className="flex items-center space-x-2">
@@ -466,26 +468,6 @@ export default function ActualDetail() {
                                         <div className="grid gap-6 md:grid-cols-2">
                                             <div className="space-y-4">
                                                 <div className="flex items-center gap-3">
-                                                    <Tag className="h-5 w-5 text-muted-foreground" />
-                                                    <div>
-                                                        <div className="text-sm text-muted-foreground">Project</div>
-                                                        <div className="font-medium">
-                                                            {typeof actual?.project === 'object' && actual?.project !== null && 'name' in (actual?.project || {})
-                                                                ? (
-                                                                    <button
-                                                                        onClick={() => navigate(`/finance/project/${(actual?.project as any)?._id}`)}
-                                                                        className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
-                                                                        title={`View project: ${(actual?.project as any)?.name}`}
-                                                                    >
-                                                                        {(actual?.project as any)?.name}
-                                                                    </button>
-                                                                )
-                                                                : (typeof actual?.project === 'string' ? actual?.project : 'N/A')
-                                                            }
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-3">
                                                     <Power className="h-5 w-5 text-muted-foreground" />
                                                     <div>
                                                         <div className="text-sm text-muted-foreground">Active</div>
@@ -496,7 +478,7 @@ export default function ActualDetail() {
                                                     <Type className="h-5 w-5 text-muted-foreground" />
                                                     <div>
                                                         <div className="text-sm text-muted-foreground">Type</div>
-                                                        <div className="font-medium">{actual?.typ}</div>
+                                                        {IconType(actual?.typ)}
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-3">
@@ -599,6 +581,26 @@ export default function ActualDetail() {
                                 <CardTitle className="h-3 w-3 text-orange-500">Metadata</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
+                                  <div className="flex items-center gap-3">
+                                    <Tag className="h-5 w-5 text-muted-foreground" />
+                                    <div>
+                                        <div className="text-sm text-muted-foreground">Project</div>
+                                        <div className="font-medium">
+                                            {typeof actual?.project === 'object' && actual?.project !== null && 'name' in (actual?.project || {})
+                                                ? (
+                                                    <button
+                                                        onClick={() => navigate(`/finance/project/${(actual?.project as any)?._id}`)}
+                                                        className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                                                        title={`View project: ${(actual?.project as any)?.name}`}
+                                                    >
+                                                        {(actual?.project as any)?.name}
+                                                    </button>
+                                                )
+                                                : (typeof actual?.project === 'string' ? actual?.project : 'N/A')
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
                                 <div className="flex items-center gap-3">
                                     <Calendar className="h-5 w-5 text-muted-foreground" />
                                     <div>
@@ -614,14 +616,6 @@ export default function ActualDetail() {
                                         <div className="text-sm text-muted-foreground">Updated By</div>
                                         <div className="font-medium">{(actual?.updatedBy as any)?.name || 'N/A'}</div>
                                         <div className="text-sm text-muted-foreground">{(actual?.updatedBy as any)?.email || 'N/A'}</div>
-                                    </div>
-                                )}
-
-                                {actual?.assignee && typeof actual?.assignee === 'object' && actual?.assignee !== null && (
-                                    <div>
-                                        <div className="text-sm text-muted-foreground">Assignee</div>
-                                        <div className="font-medium">{(actual?.assignee as any)?.name || 'N/A'}</div>
-                                        <div className="text-sm text-muted-foreground">{(actual?.assignee as any)?.email || 'N/A'}</div>
                                     </div>
                                 )}
 

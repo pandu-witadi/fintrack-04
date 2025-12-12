@@ -95,17 +95,17 @@ export function DetailSection({
 
     const stats: StatItem[] = [
         {
-            label: 'Budgets',
+            label: 'Budget',
             done: budgetCount.done,
             total: budgetCount.total
         },
         {
-            label: 'Actuals',
+            label: 'Actual',
             done: actualCount.done,
             total: actualCount.total
         },
         {
-            label: 'Transactions',
+            label: 'Trx',
             done: trxCount.done,
             total: trxCount.total
         }
@@ -113,17 +113,11 @@ export function DetailSection({
 
     return (
         <>
-            <div className="flex justify-between items-center">
-                <div className="flex items-center space-x-4">
-                    <div>
-                        <h1 className="text-2xl font-bold">{project.name}</h1>
-                        {/* <p className="text-muted-foreground text-sm">Project details and events</p> */}
-                    </div>
-                </div>
+            <div className="flex justify-end">
                 <div className="flex space-x-2">
                     <Button variant="outline" size="sm" onClick={handleCalculateFinance} disabled={isCalculating}>
                         <Calculator className="h-4 w-4 mr-2" />
-                        {isCalculating ? 'Calculating...' : 'calc'}
+                        {isCalculating ? 'Calculating...' : 'Calc'}
                     </Button>
                     <Button variant="outline" size="sm" onClick={handleEdit}>
                         <Pencil className="h-4 w-4 mr-2" />

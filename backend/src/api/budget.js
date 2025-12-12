@@ -35,7 +35,8 @@ const resp_200 = {
                     properties: {
                         _id: { type: 'string' },
                         name: { type: 'string' },
-                        code: { type: 'string' }
+                        code: { type: 'string' },
+                        stDate: { type: 'string', format: 'date' },
                     }
                 },
                 updatedBy: {
@@ -55,7 +56,7 @@ const resp_200 = {
                             _id: { type: 'string' },
                             name: { type: 'string' },
                             amount: { type: 'number' },
-                            dateEx: { type: 'string', format: 'date' },
+                            dateEx: { type: 'string', format: 'date-time' },
                             amount: { type: 'number' },
                             done: { type: 'boolean' },
                             typ: { type: 'string', enum: ['income', 'expense', 'other'] },

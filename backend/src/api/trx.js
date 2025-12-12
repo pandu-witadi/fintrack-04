@@ -151,7 +151,7 @@ async function trxApi(fastify, options) {
                     name: { type: 'string', maxLength: 50 },
                     actualId: { type: 'string' },
                     amount: { type: 'number' },
-                    dateEx: { type: 'string', format: 'date' }
+                    dateEx: { type: 'string', format: 'date-time' }
                 },
                 required: ['name', 'actualId', 'amount', 'dateEx']
             },

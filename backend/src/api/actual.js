@@ -75,7 +75,7 @@ const resp_200 = {
                         projectName: { type: 'string' }
                     }
                 },
-                dateEx: { type: 'string', format: 'date' },
+                dateEx: { type: 'string', format: 'date-time' },
                 createdAt: { type: 'string', format: 'date-time' },
                 updatedAt: { type: 'string', format: 'date-time' }
             }

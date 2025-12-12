@@ -4,10 +4,9 @@ const AppError = require('../../util/appError')
 const getAllTrx = async (request, reply) => {
     try {
         const trxs = await Trx.find({})
-        .sort({ createdAt: -1 })
         .populate({
             path: 'project',
-            select: '_id name code'
+            select: '_id name code stDate'
         })
         .populate({
             path: 'updatedBy',
@@ -33,6 +32,24 @@ const getAllTrx = async (request, reply) => {
 
         trxs.forEach(trx => {
             trx._id = trx._id.toString()
+        })
+
+        // Sort by project.stDate ascending, then by type (income first, then expense)
+        trxs.sort((a, b) => {
+            // First, sort by project.stDate ascending
+            if (a.project && b.project) {
+                const dateA = new Date(a.project.stDate).getTime()
+                const dateB = new Date(b.project.stDate).getTime()
+                if (dateA !== dateB) {
+                    return dateA - dateB
+                }
+            }
+            
+            // If same project, sort by type: income first, then expense
+            const typeOrder = { 'income': 0, 'expense': 1 }
+            const typeA = typeOrder[a.typ] ?? 2
+            const typeB = typeOrder[b.typ] ?? 2
+            return typeA - typeB
         })
 
         return {

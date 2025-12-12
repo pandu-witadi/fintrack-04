@@ -106,10 +106,10 @@ export default function ActualTrxTable({ actuals, onDelete, onAddActual, onBatch
                                     
                                 </>
                             )}
-                            <Button onClick={onAddActual} size="sm">
+                            {/* <Button onClick={onAddActual} size="sm">
                                 <Plus className="h-4 w-4 mr-2" />
                                 Add Actual
-                            </Button>
+                            </Button> */}
                         </div>
                     </div>
                     

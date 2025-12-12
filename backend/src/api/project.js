@@ -89,6 +89,8 @@ const resp_200 = {
                     }
                 },
                 year: { type: 'number' },
+                stDate: { type: 'string', format: 'date' },
+                enDate: { type: 'string', format: 'date' },
                 createdAt: { type: 'string', format: 'date-time' },
                 updatedAt: { type: 'string', format: 'date-time' }
             }
@@ -217,6 +219,16 @@ async function projectApi(fastify, options) {
                         type: 'number',
                         description: 'Year associated with the project',
                         minimum: 2000
+                    },
+                    stDate: {
+                        type: 'string',
+                        format: 'date',
+                        description: 'Start date of the project'
+                    },
+                    enDate: {
+                        type: 'string',
+                        format: 'date',
+                        description: 'End date of the project'
                     }
                 }
             },
@@ -284,6 +296,19 @@ async function projectApi(fastify, options) {
                     id: { type: 'string', description: 'Project ID' }
                 },
                 required: ['id']
+            },
+            body: {
+                type: 'object',
+                properties: {
+                    code: { type: 'string', maxLength: 50 },
+                    name: { type: 'string', maxLength: 50 },
+                    note: { type: 'string' },
+                    active: { type: 'boolean' },
+                    typ: { type: 'string', enum: ['project', 'routine', 'other'] },
+                    year: { type: 'number', minimum: 2000 },
+                    stDate: { type: 'string', format: 'date' },
+                    enDate: { type: 'string', format: 'date' }
+                }
             },
             response: {
                 200: resp_200,

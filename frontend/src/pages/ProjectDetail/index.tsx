@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeftFromLine, ChevronRight } from 'lucide-react';
 import {
     Card,
     CardContent,
@@ -29,15 +29,18 @@ import formatCurrency from '@/utils/formatCurrency.ts';
 import BudgetActualTable from './BudgetActualTable';
 import ActualTrxTable from './ActualTrxTable';
 import TrxActualTable from './TrxActualTable';
-import { AddBudgetDialogWrapper } from './AddBudgetDialogWrapper';
+import { AddBudgetDialog } from './AddBudgetDialog';
 import RegisterActualDialog from './RegisterActualDialog';
 import RegisterTrxDialog from './RegisterTrxDialog';
 import { AddActualDialog } from './AddActualDialog';
 import { AddTrxDialog } from './AddTrxDialog';
-import { BatchAttachToTrxDialog } from './BatchAttachToTrxDialog';
+import { BatchAttachAllActualToTrxDialog } from './BatchAttachAllActualToTrxDialog';
 
 import { DetailSection } from './DetailSection';
 import { EditProjectDialog } from './EditProjectDialog';
+import { Badge } from '@/components/ui/badge';
+import { IconDone } from '@/components/IconDone';
+
 
 export default function ProjectDetail() {
     const { id: projectId } = useParams<{ id: string }>();
@@ -489,7 +492,20 @@ export default function ProjectDetail() {
     };
 
     // Calculate statistics
-    const calculateStats = (): { budgetCount: { done: number; total: number }; actualCount: { done: number; total: number }; trxCount: { done: number; total: number } } => {
+    const calculateStats = (): { 
+        budgetCount: { 
+            done: number; 
+            total: number 
+        }; 
+        actualCount: { 
+            done: number; 
+            total: number 
+        }; 
+        trxCount: { 
+            done: number; 
+            total: number
+         } 
+    } => {
         const budgetsDone = budgets.filter(b => b.done).length;
         const actualsDone = actuals.filter(a => a.done).length;
         const trxsDone = trxs.filter(t => t.done).length;
@@ -538,9 +554,22 @@ export default function ProjectDetail() {
 
     return (
         <div className="space-y-6">
-            <Button variant="outline" size="icon" onClick={() => navigate('/finance/allProject')}>
-                <ArrowLeft className="h-4 w-4" />
-            </Button>
+            {/* <Button variant="outline" size="icon" onClick={() => navigate('/finance/allProject')}>
+                <ArrowLeftFromLine className="h-4 w-4" />
+            </Button> */}
+            <div className="flex items-center space-x-4">
+                <Button variant="ghost" onClick={() => navigate('/finance/allProject')} size="sm">
+                    <ArrowLeftFromLine className="h-4 w-4" />
+                </Button>
+                <div>
+                        <h2 className="text-2xl font-bold">{project?.name || 'Unnamed Project'}</h2>
+                    <div className="flex items-center space-x-2 mt-1">
+                        <Badge variant="outline" className="rounded-none">project</Badge>
+                        <ChevronRight className="h-4 w-4" />
+                        {IconDone(project?.done)}
+                    </div>
+                </div>
+            </div>
 
             <DetailSection
                 project={project}
@@ -599,11 +628,12 @@ export default function ProjectDetail() {
             />
 
             {/* Add Budget Dialog */}
-            <AddBudgetDialogWrapper
+            <AddBudgetDialog
                 open={isFormModalOpen}
                 onOpenChange={setIsFormModalOpen}
                 onSubmit={handleFormSubmit}
                 isSubmitting={isSubmitting}
+                projectId={projectId || ''}
             />
             
             {/* Add Actual Dialog */}
@@ -731,7 +761,7 @@ export default function ProjectDetail() {
                 isSubmitting={isRegisteringTrx}
             />
             
-            <BatchAttachToTrxDialog
+            <BatchAttachAllActualToTrxDialog
                 open={isBatchAttachDialogOpen}
                 onOpenChange={(open) => {
                     setIsBatchAttachDialogOpen(open);

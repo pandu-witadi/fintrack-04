@@ -22,11 +22,19 @@ import {
     Search, 
     Filter,
     Power,
-    Eye
+    Eye,
+    Trash2
 } from 'lucide-react';
 import { IconActive } from '@/components/IconActive';
 import { IconDone } from '@/components/IconDone';
 import { Project as BaseProject } from '../../services/projectService';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 
 interface Project extends BaseProject {
     environmentCount?: number;
@@ -48,6 +56,8 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [typeFilter, setTypeFilter] = useState<string>('all');
     const [yearFilter, setYearFilter] = useState<string>('all');
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
     
 
     const handleSelectAll = (checked: boolean) => {
@@ -74,6 +84,19 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
         setSortConfig({ key, direction });
     };
 
+    const handleDeleteClick = (project: Project) => {
+        setProjectToDelete(project);
+        setDeleteDialogOpen(true);
+    };
+
+    const handleConfirmDelete = () => {
+        if (projectToDelete && onDelete) {
+            onDelete(projectToDelete._id);
+            setDeleteDialogOpen(false);
+            setProjectToDelete(null);
+        }
+    };
+
     const handleToggleColumn = (column: keyof typeof visibleColumns) => {
         setVisibleColumns(prev => ({
             ...prev,
@@ -88,6 +111,7 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
         name: true,
         typ: true,
         year: true,
+        stDate: true,
         environmentCount: false,
         transactionCount: false,
         updatedAt: true,
@@ -131,6 +155,12 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
                     onCheckedChange={() => handleToggleColumn('year')}
                 >
                     Year
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem 
+                    checked={visibleColumns.stDate}
+                    onCheckedChange={() => handleToggleColumn('stDate')}
+                >
+                    Start Date
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem 
                     checked={visibleColumns.environmentCount}
@@ -349,6 +379,11 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
                                     year
                                 </TableHead>
                             )}
+                            {visibleColumns.stDate && (
+                                <TableHead className="cursor-pointer" onClick={() => handleSort('stDate')}>
+                                    stDate
+                                </TableHead>
+                            )}
                             {visibleColumns.environmentCount && (
                                 <TableHead className="cursor-pointer" onClick={() => handleSort('environmentCount')}>
                                     events
@@ -369,6 +404,7 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
                                     done
                                 </TableHead>
                             )}
+                            <TableHead className="w-20 text-center">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -410,6 +446,11 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
                                   {visibleColumns.year && (
                                       <TableCell>{project.year || 'N/A'}</TableCell>
                                   )}
+                                  {visibleColumns.stDate && (
+                                      <TableCell>
+                                        {project.stDate ? format(new Date(project.stDate), 'MMM dd, yyyy') : 'N/A'}
+                                      </TableCell>
+                                  )}
                                   {visibleColumns.environmentCount && (
                                       <TableCell>
                                           <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground border-gray-200">
@@ -432,7 +473,17 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
                                   {visibleColumns.done && (
                                       <TableCell>{IconDone(project.done)}</TableCell>
                                   )}
-                               
+                                  <TableCell className="text-center">
+                                      <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => handleDeleteClick(project)}
+                                          disabled={!onDelete}
+                                          className="text-red-600 hover:text-red-800 hover:bg-red-50"
+                                      >
+                                          <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                  </TableCell>
                               </TableRow>
                           ))
                         )}
@@ -446,6 +497,26 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
                     ? `${selectedIds.length} of ${filteredAndSortedProjects.length} project(s) selected` 
                     : `${filteredAndSortedProjects.length} project(s) total`}
             </div>
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Delete Project</DialogTitle>
+                        <DialogDescription>
+                            Are you sure you want to delete project "{projectToDelete?.name}"? This action cannot be undone.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex justify-end gap-3">
+                        <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button onClick={handleConfirmDelete} className="bg-red-600 hover:bg-red-700">
+                            Delete
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

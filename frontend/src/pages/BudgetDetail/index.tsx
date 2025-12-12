@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
 import { 
-    ArrowLeft, 
+    ArrowLeftFromLine,
     Edit, 
     Trash2, 
     Calendar, 
@@ -15,14 +15,16 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { NumberInput } from '../../components/number-input';
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { budgetService, Budget } from '../../services/budgetService';
+import { NumberInput } from '../../components/number-input';
 import formatCurrency from '../../utils/formatCurrency';
+import { IconType } from '@/components/IconType';
 import { IconActive } from '@/components/IconActive';
 import { IconDone } from '@/components/IconDone';
 
@@ -221,7 +223,7 @@ export default function BudgetDetail() {
             <div className="container mx-auto py-8">
                 <div className="flex items-center justify-between mb-6">
                     <Button variant="ghost" onClick={() => navigate(-1)}>
-                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        <ArrowLeftFromLine className="h-4 w-4 mr-2" />
                         Back
                     </Button>
                 </div>
@@ -246,7 +248,7 @@ export default function BudgetDetail() {
             <div className="container mx-auto py-8">
                 <div className="flex items-center justify-between mb-6">
                     <Button variant="ghost" onClick={() => navigate(-1)}>
-                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        <ArrowLeftFromLine className="h-4 w-4 mr-2" />
                         Back
                     </Button>
                 </div>
@@ -273,16 +275,15 @@ export default function BudgetDetail() {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
                             <Button variant="ghost" onClick={() => navigate(-1)} size="sm">
-                                <ArrowLeft className="h-4 w-4" />
+                                <ArrowLeftFromLine className="h-4 w-4" />
                             </Button>
                             <div>
-                                <h1 className="text-2xl font-bold">{budget?.name || 'Unnamed Budget'}</h1>
+                                 <h2 className="text-2xl font-bold">{budget?.name || 'Unnamed Budget'}</h2>
                                 <div className="flex items-center space-x-2 mt-1">
-                                     <Badge variant="outline">budget</Badge>
+                                     <Badge variant="outline" className="rounded-none">budget</Badge>
                                     <ChevronRight className="h-4 w-4" />
-                                    <Badge variant="outline">{budget?.typ || 'N/A'}</Badge>
+                                    {IconType(budget?.typ)}
                                     {IconDone(budget?.done)}
-
                                 </div>
                             </div>
                         </div>
@@ -469,26 +470,7 @@ export default function BudgetDetail() {
                                     <div className="space-y-6">
                                         <div className="grid gap-6 md:grid-cols-2">
                                             <div className="space-y-4">
-                                                <div className="flex items-center gap-3">
-                                                    <Tag className="h-5 w-5 text-muted-foreground" />
-                                                    <div>
-                                                        <div className="text-sm text-muted-foreground">Project</div>
-                                                        <div className="font-medium">
-                                                            {typeof budget?.project === 'object' && budget?.project !== null && 'name' in (budget?.project || {})
-                                                                ? (
-                                                                    <button 
-                                                                        onClick={() => navigate(`/finance/project/${(budget?.project as any)?._id}`)}
-                                                                        className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
-                                                                        title={`View project: ${(budget?.project as any)?.name}`}
-                                                                    >
-                                                                        {(budget?.project as any)?.name}
-                                                                    </button>
-                                                                )
-                                                                : (typeof budget?.project === 'string' ? budget?.project : 'N/A')
-                                                            }
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                               
                                                 <div className="flex items-center gap-3">
                                                     <Power className="h-5 w-5 text-muted-foreground" />
                                                     <div>
@@ -500,7 +482,7 @@ export default function BudgetDetail() {
                                                     <Type className="h-5 w-5 text-muted-foreground" />
                                                     <div>
                                                         <div className="text-sm text-muted-foreground">Type</div>
-                                                        <div className="font-medium">{budget?.typ}</div>
+                                                        {IconType(budget?.typ)}
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-3">
@@ -573,6 +555,26 @@ export default function BudgetDetail() {
                                 <CardTitle className="h-3 w-3 text-orange-500">Metadata</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
+                                 <div className="flex items-center gap-3">
+                                    <Tag className="h-5 w-5 text-muted-foreground" />
+                                    <div>
+                                        <div className="text-sm text-muted-foreground">Project</div>
+                                        <div className="font-medium">
+                                            {typeof budget?.project === 'object' && budget?.project !== null && 'name' in (budget?.project || {})
+                                                ? (
+                                                    <button 
+                                                        onClick={() => navigate(`/finance/project/${(budget?.project as any)?._id}`)}
+                                                        className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                                                        title={`View project: ${(budget?.project as any)?.name}`}
+                                                    >
+                                                        {(budget?.project as any)?.name}
+                                                    </button>
+                                                )
+                                                : (typeof budget?.project === 'string' ? budget?.project : 'N/A')
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
                                 <div className="flex items-center gap-3">
                                     <Calendar className="h-5 w-5 text-muted-foreground" />
                                     <div>
