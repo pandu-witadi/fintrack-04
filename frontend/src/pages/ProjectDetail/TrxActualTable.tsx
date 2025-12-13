@@ -38,44 +38,15 @@ interface TrxTableProps {
     trxs: Trx[];
     onDelete: (trx: Trx) => void;
     onAddTrx: () => void;
-    onRegisterTrx?: (selectedActuals: any[]) => void;
 }
 
-export default function TrxActualTable({ trxs, onDelete, onAddTrx, onRegisterTrx }: TrxTableProps) {
+export default function TrxActualTable({ trxs, onDelete, onAddTrx }: TrxTableProps) {
     const navigate = useNavigate();
 
-    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-    const [selectedTrxIds, setSelectedTrxIds] = useState<Set<string>>(new Set());
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [trxToDelete, setTrxToDelete] = useState<Trx | null>(null);
     
     const sortedTrxs = sortRow(trxs);
-
-    const handleSelectAll = () => {
-        if (selectedIds.size === trxs.length) {
-            setSelectedIds(new Set());
-        } else {
-            setSelectedIds(new Set(trxs.map(t => t._id)));
-        }
-    };
-
-    const handleSelectOne = (id: string) => {
-        const newSelected = new Set(selectedIds);
-        if (newSelected.has(id)) {
-            newSelected.delete(id);
-        } else {
-            newSelected.add(id);
-        }
-        setSelectedIds(newSelected);
-    };
-
-    const handleRegisterTrx = () => {
-        if (onRegisterTrx && selectedIds.size > 0) {
-            const selectedTrxs = trxs.filter(t => selectedIds.has(t._id));
-            onRegisterTrx(selectedTrxs);
-            setSelectedIds(new Set());
-        }
-    };
 
     if (sortedTrxs.length === 0) {
         return (
@@ -99,28 +70,6 @@ export default function TrxActualTable({ trxs, onDelete, onAddTrx, onRegisterTrx
                     <span className="text-xs bg-muted px-2 py-1 rounded-full ml-auto">{sortedTrxs.length}</span>
                 </h2>
                 <div className="flex gap-2">
-                    {selectedIds.size > 0 && (
-                        <>
-                            <Button 
-                                variant="outline"
-                                size="sm"
-                                onClick={handleRegisterTrx}
-                            >
-                                Register Selected
-                            </Button>
-                            <Button 
-                                variant="destructive"
-                                size="sm"
-                                onClick={() => {
-                                    if (window.confirm(`Are you sure you want to delete ${selectedIds.size} transaction(s)?`)) {
-                                        // Handle bulk delete if needed
-                                    }
-                                }}
-                            >
-                                Delete Selected
-                            </Button>
-                        </>
-                    )}
                     <Button onClick={onAddTrx} size="sm">
                         <Plus className="h-4 w-4 mr-2" />
                         Add Transaction
@@ -128,28 +77,16 @@ export default function TrxActualTable({ trxs, onDelete, onAddTrx, onRegisterTrx
                 </div>
             </div>
             
-            <div className="rounded-md border">
-                 <div className="text-sm text-muted-foreground">
-                    {/* Total rows: <span className="font-semibold">{budgets.length}</span> */}
-                    {selectedIds.size > 0 && (
-                        <span className="ml-3">Selected: <span className="font-semibold">{selectedIds.size}</span></span>
-                    )}
-                </div>
-                <div className="rounded-lg border">
+            <div className="rounded-lg border">
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-12">
-                                    <Checkbox
-                                        checked={selectedIds.size === trxs.length && trxs.length > 0}
-                                        onCheckedChange={handleSelectAll}
-                                    />
-                                </TableHead>
                                 <TableHead><Power className="h-4 w-4 text-cyan-500" /></TableHead>
                                 <TableHead className="text-right">name</TableHead>
                                 <TableHead className="text-right">amount</TableHead>
-                                <TableHead className="text-right">assignee</TableHead>
-                                <TableHead>dateEx</TableHead>
+                                <TableHead className="text-right">updtBy</TableHead>
+                                <TableHead className="text-center w-36">dateEx</TableHead>
+                                <TableHead  className="text-left">assignee</TableHead>
                                 <TableHead className="text-center">linkActual</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
@@ -157,15 +94,8 @@ export default function TrxActualTable({ trxs, onDelete, onAddTrx, onRegisterTrx
                         <TableBody>
                             {sortedTrxs.map((trx) => (
                                 <TableRow 
-                                    key={trx._id} 
-                                    className={selectedIds.has(trx._id) ? "bg-accent" : ""}
+                                    key={trx._id}
                                 >
-                                    <TableCell>
-                                        <Checkbox
-                                            checked={selectedIds.has(trx._id)}
-                                            onCheckedChange={() => handleSelectOne(trx._id)}
-                                        />
-                                    </TableCell>
                                     <TableCell>
                                         {IconActive(trx.active)}
                                     </TableCell>
@@ -184,19 +114,27 @@ export default function TrxActualTable({ trxs, onDelete, onAddTrx, onRegisterTrx
                                             {IconDone(trx.done)}
                                         </div>
                                     </TableCell>
-                                    <TableCell className="text-right">
+                                    <TableCell className="text-right text-sm">
+                                        {trx.updatedBy && trx.updatedBy.name ? (
+                                            <div className="text-xs">{trx.updatedBy.name}</div>
+                                        ) : (
+                                            <span className="text-xs text-muted-foreground">-</span>
+                                        )}
+                                    </TableCell>
+                                    <TableCell className="text-center text=sm w-36">
+                                        {formatDate(trx.dateEx)}
+                                    </TableCell>
+                                    <TableCell className="text-left text-sm">
                                         {trx.assignee ? (
                                             <div>
-                                                <div className="font-medium">{trx.assignee.name}</div>
-                                                <div className="text-xs text-muted-foreground">{trx.assignee.email}</div>
+                                                <div className="font-text-xs text-muted-foreground">{trx.assignee.name}</div>
+                                                {/* <div className="text-xs text-muted-foreground">{trx.assignee.email}</div> */}
                                             </div>
                                         ) : (
                                             <span className="text-muted-foreground">-</span>
                                         )}
                                     </TableCell>
-                                    <TableCell>
-                                        {formatDate(trx.dateEx)}
-                                    </TableCell>
+                                    
                                     <TableCell className="text-sm min-w-fit">
                                         {trx.lActual && trx.lActual.length > 0 ? (
                                             <div className="space-y-1">
@@ -246,7 +184,6 @@ export default function TrxActualTable({ trxs, onDelete, onAddTrx, onRegisterTrx
                             ))}
                         </TableBody>
                     </Table>
-                </div>
             </div>
             
             <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

@@ -40,7 +40,7 @@ interface Project extends BaseProject {
     environmentCount?: number;
     transactionCount?: number;
 }
-import { format } from 'date-fns';
+import { format, getYear } from 'date-fns';
 
 
 interface ProjectsTableProps {
@@ -110,11 +110,9 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
         code: true,
         name: true,
         typ: true,
-        year: true,
+        year: false,
         stDate: true,
-        environmentCount: false,
-        transactionCount: false,
-        updatedAt: true,
+        updatedAt: false,
         done: true
     });
     const renderColumnVisibilityControls = () => (
@@ -122,7 +120,7 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
             <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="flex items-center gap-2">
                     <Eye className="h-4 w-4" />
-                    Columns
+                    columns
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
@@ -130,61 +128,49 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
                     checked={visibleColumns.active}
                     onCheckedChange={() => handleToggleColumn('active')}
                 >
-                    Active
+                    active
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem 
                     checked={visibleColumns.code}
                     onCheckedChange={() => handleToggleColumn('code')}
                 >
-                    Code
+                    code
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem 
                     checked={visibleColumns.name}
                     onCheckedChange={() => handleToggleColumn('name')}
                 >
-                    Name
+                    name
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem 
                     checked={visibleColumns.typ}
                     onCheckedChange={() => handleToggleColumn('typ')}
                 >
-                    Type
+                    type
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem 
                     checked={visibleColumns.year}
                     onCheckedChange={() => handleToggleColumn('year')}
                 >
-                    Year
+                    year
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem 
                     checked={visibleColumns.stDate}
                     onCheckedChange={() => handleToggleColumn('stDate')}
                 >
-                    Start Date
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem 
-                    checked={visibleColumns.environmentCount}
-                    onCheckedChange={() => handleToggleColumn('environmentCount')}
-                >
-                    Events
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem 
-                    checked={visibleColumns.transactionCount}
-                    onCheckedChange={() => handleToggleColumn('transactionCount')}
-                >
-                    Transactions
+                    stDate
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem 
                     checked={visibleColumns.updatedAt}
                     onCheckedChange={() => handleToggleColumn('updatedAt')}
                 >
-                    Updated At
+                    updatedAt
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem 
                     checked={visibleColumns.done}
                     onCheckedChange={() => handleToggleColumn('done')}
                 >
-                    Done
+                    done
                 </DropdownMenuCheckboxItem>
             </DropdownMenuContent>
         </DropdownMenu>
@@ -193,7 +179,12 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
     // Get unique years from projects for the filter dropdown
     const uniqueYears = useMemo(() => {
         const years = projects
-            .map(project => project.year)
+            .map(project => {
+                if (project.stDate) {
+                    return getYear(new Date(project.stDate));
+                }
+                return project.year;
+            })
             .filter((year): year is number => year !== undefined)
             .filter((year, index, self) => self.indexOf(year) === index)
             .sort((a, b) => b - a);
@@ -217,7 +208,11 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
         
         // Then filter by year if not 'all'
         if (yearFilter !== 'all') {
-            filteredProjects = filteredProjects.filter(project => project.year === parseInt(yearFilter));
+            const yearFromFilter = parseInt(yearFilter);
+            filteredProjects = filteredProjects.filter(project => {
+                const projectYear = project.stDate ? getYear(new Date(project.stDate)) : project.year;
+                return projectYear === yearFromFilter;
+            });
         }
         
         // Then sort the filtered projects
@@ -269,16 +264,16 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
         });
     }, [projects, sortConfig, searchTerm, typeFilter, yearFilter]);
 
-    const getTypeBadge = (type: string) => {
+    const getTypeProjectBadge = (type: string) => {
         switch (type) {
             case 'project':
-                return <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Project</span>;
+                return <span className="bg-blue-100 text-green-800 text-xs px-2 py-1 rounded-none">project</span>;
             case 'routine':
-                return <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Routine</span>;
+                return <span className="bg-green-100 text-brown-800 text-xs px-2 py-1 rounded-none">routine</span>;
             case 'other':
-                return <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Other</span>;
+                return <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-none">other</span>;
             default:
-                return <span className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">Unknown</span>;
+                return <span className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-none">unknown</span>;
         }
     };
 
@@ -384,16 +379,6 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
                                     stDate
                                 </TableHead>
                             )}
-                            {visibleColumns.environmentCount && (
-                                <TableHead className="cursor-pointer" onClick={() => handleSort('environmentCount')}>
-                                    events
-                                </TableHead>
-                            )}
-                            {visibleColumns.transactionCount && (
-                                <TableHead className="cursor-pointer" onClick={() => handleSort('transactionCount')}>
-                                    transactions
-                                </TableHead>
-                            )}
                             {visibleColumns.updatedAt && (
                                 <TableHead className="cursor-pointer" onClick={() => handleSort('updatedAt')}>
                                     updatedAt
@@ -415,77 +400,64 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
                                 </TableCell>
                             </TableRow>
                         ) : (
-                          filteredAndSortedProjects.map((project, index) => (
-                              <TableRow key={project._id} className="hover:bg-muted/50">
-                                  <TableCell className="text-center text-sm text-muted-foreground">{index + 1}</TableCell>
-                                  <TableCell>
-                                      <Checkbox
-                                          checked={selectedIds.includes(project._id)}
-                                          onCheckedChange={(checked) => handleSelectRow(project._id, checked as boolean)}
-                                      />
-                                  </TableCell>
-                                  {visibleColumns.active && (
-                                      <TableCell>{IconActive(project.active)}</TableCell>
-                                  )}
-                                  {visibleColumns.code && (
-                                      <TableCell className="font-medium">{project.code}</TableCell>
-                                  )}
-                                  {visibleColumns.name && (
-                                      <TableCell>
-                                          <button 
-                                            onClick={() => onView(project)}
-                                            className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
-                                          >
-                                              {project.name}
-                                          </button>
-                                      </TableCell>
-                                  )}
-                                  {visibleColumns.typ && (
-                                      <TableCell>{getTypeBadge(project.typ)}</TableCell>
-                                  )}
-                                  {visibleColumns.year && (
-                                      <TableCell>{project.year || 'N/A'}</TableCell>
-                                  )}
-                                  {visibleColumns.stDate && (
-                                      <TableCell>
-                                        {project.stDate ? format(new Date(project.stDate), 'MMM dd, yyyy') : 'N/A'}
-                                      </TableCell>
-                                  )}
-                                  {visibleColumns.environmentCount && (
-                                      <TableCell>
-                                          <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground border-gray-200">
-                                              {project.environmentCount || 0}
-                                          </span>
-                                      </TableCell>
-                                  )}
-                                  {visibleColumns.transactionCount && (
-                                      <TableCell>
-                                          <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground border-gray-200">
-                                              {project.transactionCount || 0}
-                                          </span>
-                                      </TableCell>
-                                  )}
-                                  {visibleColumns.updatedAt && (
-                                      <TableCell>
-                                        {format(new Date(project.updatedAt), 'MMM dd, yyyy')}
-                                      </TableCell>
-                                  )}
-                                  {visibleColumns.done && (
-                                      <TableCell>{IconDone(project.done)}</TableCell>
-                                  )}
-                                  <TableCell className="text-center">
-                                      <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          onClick={() => handleDeleteClick(project)}
-                                          disabled={!onDelete}
-                                          className="text-red-600 hover:text-red-800 hover:bg-red-50"
-                                      >
-                                          <Trash2 className="h-4 w-4" />
-                                      </Button>
-                                  </TableCell>
-                              </TableRow>
-                          ))
+                            filteredAndSortedProjects.map((project, index) => (
+                                <TableRow key={project._id} className="hover:bg-muted/50">
+                                    <TableCell className="text-center text-sm text-muted-foreground">{index + 1}</TableCell>
+                                    <TableCell>
+                                        <Checkbox
+                                            checked={selectedIds.includes(project._id)}
+                                            onCheckedChange={(checked) => handleSelectRow(project._id, checked as boolean)}
+                                        />
+                                    </TableCell>
+                                    {visibleColumns.active && (
+                                        <TableCell>{IconActive(project.active)}</TableCell>
+                                    )}
+                                
+                                    {visibleColumns.name && (
+                                        <TableCell>
+                                            <button 
+                                                onClick={() => onView(project)}
+                                                className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                                            >
+                                                {project.code}
+                                            </button>
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.code && (
+                                        <TableCell className="font-medium">{project.name}</TableCell>
+                                    )}
+                                    {visibleColumns.typ && (
+                                        <TableCell>{getTypeProjectBadge(project.typ)}</TableCell>
+                                    )}
+                                    {visibleColumns.year && (
+                                        <TableCell>{project.stDate ? getYear(new Date(project.stDate)) : (project.year || 'N/A')}</TableCell>
+                                    )}
+                                    {visibleColumns.stDate && (
+                                        <TableCell>
+                                            {project.stDate ? format(new Date(project.stDate), 'yyyy-MM') : 'N/A'}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.updatedAt && (
+                                        <TableCell>
+                                            {format(new Date(project.updatedAt), 'MMM dd, yyyy')}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.done && (
+                                        <TableCell>{IconDone(project.done)}</TableCell>
+                                    )}
+                                    <TableCell className="text-center">
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => handleDeleteClick(project)}
+                                            disabled={!onDelete}
+                                            className="text-red-600 hover:text-red-800 hover:bg-red-50"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))
                         )}
                     </TableBody>
                 </Table>

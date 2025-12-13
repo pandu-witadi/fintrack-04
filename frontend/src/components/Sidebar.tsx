@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
     Home, 
     FileText, 
@@ -15,6 +15,14 @@ import {
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { useAuth } from '../context/AuthContext';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+} from './ui/dialog';
 
 interface NavItem {
     title: string;
@@ -28,7 +36,9 @@ export default function Sidebar() {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({}); // Track open submenus
+    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
     const location = useLocation();
+    const navigate = useNavigate();
     const { logout, user } = useAuth(); // Get user from auth context
 
     // Helper function to check if user has required role
@@ -85,7 +95,13 @@ export default function Sidebar() {
     ];
 
     const handleLogout = () => {
+        setShowLogoutConfirm(false);
         logout();
+        navigate('/login');
+    };
+
+    const handleLogoutClick = () => {
+        setShowLogoutConfirm(true);
     };
 
     useEffect(() => {
@@ -216,7 +232,7 @@ export default function Sidebar() {
                     <Button
                         variant="ghost"
                         className="w-full justify-start"
-                        onClick={handleLogout}
+                        onClick={handleLogoutClick}
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -225,6 +241,32 @@ export default function Sidebar() {
                     </Button>
                 </div>
             </div>
+
+            {/* Logout Confirmation Dialog */}
+            <Dialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
+                <DialogContent showCloseButton={true}>
+                    <DialogHeader>
+                        <DialogTitle>Confirm Logout</DialogTitle>
+                        <DialogDescription>
+                            Are you sure you want to logout? You'll need to login again to access your account.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => setShowLogoutConfirm(false)}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={handleLogout}
+                        >
+                            Logout
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </>
     );
 }

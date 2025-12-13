@@ -133,8 +133,10 @@ export default function ActualTrxTable({ actuals, onDelete, onAddActual, onBatch
                                         <TableHead><Power className="h-4 w-4 text-cyan-500" /></TableHead>
                                         <TableHead className="text-right">name</TableHead>
                                         <TableHead className="text-right">actual</TableHead>
-                                        <TableHead  className="text-right">assignee</TableHead>
-                                        <TableHead>dateEx</TableHead>
+                                        <TableHead className="text-right">updtBy</TableHead>
+                                        <TableHead className="text-center w-36">dateEx</TableHead>
+                                        <TableHead  className="text-left">assignee</TableHead>
+                                        
                                         <TableHead className="text-center">linkTrx</TableHead>
                                         <TableHead className="text-right">Actions</TableHead>
                                     </TableRow>
@@ -163,25 +165,35 @@ export default function ActualTrxTable({ actuals, onDelete, onAddActual, onBatch
                                                 </button>
                                             </TableCell>
                                             <TableCell className="text-right">
-                                                    <div className="flex items-center justify-end gap-1 text-xs">
-                                                        <span className="font-semibold">{formatCurrency(actual.amount)}</span>
-                                                        {actual.typ && IconType(actual.typ)}
-                                                        {IconDone(actual.done)}
-                                                    </div>
-                                                </TableCell>
-                                            <TableCell className="text-right">
+                                                <div className="flex items-center justify-end gap-1 text-xs">
+                                                    <span className="font-semibold">{formatCurrency(actual.amount)}</span>
+                                                    {actual.typ && IconType(actual.typ)}
+                                                    {IconDone(actual.done)}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="text-right text-sm">
+                                                {actual.updatedBy?.name && (
+                                                    <div className="text-xs text-muted-foreground">{actual.updatedBy.name}</div>
+                                                )}
+                                                {/* {budget.updatedBy?.email && (
+                                                    <div className="text-xs text-muted-foreground">{budget.updatedBy.email}</div>
+                                                )} */}
+                                            </TableCell>
+
+                                            <TableCell className="text-center text=sm w-36">
+                                                {formatDate(actual.dateEx)}
+                                            </TableCell>
+                                            <TableCell className="text-left text-sm">
                                                 {actual.assignee ? (
                                                     <div>
-                                                        <div className="font-medium">{actual.assignee.name}</div>
-                                                        <div className="text-xs text-muted-foreground">{actual.assignee.email}</div>
+                                                        <div className="font-text-xs text-muted-foreground">{actual.assignee.name}</div>
+                                                        {/* <div className="text-xs text-muted-foreground">{actual.assignee.email}</div>     */}
                                                     </div>
                                                 ) : (
                                                     <span className="text-muted-foreground">-</span>
                                                 )}
                                             </TableCell>
-                                            <TableCell>
-                                                {formatDate(actual.dateEx)}
-                                            </TableCell>
+                                        
                                             <TableCell className="text-sm min-w-fit">
                                                 {actual.trx !== undefined && actual.trx !== null ? (
                                                     <div className="border-l-2 border-muted-foreground pl-2">

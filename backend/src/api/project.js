@@ -88,7 +88,6 @@ const resp_200 = {
                         }
                     }
                 },
-                year: { type: 'number' },
                 stDate: { type: 'string', format: 'date' },
                 enDate: { type: 'string', format: 'date' },
                 createdAt: { type: 'string', format: 'date-time' },
@@ -214,11 +213,6 @@ async function projectApi(fastify, options) {
                         description: 'Type of the project',
                         enum: ['project', 'routine', 'other'],
                         default: 'project'
-                    },
-                    year: {
-                        type: 'number',
-                        description: 'Year associated with the project',
-                        minimum: 2000
                     },
                     stDate: {
                         type: 'string',

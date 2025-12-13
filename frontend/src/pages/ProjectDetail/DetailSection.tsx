@@ -4,38 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { IconActive } from '@/components/IconActive';
 import { IconDone } from '@/components/IconDone';
-
-
-interface Project {
-    _id: string;
-    name: string;
-    code: string;
-    typ: string;
-    year?: number;
-    active: boolean;
-    done: boolean;
-    createdAt: string;
-    updatedAt: string;
-    note?: string;
-    updatedBy?: {
-        name: string;
-        email: string;
-    };
-    info?: {
-        income?: {
-            budget: number;
-            actual: number;
-        };
-        expense?: {
-            budget: number;
-            actual: number;
-        };
-        profit?: {
-            budget: number;
-            actual: number;
-        };
-    };
-}
+import { Project } from '@/services/projectService.ts';
 
 interface StatItem {
     label: string;
@@ -62,7 +31,7 @@ function StatisticsBlock({ stats }: { stats: StatItem[] }) {
                     <div className="flex flex-col space-y-2">
                         <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
                         <div className="flex items-baseline space-x-2">
-                            <span className="text-2xl font-bold text-primary">{stat.done}</span>
+                            <span className="text-xl font-bold text-green-600">{stat.done}</span>
                             <span className="text-sm text-muted-foreground">/ {stat.total}</span>
                         </div>
                         <div className="mt-2 w-full bg-secondary rounded-full h-2">
@@ -158,8 +127,8 @@ export function DetailSection({
                                         <span>{project.typ}</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Year:</span>
-                                        <span>{project.year || 'N/A'}</span>
+                                        <span className="text-muted-foreground">stDate:</span>
+                                        <span>{project.stDate ? format(new Date(project.stDate), 'yyyy-MM') : 'N/A'}</span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-muted-foreground">Active:</span>

@@ -3,6 +3,7 @@ const fs = require('fs')
 const fastifyStatic = require('@fastify/static')
 const fastifyCors = require('@fastify/cors')
 const fastifyMultipart = require('@fastify/multipart')
+const fastifyHelmet = require('@fastify/helmet')
 
 const fastifyCookie = require('@fastify/cookie')
 const fastifySwagger = require('@fastify/swagger')
@@ -13,6 +14,39 @@ require('dotenv').config();
 const app = require('fastify')({ logger: true })
 
 const API_PTH = '/api'
+
+// Register Helmet for security headers
+app.register(fastifyHelmet, {
+    // contentSecurityPolicy: {
+    //     directives: {
+    //         defaultSrc: ["'self'"],
+    //         styleSrc: ["'self'", "'unsafe-inline'"],
+    //         scriptSrc: ["'self'"],
+    //         imgSrc: ["'self'", 'data:', 'https:'],
+    //     },
+    // },
+    // crossOriginEmbedderPolicy: false, // Disable for frontend assets
+    // crossOriginResourcePolicy: { policy: 'cross-origin' },
+    // hsts: {
+    //     maxAge: 31536000, // 1 year in seconds
+    //     includeSubDomains: true,
+    //     preload: true
+    // },
+    frameguard: {
+        action: 'deny' // Prevent clickjacking
+    },
+    noSniff: true, // Prevent MIME type sniffing
+    xssFilter: true, // Enable XSS filter
+    // referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+    // permissionsPolicy: {
+    //     features: {
+    //         geolocation: ["'none'"],
+    //         microphone: ["'none'"],
+    //         camera: ["'none'"]
+    //     }
+    // }
+})
+
 // Register plugins
 app.register(fastifyCors, {
     origin: process.env.CLIENT_URL || 'http://localhost:5173',

@@ -48,10 +48,10 @@ const projectSchema = new mongoose.Schema({
         enum: ['project', 'routine', 'other'],
         default: 'project',
     },
-    year: {
-        type: Number,
-        default: new Date().getFullYear(),
-    },
+    // year: {
+    //     type: Number,
+    //     default: new Date().getFullYear(),
+    // },
     stDate: {
         type: Date,
         default: new Date(),

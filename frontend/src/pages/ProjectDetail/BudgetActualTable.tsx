@@ -187,8 +187,9 @@ export default function BudgetActualTable({ budgets, onDelete, onAddBudget, onSp
                                 <TableHead><Power className="h-3 w-3 text-cyan-500" /></TableHead>
                                 <TableHead className="text-right">name</TableHead>
                                 <TableHead className="text-right">budget</TableHead>
-                                <TableHead className="text-right">dateEx</TableHead>
-                                <TableHead>updatedBy</TableHead>
+                                <TableHead className="text-right">updtBy</TableHead>
+                                <TableHead className="text-center w-36">dateEx</TableHead>
+
                                 <TableHead  className="text-center">linkActual</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
@@ -219,67 +220,70 @@ export default function BudgetActualTable({ budgets, onDelete, onAddBudget, onSp
                                             {IconDone(budget.done)}
                                         </div>
                                     </TableCell>
-                                <TableCell className="text-right">{formatDate(budget.dateEx)}</TableCell>
-                                <TableCell className="text-sm">
-                                    {budget.updatedBy?.name && (
-                                        <div>{budget.updatedBy.name}</div>
-                                    )}
-                                    {budget.updatedBy?.email && (
-                                        <div className="text-xs text-muted-foreground">{budget.updatedBy.email}</div>
-                                    )}
-                                </TableCell>
-                                <TableCell className="text-sm">
-                                    {budget.lActual && budget.lActual.length > 0 ? (
-                                        <div className="space-y-2">
-                                            {budget.lActual.map((
-                                                actual: { 
-                                                    _id: string; 
-                                                    name: string; 
-                                                    amount: number; 
-                                                    typ?: string; 
-                                                    done?: boolean,
-                                                    assignee?: { _id: string; name: string; email: string }
-                                                }
-                                            ) => (
-                                                <div key={actual._id} className="border-l-2 border-muted-foreground pl-2">
-                                                    <div className="grid grid-cols-2 gap-1">
-                                                        <div>
-                                                            <button
-                                                                onClick={() => navigate(`/finance/actual/${actual._id}`)}
-                                                                className="font-medium text-xs text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
-                                                            >
-                                                                {actual.name}
-                                                            </button>
+                                    <TableCell className="text-right text-sm">
+                                        {budget.updatedBy?.name && (
+                                            <div className="text-xs text-muted-foreground">{budget.updatedBy.name}</div>
+                                        )}
+                                            {/* {budget.updatedBy?.email && (
+                                                <div className="text-xs text-muted-foreground">{budget.updatedBy.email}</div>
+                                            )} */}
+                                    </TableCell>
+                                    <TableCell className="text-center text-sm w-36">    
+                                        {formatDate(budget.dateEx)}
+                                    </TableCell>
+                                
+                                    <TableCell className="text-sm">
+                                        {budget.lActual && budget.lActual.length > 0 ? (
+                                            <div className="space-y-2">
+                                                {budget.lActual.map((
+                                                    actual: { 
+                                                        _id: string; 
+                                                        name: string; 
+                                                        amount: number; 
+                                                        typ?: string; 
+                                                        done?: boolean,
+                                                        assignee?: { _id: string; name: string; email: string }
+                                                    }
+                                                ) => (
+                                                    <div key={actual._id} className="border-l-2 border-muted-foreground pl-2">
+                                                        <div className="grid grid-cols-2 gap-1">
+                                                            <div>
+                                                                <button
+                                                                    onClick={() => navigate(`/finance/actual/${actual._id}`)}
+                                                                    className="font-medium text-xs text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                                                                >
+                                                                    {actual.name}
+                                                                </button>
+                                                            </div>
+                                                            <div className="flex items-center justify-end gap-1 text-xs">
+                                                                <span className="font-semibold">{formatCurrency(actual.amount)}</span>
+                                                                {actual.typ && IconType(actual.typ)}
+                                                                {IconDone(actual.done ?? false)}
+                                                            </div>
                                                         </div>
-                                                        <div className="flex items-center justify-end gap-1 text-xs">
-                                                            <span className="font-semibold">{formatCurrency(actual.amount)}</span>
-                                                            {actual.typ && IconType(actual.typ)}
-                                                            {IconDone(actual.done ?? false)}
-                                                        </div>
+                                                        {actual.assignee && (
+                                                            <div className="text-xs text-muted-foreground mt-1">{actual.assignee.name} ({actual.assignee.email})</div>
+                                                        )}
                                                     </div>
-                                                    {actual.assignee && (
-                                                        <div className="text-xs text-muted-foreground mt-1">{actual.assignee.name} ({actual.assignee.email})</div>
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <span className="text-xs text-muted-foreground">No actuals</span>
-                                    )}
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => {
-                                            setBudgetToDelete(budget);
-                                            setDeleteDialogOpen(true);
-                                        }}
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                </TableCell>
-                            </TableRow>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <span className="text-xs text-muted-foreground">No actuals</span>
+                                        )}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => {
+                                                setBudgetToDelete(budget);
+                                                setDeleteDialogOpen(true);
+                                            }}
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
                             ))}
                         </TableBody>
                     </Table>

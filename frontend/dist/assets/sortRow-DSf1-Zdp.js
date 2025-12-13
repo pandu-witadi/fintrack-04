@@ -1,0 +1,1 @@
+const n=r=>[...r].sort((e,t)=>{if(e.typ!==t.typ){if(e.typ==="income")return-1;if(t.typ==="income"||e.typ==="expense")return 1;if(t.typ==="expense")return-1}return new Date(t.createdAt).getTime()-new Date(e.createdAt).getTime()});export{n as s};

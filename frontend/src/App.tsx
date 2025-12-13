@@ -1,4 +1,4 @@
-import { Suspense } from 'react'
+import { Suspense, lazy } from 'react'
 import {
     BrowserRouter as Router,
     Routes,
@@ -15,23 +15,21 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Profile from './pages/Profile'
 
-import AllUser from './pages/AllUser'
-import AllProject from './pages/AllProject'   
-
-import ProjectDetail from './pages/ProjectDetail'   
-import BudgetDetail from './pages/BudgetDetail'
-import ActualDetail from './pages/ActualDetail'
-import TrxDetail from './pages/TrxDetail'
-
-import TimeBudget from './pages/TimeBudget'
-import TimeActual from './pages/TimeActual'
-import TimeTrx from './pages/TimeTrx'
-
-import CurrentUserTimeActual from './pages/CurrentUserTimeActual' // Changed from './pages/CuTimeActual' to './pages/CuTimeActual'
+// Lazy load pages to reduce main bundle size
+const AllUser = lazy(() => import('./pages/AllUser'))
+const AllProject = lazy(() => import('./pages/AllProject'))
+const ProjectDetail = lazy(() => import('./pages/ProjectDetail'))
+const BudgetDetail = lazy(() => import('./pages/BudgetDetail'))
+const ActualDetail = lazy(() => import('./pages/ActualDetail'))
+const TrxDetail = lazy(() => import('./pages/TrxDetail'))
+const TimeBudget = lazy(() => import('./pages/TimeBudget'))
+const TimeActual = lazy(() => import('./pages/TimeActual'))
+const TimeTrx = lazy(() => import('./pages/TimeTrx'))
+const CurrentUserTimeActual = lazy(() => import('./pages/CurrentUserTimeActual'))
 
 function AppRoutes() {
     return (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
             <Routes>
                 <Route path="/login" element={<Login />} />
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />
