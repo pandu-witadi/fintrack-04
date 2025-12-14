@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import {
     Table,
     TableBody,
@@ -91,6 +92,8 @@ export default function BudgetActualTable({ budgets, onDelete, onAddBudget, onSp
                 await onSpawn(selectedBudgetIds);
             }
             setSelectedIds(new Set());
+        } catch (error) {
+            console.error('Clone failed:', error);
         } finally {
             setIsSpawning(false);
             setCloneDialogOpen(false);
@@ -144,6 +147,7 @@ export default function BudgetActualTable({ budgets, onDelete, onAddBudget, onSp
                                 disabled={isSpawning}
                                 variant="secondary"
                                 size="sm"
+                                className="bg-yellow-300 hover:bg-yellow-300 text-black"
                             >
                                 {isSpawning ? (
                                     <>
@@ -152,7 +156,7 @@ export default function BudgetActualTable({ budgets, onDelete, onAddBudget, onSp
                                     </>
                                 ) : (
                                     <>
-                                        Clone Actual
+                                        Clone to Actual
                                     </>
                                 )}
                             </Button>
@@ -331,7 +335,7 @@ export default function BudgetActualTable({ budgets, onDelete, onAddBudget, onSp
             <Dialog open={cloneDialogOpen} onOpenChange={setCloneDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Clone Actual</DialogTitle>
+                        <DialogTitle>Clone to Actual</DialogTitle>
                         <DialogDescription>
                             Are you sure you want to clone {selectedIds.size} selected budget(s) as actual records? This will create new actual records from the selected budgets.
                         </DialogDescription>

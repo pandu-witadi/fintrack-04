@@ -8,6 +8,7 @@ import formatCurrency from '../../utils/formatCurrency';
 import { IconDone } from '../../components/IconDone';
 import { IconType } from '../../components/IconType';
 import { GroupedTrxs, TrxsByMonth, MonthTotals, SelectedRows } from './types';
+import { getSortedGroupedTrxs } from './trxUtils';
 
 interface TrxTableProps {
     groupedTrxs: GroupedTrxs;
@@ -34,6 +35,7 @@ export const TrxTable: React.FC<TrxTableProps> = ({
 }) => {
     const navigate = useNavigate();
     const isAllSelected = Object.values(selectedRows).length > 0 && Object.values(selectedRows).every(v => v);
+    const sortedGroupedTrxs = getSortedGroupedTrxs(groupedTrxs);
 
     return (
         <div className="flex-1 overflow-x-auto overflow-y-auto w-full">
@@ -65,7 +67,7 @@ export const TrxTable: React.FC<TrxTableProps> = ({
                     </tr>
                 </thead>
                 <tbody>
-                    {Object.entries(groupedTrxs).map(([key, group]) => {
+                    {sortedGroupedTrxs.map(([key, group]) => {
                         const monthStatus = getTrxsByMonth(group.items);
                         return (
                             <tr key={key} className="border-b border-gray-200 hover:bg-gray-50">
@@ -96,14 +98,23 @@ export const TrxTable: React.FC<TrxTableProps> = ({
                                     </div>
                                 </td>
                                 {monthRange.map(month => {
-                                    const monthData = monthStatus[month];
+                                    const monthDataList = monthStatus[month];
                                     return (
                                         <td key={`${key}-${month}`} className="text-right py-2 px-2">
-                                            {monthData ? (
-                                                <div className="flex items-center justify-end gap-1 text-xs">
-                                                    <span className="font-semibold text-gray-800">{formatCurrency(monthData.amount)}</span>
-                                                    <div>{IconType(monthData.typ)}</div>
-                                                    <div>{IconDone(monthData.done)}</div>
+                                            {monthDataList && monthDataList.length > 0 ? (
+                                                <div className="flex flex-col items-end justify-center gap-2 text-xs">
+                                                    {monthDataList.map((monthData, idx) => (
+                                                        <div key={`${key}-${month}-${idx}`} className="flex flex-col items-end gap-1">
+                                                            <div className="flex items-center justify-end gap-1">
+                                                                <span className="font-semibold text-gray-800">{formatCurrency(monthData.amount)}</span>
+                                                                <div>{IconType(monthData.typ)}</div>
+                                                                <div>{IconDone(monthData.done)}</div>
+                                                            </div>
+                                                            {monthData.assignee && (
+                                                                <span className="text-gray-500 text-xs">{monthData.assignee.name}</span>
+                                                            )}
+                                                        </div>
+                                                    ))}
                                                 </div>
                                             ) : (
                                                 <span className="text-gray-300">—</span>

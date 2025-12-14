@@ -8,6 +8,7 @@ import formatCurrency from '../../utils/formatCurrency';
 import { IconDone } from '../../components/IconDone';
 import { IconType } from '../../components/IconType';
 import { GroupedBudgets, BudgetsByMonth, MonthTotals, SelectedRows } from './types';
+import { getSortedGroupedBudgets } from './budgetUtils';
 
 interface BudgetTableProps {
     groupedBudgets: GroupedBudgets;
@@ -34,6 +35,7 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
 }) => {
     const navigate = useNavigate();
     const isAllSelected = Object.values(selectedRows).length > 0 && Object.values(selectedRows).every(v => v);
+    const sortedGroupedBudgets = getSortedGroupedBudgets(groupedBudgets);
 
     return (
         <div className="flex-1 overflow-x-auto overflow-y-auto w-full">
@@ -65,7 +67,7 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
                     </tr>
                 </thead>
                 <tbody>
-                    {Object.entries(groupedBudgets).map(([key, group]) => {
+                    {sortedGroupedBudgets.map(([key, group]) => {
                         const monthStatus = getBudgetsByMonth(group.items);
                         return (
                             <tr key={key} className="border-b border-gray-200 hover:bg-gray-50">
@@ -96,14 +98,18 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
                                     </div>
                                 </td>
                                 {monthRange.map(month => {
-                                    const monthData = monthStatus[month];
+                                    const monthDataList = monthStatus[month];
                                     return (
                                         <td key={`${key}-${month}`} className="text-right py-2 px-2">
-                                            {monthData ? (
-                                                <div className="flex items-center justify-end gap-1 text-xs">
-                                                    <span className="font-semibold text-gray-800">{formatCurrency(monthData.amount)}</span>
-                                                    <div>{IconType(monthData.typ)}</div>
-                                                    <div>{IconDone(monthData.done)}</div>
+                                            {monthDataList && monthDataList.length > 0 ? (
+                                                <div className="flex flex-col items-end justify-center gap-2 text-xs">
+                                                    {monthDataList.map((monthData, idx) => (
+                                                        <div key={`${key}-${month}-${idx}`} className="flex items-center justify-end gap-1">
+                                                            <span className="font-semibold text-gray-800">{formatCurrency(monthData.amount)}</span>
+                                                            <div>{IconType(monthData.typ)}</div>
+                                                            <div>{IconDone(monthData.done)}</div>
+                                                        </div>
+                                                    ))}
                                                 </div>
                                             ) : (
                                                 <span className="text-gray-300">—</span>

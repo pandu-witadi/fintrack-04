@@ -14,13 +14,20 @@ export type GroupedActualGroup = {
 
 export type GroupedActuals = Record<string, GroupedActualGroup>;
 
+export type Assignee = {
+    _id: string;
+    name: string;
+    email: string;
+};
+
 export type MonthData = {
     amount: number;
     done: boolean;
     typ: string;
+    assignee?: Assignee;
 };
 
-export type ActualsByMonth = Record<string, MonthData>;
+export type ActualsByMonth = Record<string, MonthData[]>;
 
 export type MonthTotals = Record<string, number>;
 

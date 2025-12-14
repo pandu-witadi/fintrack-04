@@ -4,18 +4,21 @@ const AppError = require('../../util/appError')
 const cloneFromBudget = async (request, reply) => {
     try {
         // check parameters
-        const { name, budgetId, amount, dateEx, ...otherKeys } = request.body
-        if (!name || !budgetId || !amount || !dateEx) {
-            throw new AppError('Please provide name, projectId, budgetId, amount, and dateEx', 400)
+        const { budgetId, ...otherKeys } = request.body
+        if (!budgetId) {
+            throw new AppError('Please provide budgetId', 400)
         }
 
         // check if budget exists
-        let budget = await Budget.findById(budgetId)
+        let budget = await Budget.findById(budgetId).populate('project')
         if (!budget) {
             throw new AppError('Budget not found', 404)
         }
 
-        let project = await Project.findById(budget.project._id)
+        if (!budget.project) {
+            throw new AppError('Budget project not found', 400)
+        }
+        let project = await Project.findById(budget.project._id || budget.project)
         
         const actual = await Actual.create({
             name: budget.name,
@@ -61,6 +64,7 @@ const cloneFromBudget = async (request, reply) => {
             path: 'trx',
             select: '_id name amount'
         })
+        .lean({ virtuals: true })
 
         return {
             success: true,

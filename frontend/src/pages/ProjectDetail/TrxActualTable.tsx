@@ -38,9 +38,10 @@ interface TrxTableProps {
     trxs: Trx[];
     onDelete: (trx: Trx) => void;
     onAddTrx: () => void;
+    onRegisterTrx: (selectedActuals: any[]) => void;
 }
 
-export default function TrxActualTable({ trxs, onDelete, onAddTrx }: TrxTableProps) {
+export default function TrxActualTable({ trxs, onDelete, onAddTrx, onRegisterTrx }: TrxTableProps) {
     const navigate = useNavigate();
 
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);

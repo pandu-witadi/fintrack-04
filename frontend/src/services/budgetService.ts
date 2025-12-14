@@ -207,7 +207,7 @@ export const budgetService = {
         }
     },
 
-    async cloneFromBudget(budgetId: string, actualData: any): Promise<any> {
+    async cloneFromBudget(budgetId: string, actualData?: any): Promise<any> {
         const token = userService.getToken();
         if (!token) {
             throw new Error('No authentication token found');
@@ -217,8 +217,8 @@ export const budgetService = {
             const response = await axios.post(
                 `${API_BASE_URL}/actual/cloneFromBudget`,
                 {
-                    ...actualData,
-                    budgetId: budgetId
+                    budgetId: budgetId,
+                    ...actualData
                 },
                 { headers: { Authorization: `Bearer ${token}` } }
             );

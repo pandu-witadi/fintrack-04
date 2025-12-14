@@ -5,8 +5,8 @@ const cloneFromActual = async (request, reply) => {
     try {
         // check parameters
         const { name, actualId, amount, dateEx, ...otherKeys } = request.body
-        if (!name || !actualId || !amount || !dateEx) {
-            throw new AppError('Please provide name, actualId, amount, and dateEx', 400)
+        if (!actualId ) {
+            throw new AppError('Please provide actualId', 400)
         }
 
         // check if actual exists
@@ -15,6 +15,9 @@ const cloneFromActual = async (request, reply) => {
             throw new AppError('Actual not found', 404)
         }
 
+        if (!actual.project) {
+            throw new AppError('Actual project not found', 400)
+        }
         let project = await Project.findById(actual.project)
         
         const trx = await Trx.create({
@@ -23,6 +26,7 @@ const cloneFromActual = async (request, reply) => {
             project: actual.project.toString(),
             amount: actual.amount,
             dateEx: actual.dateEx,
+            typ: actual.typ,
             updatedBy: request.user._id,
             ...otherKeys
         })

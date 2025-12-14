@@ -84,4 +84,4 @@ actualSchema.set('toJSON', { virtuals: true });
 actualSchema.set('toObject', { virtuals: true });
 
 // Check if model already exists to prevent OverwriteModelError
-module.exports = mongoose.models.Budget || mongoose.model('Actual', actualSchema)
+module.exports = mongoose.models.Actual || mongoose.model('Actual', actualSchema)

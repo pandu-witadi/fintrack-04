@@ -380,17 +380,29 @@ export default function ProjectDetail() {
         try {
             const clonePromises = budgetIds.map(budgetId => {
                 const budget = budgets.find(b => b._id === budgetId);
-                if (!budget) return Promise.reject(new Error('Budget not found'));
+                if (!budget) return Promise.reject(new Error(`Budget ${budgetId} not found`));
 
-                return budgetService.cloneFromBudget(budgetId, {
-                    name: `${budget.name} - Actual`,
-                    amount: budget.amount,
-                    dateEx: new Date().toISOString()
-                });
+                // Backend expects only budgetId, not name/amount/dateEx
+                return budgetService.cloneFromBudget(budgetId, {});
             });
 
-            await Promise.all(clonePromises);
-            toast.success(`Created ${budgetIds.length} actual transaction(s) from budget`);
+            const results = await Promise.allSettled(clonePromises);
+            const succeeded = results.filter(r => r.status === 'fulfilled').length;
+            const failed = results.filter(r => r.status === 'rejected').length;
+
+            if (succeeded > 0) {
+                toast.success(`Successfully created ${succeeded} actual(s) from budget`);
+            }
+            
+            if (failed > 0) {
+                const failedBudgetIds = budgetIds.filter((_, i) => results[i].status === 'rejected');
+                const errorMessages = results
+                    .filter(r => r.status === 'rejected')
+                    .map((r: any) => r.reason?.message || 'Unknown error')
+                    .join('; ');
+                toast.error(`Failed to clone ${failed} budget(s): ${errorMessages}`);
+                console.error('Clone errors:', results.filter(r => r.status === 'rejected'));
+            }
             
             // Refresh budgets after cloning
             await getAllBudgetByProjectId(projectId);
@@ -401,8 +413,54 @@ export default function ProjectDetail() {
             // Also refresh transactions in case any were linked during cloning
             await getAllTrxByProjectId(projectId);
         } catch (error) {
-            toast.error('Failed to create actual from budget');
-            console.error(error);
+            toast.error(`Failed to clone budget: ${(error as Error).message}`);
+            console.error('Clone error:', error);
+        }
+    };
+
+    const handleCloneFromActuals = async (actualIds: string[]) => {
+        if (!projectId) return;
+
+        try {
+            const clonePromises = actualIds.map(actualId => {
+                const actual = actuals.find(a => a._id === actualId);
+                if (!actual) return Promise.reject(new Error(`Actual ${actualId} not found`));
+
+                // Backend uses actual's data: name, amount, dateEx from actual, plus actualId
+                return trxService.cloneFromActual({
+                    name: actual.name,
+                    actualId: actualId,
+                    amount: actual.amount,
+                    dateEx: actual.dateEx
+                });
+            });
+
+            const results = await Promise.allSettled(clonePromises);
+            const succeeded = results.filter(r => r.status === 'fulfilled').length;
+            const failed = results.filter(r => r.status === 'rejected').length;
+
+            if (succeeded > 0) {
+                toast.success(`Successfully created ${succeeded} transaction(s) from actual`);
+            }
+            
+            if (failed > 0) {
+                const failedActualIds = actualIds.filter((_, i) => results[i].status === 'rejected');
+                const errorMessages = results
+                    .filter(r => r.status === 'rejected')
+                    .map((r: any) => r.reason?.message || 'Unknown error')
+                    .join('; ');
+                toast.error(`Failed to clone ${failed} actual(s): ${errorMessages}`);
+                console.error('Clone errors:', results.filter(r => r.status === 'rejected'));
+            }
+            
+            // Refresh actuals after cloning
+            await getAllActualByProjectId(projectId);
+            
+            // Refresh transactions after cloning
+            await getAllTrxByProjectId(projectId);
+        } catch (error) {
+            toast.error(`Failed to clone actual: ${(error as Error).message}`);
+            console.error('Clone error:', error);
         }
     };
 
@@ -607,6 +665,7 @@ export default function ProjectDetail() {
                 onDelete={handleDeleteActual}
                 onAddActual={handleAddActual}
                 onBatchAttachToTrx={handleOpenBatchAttachDialog}
+                onCloneToTrx={handleCloneFromActuals}
                 onRefreshTrx={async () => {
                     if (projectId) {
                         await getAllTrxByProjectId(projectId);

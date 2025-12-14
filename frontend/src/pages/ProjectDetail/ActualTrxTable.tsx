@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import {
     Table,
     TableBody,
@@ -39,16 +40,19 @@ interface ActualTableProps {
     onDelete: (actual: Actual) => void;
     onAddActual: () => void;
     onBatchAttachToTrx?: (selectedActuals: Actual[]) => void;
+    onCloneToTrx?: (actualIds: string[]) => void;
     onRefreshTrx?: () => Promise<void>;
     onRefreshBudget?: () => Promise<void>;
 }
 
-export default function ActualTrxTable({ actuals, onDelete, onAddActual, onBatchAttachToTrx, onRefreshTrx, onRefreshBudget }: ActualTableProps) {
+export default function ActualTrxTable({ actuals, onDelete, onAddActual, onBatchAttachToTrx, onCloneToTrx, onRefreshTrx, onRefreshBudget }: ActualTableProps) {
     const navigate = useNavigate();
 
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [actualToDelete, setActualToDelete] = useState<Actual | null>(null);
+    const [isCloning, setIsCloning] = useState(false);
+    const [cloneDialogOpen, setCloneDialogOpen] = useState(false);
     
     const sortedActuals = sortRow(actuals);
 
@@ -68,6 +72,29 @@ export default function ActualTrxTable({ actuals, onDelete, onAddActual, onBatch
             newSelected.add(id);
         }
         setSelectedIds(newSelected);
+    };
+
+    const handleCloneToTrx = () => {
+        if (selectedIds.size === 0) return;
+        setCloneDialogOpen(true);
+    };
+
+    const confirmCloneToTrx = async () => {
+        if (selectedIds.size === 0) return;
+        
+        try {
+            setIsCloning(true);
+            const selectedActualIds = Array.from(selectedIds);
+            if (onCloneToTrx) {
+                await onCloneToTrx(selectedActualIds);
+            }
+            setSelectedIds(new Set());
+        } catch (error) {
+            console.error('Clone failed:', error);
+        } finally {
+            setIsCloning(false);
+            setCloneDialogOpen(false);
+        }
     };
 
     if (sortedActuals.length === 0) {
@@ -103,7 +130,24 @@ export default function ActualTrxTable({ actuals, onDelete, onAddActual, onBatch
                                     >
                                         Attach to Trx
                                     </Button>
-                                    
+                                    <Button 
+                                        onClick={handleCloneToTrx}
+                                        disabled={isCloning}
+                                        variant="secondary"
+                                        size="sm"
+                                        className="bg-orange-300 hover:bg-orange-300 text-black"
+                                    >
+                                        {isCloning ? (
+                                            <>
+                                                <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-background border-t-foreground" />
+                                                Cloning...
+                                            </>
+                                        ) : (
+                                            <>
+                                                Clone to Trx
+                                            </>
+                                        )}
+                                    </Button>
                                 </>
                             )}
                             {/* <Button onClick={onAddActual} size="sm">
@@ -283,9 +327,33 @@ export default function ActualTrxTable({ actuals, onDelete, onAddActual, onBatch
                             </DialogFooter>
                         </DialogContent>
                     </Dialog>
+
+                    <Dialog open={cloneDialogOpen} onOpenChange={setCloneDialogOpen}>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Clone to Transaction</DialogTitle>
+                                <DialogDescription>
+                                    Are you sure you want to clone {selectedIds.size} selected actual(s) as transaction records? This will create new transaction records from the selected actuals.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <DialogFooter>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setCloneDialogOpen(false)}
+                                    disabled={isCloning}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    onClick={confirmCloneToTrx}
+                                    disabled={isCloning}
+                                >
+                                    {isCloning ? 'Cloning...' : 'Clone'}
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
                 </div>
             );
         }
     }
-
-   

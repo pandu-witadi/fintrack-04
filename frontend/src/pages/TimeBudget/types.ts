@@ -20,7 +20,7 @@ export type MonthData = {
     typ: string;
 };
 
-export type BudgetsByMonth = Record<string, MonthData>;
+export type BudgetsByMonth = Record<string, MonthData[]>;
 
 export type MonthTotals = Record<string, number>;
 

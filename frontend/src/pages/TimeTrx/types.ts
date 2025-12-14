@@ -14,13 +14,20 @@ export type GroupedTrxGroup = {
 
 export type GroupedTrxs = Record<string, GroupedTrxGroup>;
 
+export type Assignee = {
+    _id: string;
+    name: string;
+    email: string;
+};
+
 export type MonthData = {
     amount: number;
     done: boolean;
     typ: string;
+    assignee?: Assignee;
 };
 
-export type TrxsByMonth = Record<string, MonthData>;
+export type TrxsByMonth = Record<string, MonthData[]>;
 
 export type MonthTotals = Record<string, number>;
 

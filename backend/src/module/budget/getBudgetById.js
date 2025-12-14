@@ -20,7 +20,11 @@ const getBudgetById = async (request, reply) => {
             })
             .populate({
                 path: 'lActual',
-                select: '_id name amount typ done',
+                select: '_id name amount typ done assignee',
+                populate: {
+                    path: 'assignee',
+                    select: '_id name email'
+                },
                 options: {
                     transform: (doc) => {
                         if (doc) {
