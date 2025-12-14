@@ -4,10 +4,8 @@ import { Actual } from '../../services/actualService';
 import { useActual } from '../../hooks/useActual';
 import { useNavigate } from 'react-router-dom';
 import sortRow from '../../utils/sortRow';
-import { TimeActualHeader } from './TimeActualHeader';
-import { MonthNavigation } from './MonthNavigation';
+import { TimeMapHeader, TimeMapMonthNavigation } from '../../components/TimeMap';
 import { ActualTable } from './ActualTable';
-import { TimeActualLegend } from './TimeActualLegend';
 import {
     formatYearMonth,
     addMonths,
@@ -98,18 +96,18 @@ export default function TimeActual() {
     const variableMonthTotals = calculateVariableMonthTotals(groupedActuals, monthRange);
 
     return (
-        <div className="flex flex-col gap-6 p-6">
-            <TimeActualHeader nRangeMonth={nRangeMonth} onRangeMonthChange={handleRangeMonthChange} />
+        <div className="flex flex-col gap-2 p-6 h-screen">
+            <TimeMapHeader title="Actual TimeMap" nRangeMonth={nRangeMonth} onRangeMonthChange={handleRangeMonthChange} />
 
-            <Card>
-                <CardContent>
+            <Card className="flex-1 flex flex-col overflow-hidden">
+                <CardContent className="flex-1 flex flex-col overflow-hidden">
                     {error || hookError && (
                         <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded text-red-700">
                             {error || hookError}
                         </div>
                     )}
 
-                    <MonthNavigation
+                    <TimeMapMonthNavigation
                         stYm={stYm}
                         enYm={enYm}
                         onPrevious={handlePrevious}
@@ -135,8 +133,6 @@ export default function TimeActual() {
                     )}
                 </CardContent>
             </Card>
-
-            <TimeActualLegend />
         </div>
     );
 }

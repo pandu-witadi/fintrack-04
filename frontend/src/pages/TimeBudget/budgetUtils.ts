@@ -1,49 +1,40 @@
 /**
  * Budget data processing utilities
+ * Wraps generic TimeMap utilities with Budget-specific logic
  */
 
 import { Budget } from '../../services/budgetService';
 import { GroupedBudgets, GroupedBudgetGroup, BudgetsByMonth, MonthTotals } from './types';
-import { getYearMonthFromDate } from '../../components/TimeMap';
+import {
+    groupItemsByProjectAndName,
+    getItemsByMonth as getItemsByMonthGeneric,
+    calculateMonthTotals as calculateMonthTotalsGeneric,
+    calculateVariableMonthTotals as calculateVariableMonthTotalsGeneric,
+    filterItemsByDateRange
+} from '../../components/TimeMap';
 
 export const groupBudgetsByProjectAndName = (budgets: Budget[]): GroupedBudgets => {
-    return budgets.reduce((acc: GroupedBudgets, budget) => {
-        const projectId = typeof budget.project === 'string' ? budget.project : (budget.project as any)?._id || 'Unknown';
-        const projectName = typeof budget.project === 'string' ? budget.project : (budget.project as any)?.name || 'Unknown';
-        const budgetId = budget._id || 'Unknown';
-        const key = `${budget.name}-${projectId}`;
-        if (!acc[key]) {
-            acc[key] = {
-                budgetName: budget.name,
-                project: projectName,
-                projectId: projectId,
-                budgetId: budgetId,
-                budgets: []
-            };
-        }
-        acc[key].budgets.push(budget);
-        return acc;
-    }, {});
+    return groupItemsByProjectAndName(
+        budgets,
+        (budget) => typeof budget.project === 'string' ? budget.project : (budget.project as any)?._id || 'Unknown',
+        (budget) => typeof budget.project === 'string' ? budget.project : (budget.project as any)?.name || 'Unknown',
+        (budget) => budget._id || 'Unknown',
+        (budget) => budget.name
+    ) as unknown as GroupedBudgets;
 };
 
 export const getBudgetsByMonth = (
     budgetList: Budget[],
     monthRange: string[]
 ): BudgetsByMonth => {
-    const result: BudgetsByMonth = {};
-    budgetList.forEach((budget: Budget) => {
-        if (budget.dateEx) {
-            const budgetYm = getYearMonthFromDate(budget.dateEx);
-            if (monthRange.includes(budgetYm)) {
-                result[budgetYm] = {
-                    amount: budget.amount || 0,
-                    done: budget.done || false,
-                    typ: budget.typ || 'expense'
-                };
-            }
-        }
-    });
-    return result;
+    return getItemsByMonthGeneric(
+        budgetList,
+        monthRange,
+        (budget) => budget.dateEx,
+        (budget) => budget.amount || 0,
+        (budget) => budget.done || false,
+        (budget) => budget.typ || 'expense'
+    ) as unknown as BudgetsByMonth;
 };
 
 export const calculateMonthTotals = (
@@ -51,50 +42,23 @@ export const calculateMonthTotals = (
     selectedRows: Record<string, boolean>,
     monthRange: string[]
 ): MonthTotals => {
-    const totals: MonthTotals = {};
-    monthRange.forEach((month: string) => {
-        totals[month] = 0;
-    });
-    
-    Object.entries(groupedBudgets).forEach(([key, group]: [string, GroupedBudgetGroup]) => {
-        // Only include this group if selected
-        if (selectedRows[key]) {
-            const monthData = getBudgetsByMonth(group.budgets, monthRange);
-            Object.entries(monthData).forEach(([month, data]) => {
-                if (data.typ === 'income') {
-                    totals[month] += data.amount;
-                } else {
-                    totals[month] -= data.amount;
-                }
-            });
-        }
-    });
-    
-    return totals;
+    return calculateMonthTotalsGeneric(
+        groupedBudgets as any,
+        selectedRows,
+        monthRange,
+        (budgets: unknown[]) => getBudgetsByMonth(budgets as Budget[], monthRange)
+    );
 };
 
 export const calculateVariableMonthTotals = (
     groupedBudgets: GroupedBudgets,
     monthRange: string[]
 ): MonthTotals => {
-    const totals: MonthTotals = {};
-    monthRange.forEach((month: string) => {
-        totals[month] = 0;
-    });
-    
-    Object.entries(groupedBudgets).forEach(([_key, group]: [string, GroupedBudgetGroup]) => {
-        // Include all groups regardless of selection
-        const monthData = getBudgetsByMonth(group.budgets, monthRange);
-        Object.entries(monthData).forEach(([month, data]) => {
-            if (data.typ === 'income') {
-                totals[month] += data.amount;
-            } else {
-                totals[month] -= data.amount;
-            }
-        });
-    });
-    
-    return totals;
+    return calculateVariableMonthTotalsGeneric(
+        groupedBudgets as any,
+        monthRange,
+        (budgets: unknown[]) => getBudgetsByMonth(budgets as Budget[], monthRange)
+    );
 };
 
 export const filterBudgetsByDateRange = (
@@ -102,8 +66,10 @@ export const filterBudgetsByDateRange = (
     startYm: string,
     endYm: string
 ): Budget[] => {
-    return budgets.filter((budget: Budget) => {
-        const budgetYm = getYearMonthFromDate(budget.dateEx);
-        return budgetYm >= startYm && budgetYm <= endYm;
-    });
+    return filterItemsByDateRange(
+        budgets,
+        startYm,
+        endYm,
+        (budget) => budget.dateEx
+    );
 };

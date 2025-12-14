@@ -6,6 +6,17 @@ const updateProject = async (request, reply) => {
         let updateData = { ...request.body }
         updateData.updatedBy = request.user._id
 
+        // Handle optional client field - only include if it has meaningful data
+        if (updateData.client) {
+            const hasClientData = Object.values(updateData.client).some(
+                value => value && String(value).trim() !== ''
+            )
+            if (!hasClientData) {
+                // If client object exists but is empty, unset it
+                updateData.client = undefined
+            }
+        }
+
         const project = await Project.findByIdAndUpdate(
             request.params.id,
             updateData,

@@ -15,6 +15,15 @@ interface ProjectInfo {
     note?: string;
 }
 
+interface ClientInfo {
+    company?: string;
+    sub?: string;
+    contact?: string;
+    phone?: string;
+    email?: string;
+    address?: string;
+}
+
 export interface Project {
     _id: string;
     code: string;
@@ -24,6 +33,7 @@ export interface Project {
     done: boolean;
     typ: 'project' | 'routine' | 'other';
     info: ProjectInfo;
+    client?: ClientInfo;
     updatedBy?: {
         _id: string;
         name: string;
@@ -57,6 +67,7 @@ interface CreateProjectData {
     year?: number;
     stDate?: string;
     enDate?: string;
+    client?: ClientInfo;
 }
 
 interface UpdateProjectData {
@@ -68,6 +79,7 @@ interface UpdateProjectData {
     year?: number;
     stDate?: string;
     enDate?: string;
+    client?: ClientInfo;
 }
 
 export const projectService = {

@@ -5,11 +5,11 @@
 import { Actual } from '../../services/actualService';
 
 export type GroupedActualGroup = {
-    actualName: string;
+    name: string;  // Actual name
     project: string;
     projectId: string;
-    actualId: string;
-    actuals: Actual[];
+    id: string;  // Actual ID
+    items: Actual[];  // Array of actuals
 };
 
 export type GroupedActuals = Record<string, GroupedActualGroup>;

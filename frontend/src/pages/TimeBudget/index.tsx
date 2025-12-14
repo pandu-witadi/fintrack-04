@@ -4,10 +4,8 @@ import { Budget } from '../../services/budgetService';
 import { useBudget } from '../../hooks/useBudget';
 import { useNavigate } from 'react-router-dom';
 import sortRow from '../../utils/sortRow';
-import { TimeBudgetHeader } from './TimeBudgetHeader';
-import { MonthNavigation } from './MonthNavigation';
+import { TimeMapHeader, TimeMapMonthNavigation } from '../../components/TimeMap';
 import { BudgetTable } from './BudgetTable';
-import { TimeBudgetLegend } from './TimeBudgetLegend';
 import {
     formatYearMonth,
     addMonths,
@@ -98,18 +96,18 @@ export default function TimeBudget() {
     const variableMonthTotals = calculateVariableMonthTotals(groupedBudgets, monthRange);
 
     return (
-        <div className="flex flex-col gap-6 p-6">
-            <TimeBudgetHeader nRangeMonth={nRangeMonth} onRangeMonthChange={handleRangeMonthChange} />
+        <div className="flex flex-col gap-2 p-6 h-screen">
+            <TimeMapHeader title="Budget TimeMap" nRangeMonth={nRangeMonth} onRangeMonthChange={handleRangeMonthChange} />
 
-            <Card>
-                <CardContent>
+            <Card className="flex-1 flex flex-col overflow-hidden">
+                <CardContent className="flex-1 flex flex-col overflow-hidden">
                     {error || hookError && (
                         <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded text-red-700">
                             {error || hookError}
                         </div>
                     )}
 
-                    <MonthNavigation
+                    <TimeMapMonthNavigation
                         stYm={stYm}
                         enYm={enYm}
                         onPrevious={handlePrevious}
@@ -135,8 +133,6 @@ export default function TimeBudget() {
                     )}
                 </CardContent>
             </Card>
-
-            <TimeBudgetLegend />
         </div>
     );
 }

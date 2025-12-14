@@ -23,7 +23,9 @@ import {
     Filter,
     Power,
     Eye,
-    Trash2
+    Trash2,
+    ArrowUp,
+    ArrowDown
 } from 'lucide-react';
 import { IconActive } from '@/components/IconActive';
 import { IconDone } from '@/components/IconDone';
@@ -52,7 +54,10 @@ interface ProjectsTableProps {
 
 export default function ProjectTable({ projects, onEdit, onDelete, onView }: ProjectsTableProps) {
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
-    const [sortConfig, setSortConfig] = useState<{ key: keyof Project; direction: 'asc' | 'desc' } | null>(null);
+    const [sortConfig, setSortConfig] = useState<{ key: keyof Project; direction: 'asc' | 'desc' } | null>({
+        key: 'stDate' as keyof Project,
+        direction: 'desc'
+    });
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [typeFilter, setTypeFilter] = useState<string>('all');
     const [yearFilter, setYearFilter] = useState<string>('all');
@@ -104,14 +109,22 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
         }));
     };
 
+    const renderSortIndicator = (columnKey: keyof Project) => {
+        if (!sortConfig || sortConfig.key !== columnKey) return null;
+        return sortConfig.direction === 'asc' 
+            ? <ArrowUp className="h-4 w-4 ml-1 inline" />
+            : <ArrowDown className="h-4 w-4 ml-1 inline" />;
+    };
+
     // Refactored column visibility controls into a separate function
     const [visibleColumns, setVisibleColumns] = useState({
         active: true,
-        code: true,
-        name: true,
+        codename: true,
+        // name: true,
         typ: true,
         year: false,
         stDate: true,
+        client: true,
         updatedAt: false,
         done: true
     });
@@ -131,17 +144,17 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
                     active
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem 
-                    checked={visibleColumns.code}
-                    onCheckedChange={() => handleToggleColumn('code')}
+                    checked={visibleColumns.codename}
+                    onCheckedChange={() => handleToggleColumn('codename')}
                 >
-                    code
+                    code/name
                 </DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem 
+                {/* <DropdownMenuCheckboxItem 
                     checked={visibleColumns.name}
                     onCheckedChange={() => handleToggleColumn('name')}
                 >
                     name
-                </DropdownMenuCheckboxItem>
+                </DropdownMenuCheckboxItem> */}
                 <DropdownMenuCheckboxItem 
                     checked={visibleColumns.typ}
                     onCheckedChange={() => handleToggleColumn('typ')}
@@ -159,6 +172,12 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
                     onCheckedChange={() => handleToggleColumn('stDate')}
                 >
                     stDate
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem 
+                    checked={visibleColumns.client}
+                    onCheckedChange={() => handleToggleColumn('client')}
+                >
+                    client
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem 
                     checked={visibleColumns.updatedAt}
@@ -216,7 +235,14 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
         }
         
         // Then sort the filtered projects
-        if (!sortConfig) return filteredProjects;
+        if (!sortConfig) {
+            // Default sort by stDate descending if no sort config
+            return [...filteredProjects].sort((a, b) => {
+                const aValue = a.stDate ? new Date(a.stDate).getTime() : 0;
+                const bValue = b.stDate ? new Date(b.stDate).getTime() : 0;
+                return bValue - aValue; // descending
+            });
+        }
         
         return [...filteredProjects].sort((a, b) => {
             // Special handling for computed properties
@@ -228,6 +254,14 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
             } else if (sortConfig.key === 'transactionCount') {
                 aValue = a.transactionCount ?? 0;
                 bValue = b.transactionCount ?? 0;
+            } else if (sortConfig.key === 'stDate') {
+                // Special handling for date comparison
+                aValue = a.stDate ? new Date(a.stDate).getTime() : 0;
+                bValue = b.stDate ? new Date(b.stDate).getTime() : 0;
+            } else if (sortConfig.key === 'client') {
+                // Special handling for client company comparison
+                aValue = a.client?.company || '';
+                bValue = b.client?.company || '';
             } else {
                 aValue = a[sortConfig.key];
                 bValue = b[sortConfig.key];
@@ -303,13 +337,13 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
                             <span className="font-semibold text-cyan-600">All Types</span>
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => setTypeFilter('project')}>
-                            Project
+                            project
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => setTypeFilter('routine')}>
-                            Routine
+                            routine
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => setTypeFilter('other')}>
-                            Other
+                            other   
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -351,42 +385,71 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
                             </TableHead>
                             {visibleColumns.active && (
                                 <TableHead className="cursor-pointer" onClick={() => handleSort('active')}>
-                                    <Power className="h-3 w-3 text-cyan-500" />
+                                    <div className="flex items-center">
+                                        <Power className="h-3 w-3 text-cyan-500" />
+                                        {renderSortIndicator('active')}
+                                    </div>
                                 </TableHead>
                             )}
-                            {visibleColumns.code && (
+                            {visibleColumns.codename && (
                                 <TableHead className="cursor-pointer" onClick={() => handleSort('code')}>
-                                    code
+                                    <div className="flex items-center gap-2">
+                                        code/name
+                                        {renderSortIndicator('code')}
+                                    </div>
                                 </TableHead>
                             )}
-                            {visibleColumns.name && (
+                            {/* {visibleColumns.name && (
                                 <TableHead className="cursor-pointer" onClick={() => handleSort('name')}>
                                     name
                                 </TableHead>
-                            )}  
+                            )} */}
                             {visibleColumns.typ && (
                                 <TableHead className="cursor-pointer" onClick={() => handleSort('typ')}>
-                                    type
+                                    <div className="flex items-center">
+                                        type
+                                        {renderSortIndicator('typ')}
+                                    </div>
                                 </TableHead>
                             )}
                             {visibleColumns.year && (
                                 <TableHead className="cursor-pointer" onClick={() => handleSort('year')}>
-                                    year
+                                    <div className="flex items-center">
+                                        year
+                                        {renderSortIndicator('year')}
+                                    </div>
                                 </TableHead>
                             )}
                             {visibleColumns.stDate && (
                                 <TableHead className="cursor-pointer" onClick={() => handleSort('stDate')}>
-                                    stDate
+                                    <div className="flex items-center">
+                                        stDate
+                                        {renderSortIndicator('stDate')}
+                                    </div>
+                                </TableHead>
+                            )}
+                            {visibleColumns.client && (
+                                <TableHead className="cursor-pointer" onClick={() => handleSort('client' as keyof Project)}>
+                                    <div className="flex items-center">
+                                        client
+                                        {renderSortIndicator('client' as keyof Project)}
+                                    </div>
                                 </TableHead>
                             )}
                             {visibleColumns.updatedAt && (
                                 <TableHead className="cursor-pointer" onClick={() => handleSort('updatedAt')}>
-                                    updatedAt
+                                    <div className="flex items-center">
+                                        updatedAt
+                                        {renderSortIndicator('updatedAt')}
+                                    </div>
                                 </TableHead>
                             )}
                             {visibleColumns.done && (
                                 <TableHead className="cursor-pointer" onClick={() => handleSort('done')}>
-                                    done
+                                    <div className="flex items-center">
+                                        done
+                                        {renderSortIndicator('done')}
+                                    </div>
                                 </TableHead>
                             )}
                             <TableHead className="w-20 text-center">Actions</TableHead>
@@ -413,19 +476,20 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
                                         <TableCell>{IconActive(project.active)}</TableCell>
                                     )}
                                 
-                                    {visibleColumns.name && (
+                                    {visibleColumns.codename && (
                                         <TableCell>
                                             <button 
                                                 onClick={() => onView(project)}
-                                                className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                                                className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-sm"
                                             >
                                                 {project.code}
                                             </button>
+                                            <div className="text-xs text-muted-foreground">{project.name}</div>
                                         </TableCell>
                                     )}
-                                    {visibleColumns.code && (
+                                    {/* {visibleColumns.name && (
                                         <TableCell className="font-medium">{project.name}</TableCell>
-                                    )}
+                                    )} */}
                                     {visibleColumns.typ && (
                                         <TableCell>{getTypeProjectBadge(project.typ)}</TableCell>
                                     )}
@@ -435,6 +499,14 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
                                     {visibleColumns.stDate && (
                                         <TableCell>
                                             {project.stDate ? format(new Date(project.stDate), 'yyyy-MM') : 'N/A'}
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.client && (
+                                        <TableCell>
+                                            <div className="text-sm">{project.client?.company || '-'}</div>
+                                            {project.client?.contact && (
+                                                <div className="text-xs text-muted-foreground">{project.client.contact}</div>
+                                            )}
                                         </TableCell>
                                     )}
                                     {visibleColumns.updatedAt && (

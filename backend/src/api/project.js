@@ -58,6 +58,17 @@ const resp_200 = {
                         email: { type: 'string' }
                     }
                 },
+                client: { 
+                    type: 'object',
+                    properties: {
+                        company: { type: 'string' },
+                        sub: { type: 'string' },
+                        contact: { type: 'string' },
+                        phone: { type: 'string' },
+                        email: { type: 'string' },
+                        address: { type: 'string' }
+                    }
+                },
                 lBudget: { 
                     type: 'array',
                     items: { 
@@ -187,7 +198,6 @@ async function projectApi(fastify, options) {
             }],
             body: {
                 type: 'object',
-                required: ['code', 'name'],
                 properties: {
                     code: {
                         type: 'string',
@@ -223,6 +233,39 @@ async function projectApi(fastify, options) {
                         type: 'string',
                         format: 'date',
                         description: 'End date of the project'
+                    },
+                    client: {
+                        type: 'object',
+                        description: 'Client information',
+                        properties: {
+                            company: {
+                                type: 'string',
+                                maxLength: 50,
+                                description: 'Client company name'
+                            },
+                            sub: {
+                                type: 'string',
+                                maxLength: 50,
+                                description: 'Client sub company name'
+                            },
+                            contact: {
+                                type: 'string',
+                                description: 'Client contact person'
+                            },
+                            phone: {
+                                type: 'string',
+                                description: 'Client phone number'
+                            },
+                            email: {
+                                type: ['string', 'null'],
+                                description: 'Client email address (optional)'
+                            },
+                            address: {
+                                type: 'string',
+                                maxLength: 100,
+                                description: 'Client address'
+                            }
+                        }
                     }
                 }
             },
@@ -301,7 +344,18 @@ async function projectApi(fastify, options) {
                     typ: { type: 'string', enum: ['project', 'routine', 'other'] },
                     year: { type: 'number', minimum: 2000 },
                     stDate: { type: 'string', format: 'date' },
-                    enDate: { type: 'string', format: 'date' }
+                    enDate: { type: 'string', format: 'date' },
+                    client: {
+                        type: 'object',
+                        properties: {
+                            company: { type: 'string', maxLength: 50 },
+                            sub: { type: 'string', maxLength: 50 },
+                            contact: { type: 'string' },
+                            phone: { type: 'string' },
+                            email: { type: ['string', 'null'] },
+                            address: { type: 'string', maxLength: 100 }
+                        }
+                    }
                 }
             },
             response: {

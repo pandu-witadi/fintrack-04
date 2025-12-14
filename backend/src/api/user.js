@@ -133,7 +133,7 @@ async function userApi(fastify, options) {
     fastify.route({
         method: 'GET',
         url: '/me',
-        preHandler: [protect, restrictTo(['guest', 'user', 'finance', 'admin'])],
+        preHandler: [protect, restrictTo(['guest', 'vendor', 'user', 'finance', 'admin'])],
         handler: getMe,
         schema: {
             tags: ['user'],
@@ -167,7 +167,7 @@ async function userApi(fastify, options) {
     fastify.route({
         method: 'GET',
         url: '/:id',
-        preHandler: [protect, restrictTo(['guest', 'user', 'finance', 'admin'])],
+        preHandler: [protect, restrictTo(['guest', 'vendor', 'user', 'finance', 'admin'])],
         handler: getUserById,
         schema: {
             tags: ['user'],
@@ -231,7 +231,7 @@ async function userApi(fastify, options) {
     fastify.route({
         method: 'PATCH',
         url: '/:id',
-        preHandler: [protect, restrictTo(['guest', 'user', 'finance', 'admin'])],
+        preHandler: [protect, restrictTo(['guest', 'vendor', 'user', 'finance', 'admin'])],
         handler: updateUser,
         schema: {
             tags: ['user'],

@@ -1,49 +1,40 @@
 /**
  * Actual data processing utilities
+ * Wraps generic TimeMap utilities with Actual-specific logic
  */
 
 import { Actual } from '../../services/actualService';
 import { GroupedActuals, GroupedActualGroup, ActualsByMonth, MonthTotals } from './types';
-import { getYearMonthFromDate } from '../../components/TimeMap';
+import {
+    groupItemsByProjectAndName,
+    getItemsByMonth as getItemsByMonthGeneric,
+    calculateMonthTotals as calculateMonthTotalsGeneric,
+    calculateVariableMonthTotals as calculateVariableMonthTotalsGeneric,
+    filterItemsByDateRange
+} from '../../components/TimeMap';
 
 export const groupActualsByProjectAndName = (actuals: Actual[]): GroupedActuals => {
-    return actuals.reduce((acc: GroupedActuals, actual) => {
-        const projectId = typeof actual.project === 'string' ? actual.project : (actual.project as any)?._id || 'Unknown';
-        const projectName = typeof actual.project === 'string' ? actual.project : (actual.project as any)?.name || 'Unknown';
-        const actualId = actual._id || 'Unknown';
-        const key = `${actual.name}-${projectId}`;
-        if (!acc[key]) {
-            acc[key] = {
-                actualName: actual.name,
-                project: projectName,
-                projectId: projectId,
-                actualId: actualId,
-                actuals: []
-            };
-        }
-        acc[key].actuals.push(actual);
-        return acc;
-    }, {});
+    return groupItemsByProjectAndName(
+        actuals,
+        (actual) => typeof actual.project === 'string' ? actual.project : (actual.project as any)?._id || 'Unknown',
+        (actual) => typeof actual.project === 'string' ? actual.project : (actual.project as any)?.name || 'Unknown',
+        (actual) => actual._id || 'Unknown',
+        (actual) => actual.name
+    ) as unknown as GroupedActuals;
 };
 
 export const getActualsByMonth = (
     actualList: Actual[],
     monthRange: string[]
 ): ActualsByMonth => {
-    const result: ActualsByMonth = {};
-    actualList.forEach((actual: Actual) => {
-        if (actual.dateEx) {
-            const actualYm = getYearMonthFromDate(actual.dateEx);
-            if (monthRange.includes(actualYm)) {
-                result[actualYm] = {
-                    amount: actual.amount || 0,
-                    done: actual.done || false,
-                    typ: actual.typ || 'expense'
-                };
-            }
-        }
-    });
-    return result;
+    return getItemsByMonthGeneric(
+        actualList,
+        monthRange,
+        (actual) => actual.dateEx,
+        (actual) => actual.amount || 0,
+        (actual) => actual.done || false,
+        (actual) => actual.typ || 'expense'
+    ) as unknown as ActualsByMonth;
 };
 
 export const calculateMonthTotals = (
@@ -51,50 +42,23 @@ export const calculateMonthTotals = (
     selectedRows: Record<string, boolean>,
     monthRange: string[]
 ): MonthTotals => {
-    const totals: MonthTotals = {};
-    monthRange.forEach((month: string) => {
-        totals[month] = 0;
-    });
-    
-    Object.entries(groupedActuals).forEach(([key, group]: [string, GroupedActualGroup]) => {
-        // Only include this group if selected
-        if (selectedRows[key]) {
-            const monthData = getActualsByMonth(group.actuals, monthRange);
-            Object.entries(monthData).forEach(([month, data]) => {
-                if (data.typ === 'income') {
-                    totals[month] += data.amount;
-                } else {
-                    totals[month] -= data.amount;
-                }
-            });
-        }
-    });
-    
-    return totals;
+    return calculateMonthTotalsGeneric(
+        groupedActuals as any,
+        selectedRows,
+        monthRange,
+        (actuals: unknown[]) => getActualsByMonth(actuals as Actual[], monthRange)
+    );
 };
 
 export const calculateVariableMonthTotals = (
     groupedActuals: GroupedActuals,
     monthRange: string[]
 ): MonthTotals => {
-    const totals: MonthTotals = {};
-    monthRange.forEach((month: string) => {
-        totals[month] = 0;
-    });
-    
-    Object.entries(groupedActuals).forEach(([_key, group]: [string, GroupedActualGroup]) => {
-        // Include all groups regardless of selection
-        const monthData = getActualsByMonth(group.actuals, monthRange);
-        Object.entries(monthData).forEach(([month, data]) => {
-            if (data.typ === 'income') {
-                totals[month] += data.amount;
-            } else {
-                totals[month] -= data.amount;
-            }
-        });
-    });
-    
-    return totals;
+    return calculateVariableMonthTotalsGeneric(
+        groupedActuals as any,
+        monthRange,
+        (actuals: unknown[]) => getActualsByMonth(actuals as Actual[], monthRange)
+    );
 };
 
 export const filterActualsByDateRange = (
@@ -102,8 +66,10 @@ export const filterActualsByDateRange = (
     startYm: string,
     endYm: string
 ): Actual[] => {
-    return actuals.filter((actual: Actual) => {
-        const actualYm = getYearMonthFromDate(actual.dateEx);
-        return actualYm >= startYm && actualYm <= endYm;
-    });
+    return filterItemsByDateRange(
+        actuals,
+        startYm,
+        endYm,
+        (actual) => actual.dateEx
+    );
 };

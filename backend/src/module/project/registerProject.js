@@ -4,19 +4,27 @@ const AppError = require('../../util/appError')
 
 const registerProject = async (request, reply) => {
     try {
-        const { code, name, updatedBy, ...otherKeys } = request.body
+        const { code, name, updatedBy, client, ...otherKeys } = request.body
 
         const existingProject = await Project.findOne({ code: code })
         if (existingProject) {
             throw new AppError('Project already in use', 400)
         }
 
-        const project = await Project.create({
+        // Only include client if it has at least one non-empty value
+        const projectData = {
             code: code,
             name: name,
             updatedBy: request.user._id,
             ...otherKeys
-        })
+        }
+        
+        // Add client only if it has meaningful data
+        if (client && Object.values(client).some(value => value && String(value).trim() !== '')) {
+            projectData.client = client
+        }
+
+        const project = await Project.create(projectData)
 
         reply.send({
             success: true,

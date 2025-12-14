@@ -4,10 +4,8 @@ import { Trx } from '../../services/trxService';
 import { useTrx } from '../../hooks/useTrx';
 import { useNavigate } from 'react-router-dom';
 import sortRow from '../../utils/sortRow';
-import { TimeTrxHeader } from './TimeTrxHeader';
-import { MonthNavigation } from './MonthNavigation';
+import { TimeMapHeader, TimeMapMonthNavigation } from '../../components/TimeMap';
 import { TrxTable } from './TrxTable';
-import { TimeTrxLegend } from './TimeTrxLegend';
 import {
     formatYearMonth,
     addMonths,
@@ -98,18 +96,18 @@ export default function TimeTrx() {
     const variableMonthTotals = calculateVariableMonthTotals(groupedTrxs, monthRange);
 
     return (
-        <div className="flex flex-col gap-6 p-6">
-            <TimeTrxHeader nRangeMonth={nRangeMonth} onRangeMonthChange={handleRangeMonthChange} />
+        <div className="flex flex-col gap-2 p-6 h-screen">
+            <TimeMapHeader title="Trx TimeMap" nRangeMonth={nRangeMonth} onRangeMonthChange={handleRangeMonthChange} />
 
-            <Card>
-                <CardContent>
+            <Card className="flex-1 flex flex-col overflow-hidden">
+                <CardContent className="flex-1 flex flex-col overflow-hidden">
                     {error || hookError && (
                         <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded text-red-700">
                             {error || hookError}
                         </div>
                     )}
 
-                    <MonthNavigation
+                    <TimeMapMonthNavigation
                         stYm={stYm}
                         enYm={enYm}
                         onPrevious={handlePrevious}
@@ -135,8 +133,6 @@ export default function TimeTrx() {
                     )}
                 </CardContent>
             </Card>
-
-            <TimeTrxLegend />
         </div>
     );
 }

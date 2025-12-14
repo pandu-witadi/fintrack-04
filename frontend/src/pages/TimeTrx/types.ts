@@ -5,11 +5,11 @@
 import { Trx } from '../../services/trxService';
 
 export type GroupedTrxGroup = {
-    trxName: string;
+    name: string;  // Trx name
     project: string;
     projectId: string;
-    trxId: string;
-    trxs: Trx[];
+    id: string;  // Trx ID
+    items: Trx[];  // Array of trxs
 };
 
 export type GroupedTrxs = Record<string, GroupedTrxGroup>;

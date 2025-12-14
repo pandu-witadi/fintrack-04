@@ -1,11 +1,12 @@
 import ProjectForm from '../AllProject/AddProjectDialog.tsx';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../components/ui/dialog';
+import { Project } from '../../services/projectService';
 
 interface EditProjectDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    projectToEdit: any;
-    onUpdateProject: (data: Partial<any>) => Promise<void>;
+    projectToEdit: Project | null;
+    onUpdateProject: (data: Partial<Project>) => Promise<void>;
     isSubmitting: boolean;
 }
 

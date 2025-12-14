@@ -3,7 +3,7 @@
  * Used across TimeBudget, TimeActual, TimeTrx, and TimeMap components
  */
 
-export type SelectedRows = Record<string, boolean>;
+import { SelectedRows } from './types';
 
 export const handleRowSelect = (key: string, selectedRows: SelectedRows): SelectedRows => {
     return {

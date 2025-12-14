@@ -5,11 +5,11 @@
 import { Budget } from '../../services/budgetService';
 
 export type GroupedBudgetGroup = {
-    budgetName: string;
+    name: string;  // Budget name
     project: string;
     projectId: string;
-    budgetId: string;
-    budgets: Budget[];
+    id: string;  // Budget ID
+    items: Budget[];  // Array of budgets
 };
 
 export type GroupedBudgets = Record<string, GroupedBudgetGroup>;

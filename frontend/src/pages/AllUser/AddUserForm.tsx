@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Eye, EyeOff, Lock } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import { User } from '@/services/userService';
 
 interface UserFormProps {
@@ -101,10 +102,10 @@ export default function AddUserForm({ user, onSubmit, onCancel, isSubmitting }: 
                             <SelectValue placeholder="Select role" />
                         </SelectTrigger>
                       <SelectContent>
-                          <SelectItem value="guest">Guest</SelectItem>
-                          <SelectItem value="user">User</SelectItem>
-                          <SelectItem value="finance">Finance</SelectItem>
-                          <SelectItem value="admin">Admin</SelectItem>
+                          <SelectItem value="guest">guest</SelectItem>
+                          <SelectItem value="vendor">vendor</SelectItem>
+                          <SelectItem value="user">user</SelectItem>
+                          <SelectItem value="finance">finance</SelectItem>
                       </SelectContent>
                     </Select>
                 </div>
@@ -120,15 +121,16 @@ export default function AddUserForm({ user, onSubmit, onCancel, isSubmitting }: 
                 
                 <div className="space-y-2">
                     <Label htmlFor="active">Status</Label>
-                    <Select value={active ? 'active' : 'inactive'} onValueChange={(value) => setactive(value === 'active')}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="active">Active</SelectItem>
-                            <SelectItem value="inactive">Inactive</SelectItem>
-                        </SelectContent>
-                    </Select>
+                    <div className="flex items-center space-x-2">
+                        <Checkbox
+                            id="active"
+                            checked={active}
+                            onCheckedChange={(checked) => setactive(checked === true)}
+                        />
+                        <Label htmlFor="active" className="cursor-pointer font-normal">
+                            {active ? 'active' : 'inactive'}
+                        </Label>
+                    </div>
                 </div>
             </div>
             

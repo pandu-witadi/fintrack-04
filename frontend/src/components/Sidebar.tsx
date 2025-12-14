@@ -229,6 +229,13 @@ export default function Sidebar() {
                 </nav>
 
                  <div className="p-4 border-t">
+                    {!isCollapsed && user && (
+                        <div className="mb-4 text-sm">
+                            <div className="font-semibold text-gray-900 truncate">{user.name}</div>
+                            <div className="text-gray-600 text-xs truncate">{user.role}</div>
+                            <div className="text-gray-500 text-xs truncate">{user.email}</div>
+                        </div>
+                    )}
                     <Button
                         variant="ghost"
                         className="w-full justify-start"

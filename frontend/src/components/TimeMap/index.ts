@@ -5,4 +5,7 @@
 
 export * from './dateUtils';
 export * from './selectionUtils';
-export * from './types';
+export { type MonthData, type MonthTotals, type SelectedRows, type GroupedItemGroup, type GroupedItems, type ItemsByMonth } from './types';
+export * from './dataUtils';
+export * from './TimeMapHeader';
+export * from './TimeMapMonthNavigation';

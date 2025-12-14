@@ -18,6 +18,28 @@ const info = {
     note: { type: String, trim: true }  
 }
 
+const client = {
+    company: {
+        type: String,
+        trim: true,
+        maxlength: [50, 'Company name cannot be more than 50 characters'],
+    },
+    sub: {
+        type: String,
+        trim: true,
+        maxlength: [50, 'sub company name cannot be more than 50 characters'],
+    },
+    contact: String,
+    phone: String,
+    email: String,
+    address: {
+        type: String,
+        trim: true,
+        maxlength: [100, 'Address cannot be more than 100 characters'],
+    }
+}
+
+
 const projectSchema = new mongoose.Schema({
     code: {
         type: String,
@@ -77,6 +99,7 @@ const projectSchema = new mongoose.Schema({
         ref: 'Trx'
     }],
     info: info,
+    client: client,
 }, {
     strict: false,
     strictPopulate: false,

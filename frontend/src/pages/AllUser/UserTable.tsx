@@ -8,13 +8,8 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { 
-    DropdownMenu, 
-    DropdownMenuContent, 
-    DropdownMenuItem, 
-    DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
-import { Power, MoreHorizontal, Eye, Trash2 } from 'lucide-react';
+// ... existing code ...
+import { Power, Eye, Trash2, Edit } from 'lucide-react';
 import { User as AuthUser } from '@/services/userService';
 import { IconActive } from '@/components/IconActive';
 import { format } from 'date-fns';
@@ -79,6 +74,7 @@ export function UsersTable({
             <Table>
                 <TableHeader>
                     <TableRow>
+                        <TableHead className="w-12 bg-blue-50 dark:bg-blue-950 text-center">No.</TableHead>
                         <TableHead className="w-12 bg-blue-50 dark:bg-blue-950">
                             <Checkbox
                                 checked={selectedIds.length === users.length && users.length > 0}
@@ -111,10 +107,11 @@ export function UsersTable({
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {users.map((user) => (
+                    {users.map((user, index) => (
                         <TableRow key={user._id} className={`hover:bg-muted/50 ${
                             selectedIds.includes(user._id) ? 'bg-blue-50 dark:bg-blue-950' : ''
                         }`}>
+                            <TableCell className="text-center font-medium text-gray-500">{index + 1}</TableCell>
                             <TableCell>
                                 <Checkbox
                                     checked={selectedIds.includes(user._id)}
@@ -132,35 +129,33 @@ export function UsersTable({
                             <TableCell>{formatLastAccess(user.lastAccess)}</TableCell>
                             <TableCell>{formatDate(user.updatedAt)}</TableCell>
                             <TableCell className="text-right">
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" className="h-8 w-8 p-0">
-                                            <span className="sr-only">Open menu</span>
-                                            <MoreHorizontal className="h-4 w-4" />
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                        <DropdownMenuItem onClick={() => onViewDetails(user)}>
-                                            <Eye className="mr-2 h-4 w-4" />
-                                            Details
-                                        </DropdownMenuItem>
-                                        {canAddUsers && (
-                                            <DropdownMenuItem onClick={() => onEditUser(user)}>
-                                                <Eye className="mr-2 h-4 w-4" />
-                                                Edit
-                                            </DropdownMenuItem>
-                                        )}
-                                        {canAddUsers && (
-                                            <DropdownMenuItem 
-                                                className="text-red-600"
-                                                onClick={() => onDeleteUser(user)}
-                                            >
-                                                <Trash2 className="mr-2 h-4 w-4" />
-                                                Delete
-                                            </DropdownMenuItem>
-                                        )}
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
+                                <div className="flex justify-end gap-2">
+                                    <button
+                                        onClick={() => onViewDetails(user)}
+                                        className="hover:opacity-70 transition-opacity"
+                                        title="View Details"
+                                    >
+                                        <Eye className="h-4 w-4 text-gray-500" />
+                                    </button>
+                                    {canAddUsers && (
+                                        <button
+                                            onClick={() => onEditUser(user)}
+                                            className="hover:opacity-70 transition-opacity"
+                                            title="Edit"
+                                        >
+                                            <Edit className="h-4 w-4 text-gray-500" />
+                                        </button>
+                                    )}
+                                    {canAddUsers && (
+                                        <button
+                                            onClick={() => onDeleteUser(user)}
+                                            className="hover:opacity-70 transition-opacity"
+                                            title="Delete"
+                                        >
+                                            <Trash2 className="h-4 w-4 text-gray-500" />
+                                        </button>
+                                    )}
+                                </div>
                             </TableCell>
                         </TableRow>
                     ))}

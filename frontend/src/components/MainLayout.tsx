@@ -41,11 +41,11 @@ export default function MainLayout() {
                             >
                                 <Menu className="h-6 w-6" />
                             </Button>
-                            <div className="flex flex-col items-start">
+                            {/* <div className="flex flex-col items-start">
                                 <p className="text-sm font-semibold">{user?.name || 'No name'}</p>
                                 <p className="text-xs text-muted-foreground">{user?.email || 'No email'}</p>
                                 <p className="text-xs text-muted-foreground">{user?.role || 'guest'}</p>
-                            </div>
+                            </div> */}
                         </div>
                         {/* <Button
                             variant="ghost"
@@ -60,7 +60,7 @@ export default function MainLayout() {
                 </header>
 
                 {/* Content */}
-                <main className="flex-1 overflow-y-auto p-4 md:p-6">
+                <main className="flex-1 overflow-y-auto p-4 md:p-2">
                     <Outlet />
                 </main>
             </div>

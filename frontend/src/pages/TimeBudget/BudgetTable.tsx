@@ -36,9 +36,9 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
     const isAllSelected = Object.values(selectedRows).length > 0 && Object.values(selectedRows).every(v => v);
 
     return (
-        <div className="overflow-x-auto">
+        <div className="flex-1 overflow-x-auto overflow-y-auto w-full">
             <table className="w-full border-collapse text-sm">
-                <thead>
+                <thead className="sticky top-0 z-20 bg-gray-50">
                     <tr className="border-b border-gray-200">
                         <th className="text-left py-3 px-4 font-semibold text-gray-700 bg-gray-50 sticky left-0 z-10 min-w-[200px]">
                             <div className="flex items-center gap-2">
@@ -66,7 +66,7 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
                 </thead>
                 <tbody>
                     {Object.entries(groupedBudgets).map(([key, group]) => {
-                        const monthStatus = getBudgetsByMonth(group.budgets);
+                        const monthStatus = getBudgetsByMonth(group.items);
                         return (
                             <tr key={key} className="border-b border-gray-200 hover:bg-gray-50">
                                 <td className="py-2 px-3 font-medium text-gray-900 bg-white sticky left-0 z-10">
@@ -79,11 +79,11 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
                                         />
                                         <div className="flex flex-col gap-1">
                                             <button
-                                                onClick={() => navigate(`/finance/budget/${group.budgetId}`)}
+                                                onClick={() => navigate(`/finance/budget/${group.id}`)}
                                                 className="text-blue-600 hover:text-blue-800 hover:underline text-left font-medium"
-                                                title={`Budget: ${group.budgetName}`}
+                                                title={`Budget: ${group.name}`}
                                             >
-                                                {group.budgetName}
+                                                {group.name}
                                             </button>
                                             <button
                                                 onClick={() => navigate(`/finance/project/${group.projectId}`)}
