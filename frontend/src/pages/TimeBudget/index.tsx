@@ -32,6 +32,7 @@ export default function TimeBudget() {
     const [error, setError] = useState<string | null>(null);
     const [selectedRows, setSelectedRows] = useState<Record<string, boolean>>({});
     const [nRangeMonth, setNRangeMonth] = useState<number>(2);
+    const [filterType, setFilterType] = useState<'view all' | 'income' | 'expense'>('view all');
 
     const currentYm = getCurrentYearMonth();
     const [stYm, setStYm] = useState(addMonths(currentYm, -nRangeMonth));
@@ -112,6 +113,8 @@ export default function TimeBudget() {
                         enYm={enYm}
                         onPrevious={handlePrevious}
                         onNext={handleNext}
+                        filterType={filterType}
+                        onFilterChange={setFilterType}
                     />
 
                     {loading ? (
@@ -129,6 +132,7 @@ export default function TimeBudget() {
                             onRowSelect={handleRowSelect}
                             onSelectAll={handleSelectAll}
                             onNavigateToBudget={(budgetId: string) => navigate(`/finance/budget/${budgetId}`)}
+                            filterType={filterType}
                         />
                     )}
                 </CardContent>

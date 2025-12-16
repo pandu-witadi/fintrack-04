@@ -20,6 +20,7 @@ interface TrxTableProps {
     onRowSelect: (key: string) => void;
     onSelectAll: () => void;
     onNavigateToTrx: (trxId: string) => void;
+    filterType?: 'view all' | 'income' | 'expense';
 }
 
 export const TrxTable: React.FC<TrxTableProps> = ({
@@ -31,11 +32,17 @@ export const TrxTable: React.FC<TrxTableProps> = ({
     getTrxsByMonth,
     onRowSelect,
     onSelectAll,
-    onNavigateToTrx
+    onNavigateToTrx,
+    filterType = 'view all'
 }) => {
     const navigate = useNavigate();
     const isAllSelected = Object.values(selectedRows).length > 0 && Object.values(selectedRows).every(v => v);
     const sortedGroupedTrxs = getSortedGroupedTrxs(groupedTrxs);
+
+    const filterMonthDataList = (monthDataList: any[]) => {
+        if (filterType === 'view all') return monthDataList;
+        return monthDataList.filter(item => item.typ === filterType);
+    };
 
     return (
         <div className="flex-1 overflow-x-auto overflow-y-auto w-full">
@@ -99,11 +106,12 @@ export const TrxTable: React.FC<TrxTableProps> = ({
                                 </td>
                                 {monthRange.map(month => {
                                     const monthDataList = monthStatus[month];
+                                    const filteredMonthDataList = filterMonthDataList(monthDataList || []);
                                     return (
                                         <td key={`${key}-${month}`} className="text-right py-2 px-2">
-                                            {monthDataList && monthDataList.length > 0 ? (
+                                            {filteredMonthDataList && filteredMonthDataList.length > 0 ? (
                                                 <div className="flex flex-col items-end justify-center gap-2 text-xs">
-                                                    {monthDataList.map((monthData, idx) => (
+                                                    {filteredMonthDataList.map((monthData, idx) => (
                                                         <div key={`${key}-${month}-${idx}`} className="flex flex-col items-end gap-1">
                                                             <div className="flex items-center justify-end gap-1">
                                                                 <span className="font-semibold text-gray-800">{formatCurrency(monthData.amount)}</span>

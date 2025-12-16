@@ -35,6 +35,9 @@ const addMonths = (ym: string, months: number): string => {
     return formatYearMonth(newYear, newMonth);
 };
 
+
+// not yet implemented
+// search by criteria, such as prject, etc
 export default function CurrentUserTimeActual() {
     const navigate = useNavigate();
     const { user } = useAuth();
