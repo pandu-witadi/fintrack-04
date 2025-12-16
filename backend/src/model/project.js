@@ -43,7 +43,6 @@ const client = {
 const projectSchema = new mongoose.Schema({
     code: {
         type: String,
-        required: [true, 'Please provide a code'],
         trim: true,
         maxlength: [50, 'Code cannot be more than 50 characters'],
     },

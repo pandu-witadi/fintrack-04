@@ -611,7 +611,7 @@ export default function ProjectDetail() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 p-3">
             {/* <Button variant="outline" size="icon" onClick={() => navigate('/finance/allProject')}>
                 <ArrowLeftFromLine className="h-4 w-4" />
             </Button> */}

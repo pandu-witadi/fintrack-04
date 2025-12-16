@@ -78,19 +78,30 @@ export default function AddProjectDialog({ project, onSubmit, onCancel, isSubmit
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="name">name *</Label>
+                    <Input
+                        id="name"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        required
+                        placeholder="Enter project name"
+                    />
+                </div>
+                
                 <div className="space-y-2">
-                    <Label htmlFor="code">code *</Label>
+                    <Label htmlFor="code">code</Label>
                     <Input
                         id="code"
                         name="code"
                         value={formData.code}
                         onChange={handleChange}
-                        required
-                        placeholder="Enter project code"
+                        placeholder="Enter project code (optional)"
                     />
-                  </div>
+                </div>
                   
-                  <div className="space-y-2">
+                <div className="space-y-2">
                     <Label htmlFor="typ">type</Label>
                     <Select name="typ" value={formData.typ} onValueChange={(value: string) => handleSelectChange('typ', value)}>
                         <SelectTrigger>
@@ -104,17 +115,7 @@ export default function AddProjectDialog({ project, onSubmit, onCancel, isSubmit
                     </Select>
                 </div>
 
-                  <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="name">name *</Label>
-                    <Input
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        required
-                        placeholder="Enter project name"
-                    />
-                </div>
+                
                 
               
                 

@@ -215,7 +215,7 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
         let filteredProjects = projects;
         if (searchTerm) {
             filteredProjects = projects.filter(project => 
-                project.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (project.code && project.code.toLowerCase().includes(searchTerm.toLowerCase())) ||
                 project.name.toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
@@ -262,6 +262,10 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
                 // Special handling for client company comparison
                 aValue = a.client?.company || '';
                 bValue = b.client?.company || '';
+            } else if (sortConfig.key === 'code') {
+                // Special handling for optional code field
+                aValue = a.code || '';
+                bValue = b.code || '';
             } else {
                 aValue = a[sortConfig.key];
                 bValue = b[sortConfig.key];
@@ -482,9 +486,9 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
                                                 onClick={() => onView(project)}
                                                 className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-sm"
                                             >
-                                                {project.code}
+                                                {project.name}
                                             </button>
-                                            <div className="text-xs text-muted-foreground">{project.name}</div>
+                                            <div className="text-xs text-muted-foreground">{project.code || '-'}</div>
                                         </TableCell>
                                     )}
                                     {/* {visibleColumns.name && (

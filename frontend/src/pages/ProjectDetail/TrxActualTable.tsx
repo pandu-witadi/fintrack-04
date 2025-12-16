@@ -138,7 +138,7 @@ export default function TrxActualTable({ trxs, onDelete, onAddTrx, onRegisterTrx
                                     
                                     <TableCell className="text-sm min-w-fit">
                                         {trx.lActual && trx.lActual.length > 0 ? (
-                                            <div className="space-y-1">
+                                            <div className="space-y-4">
                                                 {trx.lActual.map((actual: { _id: string; name: string; amount: number; typ?: string; done?: boolean; projectId?: string; projectName?: string }) => (
                                                     <div key={actual._id} className="border-l-2 border-muted-foreground pl-2 py-0.5">
                                                         <div className="flex items-center justify-between gap-2">
@@ -160,7 +160,11 @@ export default function TrxActualTable({ trxs, onDelete, onAddTrx, onRegisterTrx
                                                                     </button>
                                                                 )}
                                                             </div>
-                                                            <span className="font-semibold text-xs whitespace-nowrap">{formatCurrency(actual.amount)}</span>
+                                                            <div className="flex items-center justify-end gap-1 text-xs">
+                                                                <span className="font-semibold">{formatCurrency(actual.amount)}</span>
+                                                                {actual.typ && IconType(actual.typ)}
+                                                                {IconDone(actual.done ?? false)}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 ))}

@@ -113,9 +113,11 @@ export function BatchAttachAllActualToTrxDialog({
                                         <SelectItem key={project._id} value={project._id}>
                                             <div className="flex items-center gap-2">
                                                 <span>{project.name}</span>
-                                                <span className="text-muted-foreground text-xs">
-                                                    ({project.code})
-                                                </span>
+                                                {project.code && (
+                                                    <span className="text-muted-foreground text-xs">
+                                                        ({project.code})
+                                                    </span>
+                                                )}
                                             </div>
                                         </SelectItem>
                                     ))}

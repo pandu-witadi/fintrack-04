@@ -28,7 +28,7 @@ export interface Trx {
     project: {
         _id: string;
         name: string;
-        code: string;
+        code?: string;
     };
     updatedBy?: {
         _id: string;

@@ -120,7 +120,7 @@ export function DetailSection({
                                     <div className="space-y-3">
                                         <div>
                                             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Code</span>
-                                            <p className="text-lg font-bold text-blue-600 mt-1">{project.code}</p>
+                                            <p className="text-lg font-bold text-blue-600 mt-1">{project.code || '-'}</p>
                                         </div>
                                         <div>
                                             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Name</span>

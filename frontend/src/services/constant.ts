@@ -7,7 +7,7 @@ export interface userPopulate {
 export interface projectPopulate {
     _id: string;
     name: string;
-    code: string;
+    code?: string;
 }
 
 export interface bankInfoPopulate {

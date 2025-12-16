@@ -153,6 +153,7 @@ async function projectApi(fastify, options) {
         }
     });
 
+
     // Get project by ID (only accessible by admin/finance roles)
     fastify.route({
         method: 'GET',
@@ -201,7 +202,7 @@ async function projectApi(fastify, options) {
                 properties: {
                     code: {
                         type: 'string',
-                        description: 'Unique code for the project',
+                        description: 'Code for the project (optional)',
                         maxLength: 50
                     },
                     name: {
@@ -337,7 +338,7 @@ async function projectApi(fastify, options) {
             body: {
                 type: 'object',
                 properties: {
-                    code: { type: 'string', maxLength: 50 },
+                    code: { type: 'string', maxLength: 50, description: 'Code for the project (optional)' },
                     name: { type: 'string', maxLength: 50 },
                     note: { type: 'string' },
                     active: { type: 'boolean' },

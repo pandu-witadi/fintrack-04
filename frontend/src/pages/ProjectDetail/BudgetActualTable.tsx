@@ -238,7 +238,7 @@ export default function BudgetActualTable({ budgets, onDelete, onAddBudget, onSp
                                 
                                     <TableCell className="text-sm">
                                         {budget.lActual && budget.lActual.length > 0 ? (
-                                            <div className="space-y-2">
+                                            <div className="space-y-4">
                                                 {budget.lActual.map((
                                                     actual: { 
                                                         _id: string; 
@@ -265,9 +265,9 @@ export default function BudgetActualTable({ budgets, onDelete, onAddBudget, onSp
                                                                 {IconDone(actual.done ?? false)}
                                                             </div>
                                                         </div>
-                                                        {actual.assignee && (
-                                                            <div className="text-xs text-muted-foreground mt-1">{actual.assignee.name} ({actual.assignee.email})</div>
-                                                        )}
+                                                        <div className="text-xs text-muted-foreground mt-1">
+                                                            {actual.assignee?.name || '-'}
+                                                        </div>
                                                     </div>
                                                 ))}
                                             </div>

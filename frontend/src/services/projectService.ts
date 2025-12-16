@@ -26,7 +26,7 @@ interface ClientInfo {
 
 export interface Project {
     _id: string;
-    code: string;
+    code?: string;
     name: string;
     note?: string;
     active: boolean;
@@ -59,7 +59,7 @@ export interface Project {
 }
 
 interface CreateProjectData {
-    code: string;
+    code?: string;
     name: string;
     note?: string;
     active?: boolean;

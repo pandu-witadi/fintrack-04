@@ -30,10 +30,12 @@ export default function FinAllProjectPage() {
 
     const handleFormSubmit = async (data: Partial<Project>) => {
         try {
-              setIsSubmitting(true);
-              await createProject(data as Omit<Project, '_id' | 'createdAt' | 'updatedAt' | 'updatedBy' | 'lBudget' | 'lActual' | 'lTrx' |  'info'>);
-              toast.success('Project created successfully');
-              setIsFormModalOpen(false);
+                setIsSubmitting(true);
+                await createProject(data as Omit<Project, 
+                    '_id' | 'createdAt' | 'updatedAt' | 'updatedBy' | 'lBudget' | 'lActual' | 'lTrx' |  'info'>
+                );
+                toast.success('Project created successfully')
+                setIsFormModalOpen(false);
         } catch (error) {
             toast.error('Failed to create project');
             console.error(error);
@@ -74,17 +76,18 @@ export default function FinAllProjectPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center p-2
+            ">
                 <div>
-                    <h1 className="text-3xl font-bold">Projects</h1>
-                    <p className="text-muted-foreground">Manage your projects</p>
+                    <h1 className="text-3xl font-bold">Project</h1>
+                    {/* <p className="text-muted-foreground">Manage your projects</p> */}
                 </div>
                 <Button onClick={handleAddProject}>
                     Add Project
                 </Button>
             </div>
 
-            <div className="rounded-lg border bg-card p-6 shadow-sm">
+            <div className="rounded-lg border bg-card p-6 shadow-sm p-2">
                 <ProjectTable 
                     projects={projects} 
                     onView={handleView}
