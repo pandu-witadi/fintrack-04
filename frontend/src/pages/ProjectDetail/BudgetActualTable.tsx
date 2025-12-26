@@ -188,6 +188,7 @@ export default function BudgetActualTable({ budgets, onDelete, onAddBudget, onSp
                                         className="w-4 h-4"
                                     />
                                 </TableHead>
+                                <TableHead className="w-12 text-center">#</TableHead>
                                 <TableHead><Power className="h-3 w-3 text-cyan-500" /></TableHead>
                                 <TableHead className="text-right">name</TableHead>
                                 <TableHead className="text-right">budget</TableHead>
@@ -199,7 +200,7 @@ export default function BudgetActualTable({ budgets, onDelete, onAddBudget, onSp
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {sortedBudgets.map((budget) => (
+                            {sortedBudgets.map((budget, index) => (
                                 <TableRow key={budget._id}>
                                     <TableCell className="w-12">
                                         <Checkbox
@@ -207,6 +208,7 @@ export default function BudgetActualTable({ budgets, onDelete, onAddBudget, onSp
                                             onCheckedChange={() => handleSelectOne(budget._id)}
                                         />
                                     </TableCell>
+                                    <TableCell className="w-12 text-center text-sm font-medium text-muted-foreground">{index + 1}</TableCell>
                                     <TableCell>{IconActive(budget.active)}</TableCell>
                                     <TableCell className="font-medium text-right">
                                         <button 

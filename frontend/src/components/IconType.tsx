@@ -1,15 +1,15 @@
 export const IconType = (typ: string) => {
     return typ == "income" ? (
-        <button className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-none hover:bg-green-200 hover:underline"
+        <button className="bg-green-100 text-cyan-600 text-xs px-1 py-1 rounded-none"
              title={`type: ${typ}`}
         >
-            inc
+            in
         </button>
       ) : (
-        <button className="bg-pink-100 text-pink-800 text-xs px-2 py-1 rounded-none hover:bg-pink-200 hover:underline" 
+        <button className="bg-pink-100 text-cyan-700 text-xs px-1 py-1 rounded-none" 
              title={`type: ${typ}`}
         >
-            exp
+            ex
         </button>
     );
 };

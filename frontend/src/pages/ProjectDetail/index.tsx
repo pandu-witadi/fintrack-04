@@ -640,6 +640,8 @@ export default function ProjectDetail() {
                 trxCount={trxCount}
             />
 
+            <div className="border-t-2 border-purple-400 my-6"></div>
+
             {/* Budget Actual Section */}
             <BudgetActualTable
                 budgets={budgets}
@@ -658,7 +660,9 @@ export default function ProjectDetail() {
                     }
                 }}
             />
-            
+
+            <div className="border-t-2 border-amber-400 my-6"></div>
+
             {/* Actual Transactions Section */}
             <ActualTrxTable
                 actuals={actuals}
@@ -677,7 +681,9 @@ export default function ProjectDetail() {
                     }
                 }}
             />
-            
+
+            <div className="border-t-2 border-emerald-400 my-6"></div>
+
             {/* Transactions Section */}
             <TrxActualTable
                 trxs={trxs}

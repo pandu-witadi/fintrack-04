@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useMemo, useEffect } from 'react';
 import { 
     Dialog, 
     DialogContent, 
@@ -9,6 +10,9 @@ import {
 } from '../../components/ui/dialog';
 import { Button } from '../../components/ui/button';
 import { useProject } from '../../hooks/useProject.js';
+import { useBudget } from '../../hooks/useBudget.js';
+import { useActual } from '../../hooks/useActual.js';
+import { useTrx } from '../../hooks/useTrx.js';
 import { Project } from '../../services/projectService.js'; 
 import ProjectTable from './ProjectTable';
 import AddProjectDialog from './AddProjectDialog';
@@ -17,8 +21,57 @@ import AddProjectDialog from './AddProjectDialog';
 export default function FinAllProjectPage() {
     const navigate = useNavigate();
     const { projects, loading, error, fetchAllProject, createProject, deleteProject } = useProject();
+    const { budgets, getAllBudget } = useBudget();
+    const { actuals, getAllActual } = useActual();
+    const { trxs, getAllTrx } = useTrx();
     const [isFormModalOpen, setIsFormModalOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Fetch budget, actual, and transaction data on mount
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                await Promise.all([getAllBudget(), getAllActual(), getAllTrx()]);
+            } catch (error) {
+                console.error('Error fetching stats data:', error);
+            }
+        };
+        fetchData();
+    }, []);
+    const projectStats = useMemo(() => {
+        const stats: Record<string, any> = {};
+        
+        projects.forEach(project => {
+            // Filter budgets by project ID - handle both string and object references
+            const projectBudgets = budgets.filter(b => {
+                const budgetProjectId = typeof b.project === 'string' ? b.project : b.project?._id;
+                return budgetProjectId === project._id;
+            });
+            
+            // Filter actuals by project ID
+            const projectActuals = actuals.filter(a => a.project?._id === project._id);
+            
+            // Filter transactions by project ID
+            const projectTrxs = trxs.filter(t => t.project?._id === project._id);
+
+            stats[project._id] = {
+                budgetCount: {
+                    done: projectBudgets.filter(b => b.done).length,
+                    total: projectBudgets.length
+                },
+                actualCount: {
+                    done: projectActuals.filter(a => a.done).length,
+                    total: projectActuals.length
+                },
+                trxCount: {
+                    done: projectTrxs.filter(t => t.done).length,
+                    total: projectTrxs.length
+                }
+            };
+        });
+        
+        return stats;
+    }, [projects, budgets, actuals, trxs]);
 
     const handleView = (project: Project) => {
         navigate(`/finance/project/${project._id}`);
@@ -76,22 +129,13 @@ export default function FinAllProjectPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center p-2
-            ">
-                <div>
-                    <h1 className="text-3xl font-bold">Project</h1>
-                    {/* <p className="text-muted-foreground">Manage your projects</p> */}
-                </div>
-                <Button onClick={handleAddProject}>
-                    Add Project
-                </Button>
-            </div>
-
             <div className="rounded-lg border bg-card p-6 shadow-sm p-2">
                 <ProjectTable 
                     projects={projects} 
                     onView={handleView}
                     onDelete={handleDeleteProject}
+                    projectStats={projectStats}
+                    onAddProject={handleAddProject}
                 />
             </div>
 

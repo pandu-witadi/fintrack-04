@@ -5,8 +5,6 @@
 #   ./fintrack.sh --backup --file db-2025-11-10.tgz
 #   ./fintrack.sh --restore --file db-2025-11-10.tgz
 
-set -e
-
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -76,10 +74,10 @@ error() {
 # Check if mongodump and mongorestore are available
 check_mongo_tools() {
     if ! command -v mongodump &> /dev/null; then
-        error "mongodump not found. Please install MongoDB tools."
+        error "mongodump not found. Please install MongoDB tools. Visit: https://www.mongodb.com/try/download/database-tools"
     fi
     if ! command -v mongorestore &> /dev/null; then
-        error "mongorestore not found. Please install MongoDB tools."
+        error "mongorestore not found. Please install MongoDB tools. Visit: https://www.mongodb.com/try/download/database-tools"
     fi
     log "MongoDB tools found"
 }
@@ -188,6 +186,12 @@ list_backups() {
 
 # Main script
 main() {
+    # Show help if no arguments
+    if [[ $# -eq 0 ]]; then
+        usage
+        exit 0
+    fi
+    
     local action=""
     local filename=""
     
@@ -245,5 +249,7 @@ main() {
     esac
 }
 
-# Run main function
-main "$@"
+# Run main function with error handling
+if ! main "$@"; then
+    exit 1
+fi

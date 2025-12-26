@@ -130,7 +130,7 @@ export default function Sidebar() {
                       location.pathname === item.href
                         ? 'bg-blue-500 text-white'
                         : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                    } ${isSubItem ? 'ml-4' : ''}`}
+                    } ${isSubItem ? 'ml-1' : ''}`}
                 >
                   {item.icon}
                   {!isCollapsed && <span className="ml-3">{item.title}</span>}
@@ -160,7 +160,7 @@ export default function Sidebar() {
                             {item.submenu
                                 .filter(subItem => hasRequiredRole(subItem.roles))
                                 .map((subItem, index) => (
-                                    <div key={index} className="ml-8">
+                                    <div key={index} className="ml-3">
                                         {renderNavItem(subItem, true)}
                                     </div>
                                 ))}
@@ -190,16 +190,18 @@ export default function Sidebar() {
 
             <div
                 className={`bg-card border-r transition-all duration-300 ease-in-out ${
-                  isCollapsed ? 'w-20' : 'w-64'
+                  isCollapsed ? 'w-16' : 'w-50'
                 } ${isMobile && isCollapsed ? 'hidden' : 'fixed md:relative'} h-screen flex flex-col`}
             >
                 <div className="flex items-center justify-between p-4 border-b">
                     {!isCollapsed && (
                         <div className="flex items-center space-x-2">
+                            {/* 
                             <div className="bg-primary w-8 h-8 rounded-lg flex items-center justify-center">
                                 <span className="text-primary-foreground font-bold">P</span>
-                            </div>
-                            <span className="text-xl font-bold">Projects</span>
+                            </div> 
+                            */}
+                            <span className="text-l font-bold">FinTrack</span> 
                         </div>
                     )}
                     <Button
@@ -216,8 +218,8 @@ export default function Sidebar() {
                     </Button>
                 </div>
 
-                <nav className="flex-1 overflow-y-auto py-4">
-                    <ul className="space-y-1 px-2">
+                <nav className="flex-1 overflow-y-auto py-3">
+                    <ul className="space-y-1 px-1">
                         {navItems
                             .filter(item => hasRequiredRole(item.roles))
                             .map((item, index) => (

@@ -43,16 +43,29 @@ interface Project extends BaseProject {
     transactionCount?: number;
 }
 import { format, getYear } from 'date-fns';
+import formatCurrency from '@/utils/formatCurrency';
 
+interface StatCount {
+    done: number;
+    total: number;
+}
+
+interface StatData {
+    budgetCount: StatCount;
+    actualCount: StatCount;
+    trxCount: StatCount;
+}
 
 interface ProjectsTableProps {
     projects: Project[];
     onEdit?: (project: Project) => void; // Make onEdit optional
     onDelete?: (id: string) => void; // Make onDelete optional
     onView: (project: Project) => void;
+    projectStats?: Record<string, StatData>; // Map of projectId to stats
+    onAddProject?: () => void; // Add project button handler
 }
 
-export default function ProjectTable({ projects, onEdit, onDelete, onView }: ProjectsTableProps) {
+export default function ProjectTable({ projects, onEdit, onDelete, onView, projectStats, onAddProject }: ProjectsTableProps) {
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [sortConfig, setSortConfig] = useState<{ key: keyof Project; direction: 'asc' | 'desc' } | null>({
         key: 'stDate' as keyof Project,
@@ -61,6 +74,7 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [typeFilter, setTypeFilter] = useState<string>('all');
     const [yearFilter, setYearFilter] = useState<string>('all');
+    const [activeFilter, setActiveFilter] = useState<string>('all');
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
     
@@ -126,7 +140,10 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
         stDate: true,
         client: true,
         updatedAt: false,
-        done: true
+        done: true,
+        budget: true,
+        actual: true,
+        taskStat: true
     });
     const renderColumnVisibilityControls = () => (
         <DropdownMenu>
@@ -191,6 +208,24 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
                 >
                     done
                 </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem 
+                    checked={visibleColumns.budget}
+                    onCheckedChange={() => handleToggleColumn('budget')}
+                >
+                    budget
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem 
+                    checked={visibleColumns.actual}
+                    onCheckedChange={() => handleToggleColumn('actual')}
+                >
+                    actual
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem 
+                    checked={visibleColumns.taskStat}
+                    onCheckedChange={() => handleToggleColumn('taskStat')}
+                >
+                    task
+                </DropdownMenuCheckboxItem>
             </DropdownMenuContent>
         </DropdownMenu>
     );
@@ -223,6 +258,12 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
         // Then filter by type if not 'all'
         if (typeFilter !== 'all') {
             filteredProjects = filteredProjects.filter(project => project.typ === typeFilter);
+        }
+        
+        // Then filter by active if not 'all'
+        if (activeFilter !== 'all') {
+            const activeValue = activeFilter === 'true';
+            filteredProjects = filteredProjects.filter(project => project.active === activeValue);
         }
         
         // Then filter by year if not 'all'
@@ -300,7 +341,7 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
               ? String(aValue).localeCompare(String(bValue)) 
               : String(bValue).localeCompare(String(aValue));
         });
-    }, [projects, sortConfig, searchTerm, typeFilter, yearFilter]);
+    }, [projects, sortConfig, searchTerm, typeFilter, yearFilter, activeFilter]);
 
     const getTypeProjectBadge = (type: string) => {
         switch (type) {
@@ -315,70 +356,231 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
         }
     };
 
+    const renderStatCell = (stat: StatCount | undefined) => {
+        if (!stat) return <span className="text-xs text-muted-foreground">-</span>;
+        return (
+            <div className="text-center">
+                <div className="text-sm font-medium">
+                    <span className="text-green-700">{stat.done}</span>
+                    <span className="text-muted-foreground">/{stat.total}</span>
+                </div>
+            </div>
+        );
+    };
+
+    const renderTaskCell = (project: Project) => {
+        const stats = projectStats?.[project._id];
+        if (!stats) return <span className="text-xs text-muted-foreground">-</span>;
+        
+        return (
+            <div className="flex items-center gap-2 justify-center text-xs">
+                <div className="text-center">
+                    <span className="text-green-700 font-medium">{stats.budgetCount.done}</span>
+                    <span className="text-muted-foreground">/{stats.budgetCount.total}</span>
+                </div>
+                <span className="text-muted-foreground">--</span>
+                <div className="text-center">
+                    <span className="text-green-700 font-medium">{stats.actualCount.done}</span>
+                    <span className="text-muted-foreground">/{stats.actualCount.total}</span>
+                </div>
+                <span className="text-muted-foreground">--</span>
+                <div className="text-center">
+                    <span className="text-green-700 font-medium">{stats.trxCount.done}</span>
+                    <span className="text-muted-foreground">/{stats.trxCount.total}</span>
+                </div>
+            </div>
+        );
+    };
+
+    const renderBudgetCell = (project: Project) => {
+        if (!project.info) return <span className="text-xs text-muted-foreground">-</span>;
+        
+        const income = project.info.income?.budget || 0;
+        const expense = project.info.expense?.budget || 0;
+        const profit = project.info.profit?.budget || 0;
+        
+        return (
+            <div className="flex flex-col gap-1 text-right text-xs">
+                <div className="text-green-600">{formatCurrency(income)}</div>
+                <div className="text-red-400">{formatCurrency(expense)}</div>
+                { income >= expense ? 
+                    <div className="text-green-500">{formatCurrency(profit)}</div> 
+                    : <div className="text-red-500">{formatCurrency(profit)}</div> 
+                }    
+            </div>
+        );
+    };
+
+    const renderActualCell = (project: Project) => {
+        if (!project.info) return <span className="text-xs text-muted-foreground">-</span>;
+        
+        const income = project.info.income?.actual || 0;
+        const expense = project.info.expense?.actual || 0;
+        const profit = project.info.profit?.actual || 0;
+        
+        return (
+            <div className="flex flex-col gap-1 text-right text-xs">
+                <div className="text-green-600">{formatCurrency(income)}</div>
+                <div className="text-red-400">{formatCurrency(expense)}</div>
+                { income >= expense ? 
+                    <div className="text-green-500">{formatCurrency(profit)}</div> 
+                    : <div className="text-red-500">{formatCurrency(profit)}</div> 
+                }    
+            </div>
+        );
+    };
+
+    const calculateSelectedIncome = useMemo(() => {
+        return selectedIds.reduce((sum, id) => {
+            const project = filteredAndSortedProjects.find(p => p._id === id);
+            if (project?.active && project?.info?.income?.budget) {
+                return sum + project.info.income.budget;
+            }
+            return sum;
+        }, 0);
+    }, [selectedIds, filteredAndSortedProjects]);
+
+    const calculateSelectedExpense = useMemo(() => {
+        return selectedIds.reduce((sum, id) => {
+            const project = filteredAndSortedProjects.find(p => p._id === id);
+            if (project?.active && project?.info?.expense?.budget) {
+                return sum + project.info.expense.budget;
+            }
+            return sum;
+        }, 0);
+    }, [selectedIds, filteredAndSortedProjects]);
+
+    const calculateSelectedProfit = useMemo(() => {
+        return selectedIds.reduce((sum, id) => {
+            const project = filteredAndSortedProjects.find(p => p._id === id);
+            if (project?.active && project?.info?.profit?.budget) {
+                return sum + project.info.profit.budget;
+            }
+            return sum;
+        }, 0);
+    }, [selectedIds, filteredAndSortedProjects]);
+
+    const calculateSelectedActualIncome = useMemo(() => {
+        return selectedIds.reduce((sum, id) => {
+            const project = filteredAndSortedProjects.find(p => p._id === id);
+            if (project?.active && project?.info?.income?.actual) {
+                return sum + project.info.income.actual;
+            }
+            return sum;
+        }, 0);
+    }, [selectedIds, filteredAndSortedProjects]);
+
+    const calculateSelectedActualExpense = useMemo(() => {
+        return selectedIds.reduce((sum, id) => {
+            const project = filteredAndSortedProjects.find(p => p._id === id);
+            if (project?.active && project?.info?.expense?.actual) {
+                return sum + project.info.expense.actual;
+            }
+            return sum;
+        }, 0);
+    }, [selectedIds, filteredAndSortedProjects]);
+
+    const calculateSelectedActualProfit = useMemo(() => {
+        return selectedIds.reduce((sum, id) => {
+            const project = filteredAndSortedProjects.find(p => p._id === id);
+            if (project?.active && project?.info?.profit?.actual) {
+                return sum + project.info.profit.actual;
+            }
+            return sum;
+        }, 0);
+    }, [selectedIds, filteredAndSortedProjects]);
+
 
 
     return (
-        <div className="space-y-4">
-            <div className="flex items-center py-2 gap-2 flex-wrap">
-                <div className="relative w-64">
-                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        placeholder="Search by code or name..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-8"
-                    />
+        <div className="flex flex-col h-screen">
+            <div className="flex items-center py-2 gap-2 flex-wrap justify-between flex-shrink-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                    <div className="relative w-64">
+                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Search by code or name..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="pl-8"
+                        />
+                    </div>
+
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="flex items-center gap-2">
+                              <Filter className="h-4 w-4" />
+                              {activeFilter === 'all' ? 'Active' : (activeFilter === 'true' ? 'Active' : 'Inactive')}
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start">
+                            <DropdownMenuItem onClick={() => setActiveFilter('all')}>
+                                <span className="font-semibold text-cyan-600">All Status</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setActiveFilter('true')}>
+                                active
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setActiveFilter('false')}>
+                                inactive
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="flex items-center gap-2">
+                              <Filter className="h-4 w-4" />
+                              {typeFilter === 'all' ? 'Type' : typeFilter.charAt(0).toUpperCase() + typeFilter.slice(1)}
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start">
+                            <DropdownMenuItem onClick={() => setTypeFilter('all')}>
+                                <span className="font-semibold text-cyan-600">All Types</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setTypeFilter('project')}>
+                                project
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setTypeFilter('routine')}>
+                                routine
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setTypeFilter('other')}>
+                                other   
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="flex items-center gap-2">
+                                <Filter className="h-4 w-4" />
+                                {yearFilter === 'all' ? 'Year' : yearFilter}
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start">
+                            <DropdownMenuItem onClick={() => setYearFilter('all')}>
+                              <span className="font-semibold text-cyan-600">All Years</span>
+                            </DropdownMenuItem>
+                            {uniqueYears.map(year => (
+                                <DropdownMenuItem key={year} onClick={() => setYearFilter(year.toString())}>
+                                    {year}
+                                </DropdownMenuItem>
+                            ))}
+                            {uniqueYears.length === 0 && (
+                                <DropdownMenuItem disabled>
+                                    No years available
+                                </DropdownMenuItem>
+                            )}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                    {renderColumnVisibilityControls()}
                 </div>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="flex items-center gap-2">
-                          <Filter className="h-4 w-4" />
-                          {typeFilter === 'all' ? 'Type' : typeFilter.charAt(0).toUpperCase() + typeFilter.slice(1)}
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start">
-                        <DropdownMenuItem onClick={() => setTypeFilter('all')}>
-                            <span className="font-semibold text-cyan-600">All Types</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setTypeFilter('project')}>
-                            project
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setTypeFilter('routine')}>
-                            routine
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setTypeFilter('other')}>
-                            other   
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="flex items-center gap-2">
-                            <Filter className="h-4 w-4" />
-                            {yearFilter === 'all' ? 'Year' : yearFilter}
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start">
-                        <DropdownMenuItem onClick={() => setYearFilter('all')}>
-                          <span className="font-semibold text-cyan-600">All Years</span>
-                        </DropdownMenuItem>
-                        {uniqueYears.map(year => (
-                            <DropdownMenuItem key={year} onClick={() => setYearFilter(year.toString())}>
-                                {year}
-                            </DropdownMenuItem>
-                        ))}
-                        {uniqueYears.length === 0 && (
-                            <DropdownMenuItem disabled>
-                                No years available
-                            </DropdownMenuItem>
-                        )}
-                    </DropdownMenuContent>
-                </DropdownMenu>
-                {renderColumnVisibilityControls()}
+                {onAddProject && (
+                    <Button onClick={onAddProject} className="ml-auto">
+                        Add Project
+                    </Button>
+                )}
             </div>
-            <div className="rounded-md border">
-                <Table>
-                    <TableHeader>
+            <div className="rounded-md border flex-1 overflow-hidden flex flex-col">
+                <Table className="border-spacing-y-2">
+                    <TableHeader className="border-b-3 border-gray-300 sticky top-0 bg-white z-10">
                         <TableRow>
                             <TableHead className="w-12">No</TableHead>
                             <TableHead className="w-12">
@@ -456,13 +658,32 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
                                     </div>
                                 </TableHead>
                             )}
+                            {visibleColumns.budget && (
+                                <TableHead className="text-right">
+                                    <div className="text-sm">budget</div>
+                                    <div className="text-xs text-green-600 font-normal mt-1">{formatCurrency(calculateSelectedIncome)}</div>
+                                    <div className="text-xs text-red-400 font-normal">{formatCurrency(calculateSelectedExpense)}</div>
+                                    <div className="text-xs text-green-500 font-normal">{formatCurrency(calculateSelectedProfit)}</div>
+                                </TableHead>
+                            )}
+                            {visibleColumns.actual && (
+                                <TableHead className="text-right">
+                                    <div className="text-sm">actual</div>
+                                    <div className="text-xs text-green-600 font-normal mt-1">{formatCurrency(calculateSelectedActualIncome)}</div>
+                                    <div className="text-xs text-red-400 font-normal">{formatCurrency(calculateSelectedActualExpense)}</div>
+                                    <div className="text-xs text-green-500 font-normal">{formatCurrency(calculateSelectedActualProfit)}</div>
+                                </TableHead>
+                            )}
+                            {visibleColumns.taskStat && (
+                                <TableHead className="text-center">task</TableHead>
+                            )}
                             <TableHead className="w-20 text-center">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
-                    <TableBody>
+                    <TableBody className="border-spacing-y-2 overflow-y-auto">
                         {filteredAndSortedProjects.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={Object.values(visibleColumns).filter(Boolean).length + 3} className="text-center py-10">
+                                <TableCell colSpan={Object.values(visibleColumns).filter(Boolean).length + 2} className="text-center py-10">
                                     <X className="text-red-500" size={16} />No projects found
                                 </TableCell>
                             </TableRow>
@@ -521,6 +742,15 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
                                     {visibleColumns.done && (
                                         <TableCell>{IconDone(project.done)}</TableCell>
                                     )}
+                                    {visibleColumns.budget && (
+                                        <TableCell className="px-2">{renderBudgetCell(project)}</TableCell>
+                                    )}
+                                    {visibleColumns.actual && (
+                                        <TableCell className="px-2">{renderActualCell(project)}</TableCell>
+                                    )}
+                                    {visibleColumns.taskStat && (
+                                        <TableCell className="px-2">{renderTaskCell(project)}</TableCell>
+                                    )}
                                     <TableCell className="text-center">
                                         <Button
                                             variant="ghost"
@@ -540,7 +770,7 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView }: Pro
             </div>
             
             {/* Selection info */}
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-muted-foreground flex-shrink-0 py-2">
                 {selectedIds.length > 0 
                     ? `${selectedIds.length} of ${filteredAndSortedProjects.length} project(s) selected` 
                     : `${filteredAndSortedProjects.length} project(s) total`}

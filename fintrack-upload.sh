@@ -3,10 +3,8 @@
 # FinTrack Upload Directory Backup and Restore Script
 # Backs up and restores the backend/upload directory containing picture files
 # Usage:
-#   ./fintrack.sh --backup --file db-2025-11-10.tgz --upload
-#   ./fintrack.sh --restore --file fintrack_upload_2025-11-10.tgz --upload
-
-set -e
+#   ./fintrack-upload.sh --backup --file db-2025-11-10
+#   ./fintrack-upload.sh --restore --file fintrack_upload_2025-11-10.tgz
 
 # Colors for output
 RED='\033[0;31m'
@@ -172,6 +170,12 @@ list_backups() {
 
 # Main script
 main() {
+    # Show help if no arguments
+    if [[ $# -eq 0 ]]; then
+        usage
+        exit 0
+    fi
+    
     local action=""
     local filename=""
     
@@ -228,5 +232,7 @@ main() {
     esac
 }
 
-# Run main function
-main "$@"
+# Run main function with error handling
+if ! main "$@"; then
+    exit 1
+fi

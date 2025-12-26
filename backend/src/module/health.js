@@ -10,6 +10,10 @@ const healthCheck = async (request, reply) => {
             version: '0.0.4',
             description: 'finance tracking application',
             node_env: process.env.NODE_ENV,
+            host: process.env.HOST,
+            port: process.env.PORT,
+            mongodb_uri: process.env.MONGODB_URI,
+            jwt_expires_in: process.env.JWT_EXPIRES_IN,
             timestamp: new Date().toLocaleString('en-GB', { timeZone: 'Asia/Ho_Chi_Minh' }),
             uptime: process.uptime(),
             memoryUsage: process.memoryUsage()

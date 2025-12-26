@@ -25,23 +25,15 @@ interface DetailSectionProps {
 
 function StatisticsBlock({ stats }: { stats: StatItem[] }) {
     return (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-0">
             {/* Statistics Block */}
             {stats.map((stat, index) => (
-                <div key={index} className="rounded-lg border bg-card shadow-sm p-6">
-                    <div className="flex flex-col space-y-2">
-                        <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
-                        <div className="flex items-baseline space-x-2">
-                            <span className="text-l font-bold text-green-600">{stat.done}</span>
-                            <span className="text-sm text-muted-foreground">/ {stat.total}</span>
-                        </div>
-                        <div className="mt-2 w-full bg-secondary rounded-full h-2">
-                            <div
-                                className="bg-primary h-2 rounded-full transition-all"
-                                style={{
-                                    width: stat.total > 0 ? `${(stat.done / stat.total) * 100}%` : '0%'
-                                }}
-                            />
+                <div key={index} className="rounded-none border-0 bg-card shadow-none p-3">
+                    <div className="flex flex-col space-y-1">
+                        <p className="text-xs font-medium text-muted-foreground">{stat.label}</p>
+                        <div className="flex items-baseline space-x-1">
+                            <span className="text-sm font-bold text-green-600">{stat.done}</span>
+                            <span className="text-xs text-muted-foreground">/ {stat.total}</span>
                         </div>
                     </div>
                 </div>
@@ -99,7 +91,7 @@ export function DetailSection({
 
            
 
-            <div className="grid grid-cols-9 gap-8 mt-8">
+            <div className="grid grid-cols-9 gap-4 mt-8">
                 {/* Left Column - Project Details (4 columns) */}
                 <div className="col-span-4">
                     <div className="rounded-lg border bg-card shadow-sm">
@@ -199,7 +191,59 @@ export function DetailSection({
                     </div>
                 </div>
 
-                {/* Middle Column - Client Information (2 columns) */}
+                {/* Middle Column - Financial Summary (3 columns) */}
+                <div className="col-span-3">
+                    <div className="rounded-lg border bg-card shadow-sm">
+                        <div 
+                            className="flex justify-between items-center p-4 cursor-pointer"
+                            onClick={() => setIsFinancialSummaryCollapsed(!isFinancialSummaryCollapsed)}
+                        >
+                            <h2 className="text-base font-semibold">Financial Summary</h2>
+                            {isFinancialSummaryCollapsed ? 
+                                <ChevronDown className="h-4 w-4" /> : 
+                                <ChevronUp className="h-4 w-4" />
+                            }
+                        </div>
+                        {!isFinancialSummaryCollapsed && (
+                            <div className="rounded-lg border bg-card shadow-sm">
+                     
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr className="border-b">
+                                        <th className="text-left p-3 font-semibold"> - </th>
+                                        <th className="text-right p-3 font-semibold">Budget</th>
+                                        <th className="text-right p-3 font-semibold">Actual</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr className="border-b">
+                                        <td className="p-3 text-xs text-green-700">income</td>
+                                        <td className="text-right p-3 font-medium text-xs">{formatCurrency(project.info?.income?.budget || 0)}</td>
+                                        <td className="text-right p-3 font-medium text-xs">{formatCurrency(project.info?.income?.actual || 0)}</td>
+                                    </tr>
+                                    <tr className="border-b">
+                                        <td className="p-3 text-xs text-red-600">expense</td>
+                                        <td className="text-right p-3 font-medium text-xs">{formatCurrency(project.info?.expense?.budget || 0)}</td>
+                                        <td className="text-right p-3 font-medium text-xs">{formatCurrency(project.info?.expense?.actual || 0)}</td>
+                                    </tr>
+                                    <tr className="border-b">
+                                        <td className="p-3 text-xs">profit</td>
+                                        <td className="text-right p-3 font-medium text-xs">{formatCurrency(project.info?.profit?.budget || 0)}</td>
+                                        <td className="text-right p-3 font-medium text-xs">{formatCurrency(project.info?.profit?.actual || 0)}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="p-3 text-xs">% profit</td>
+                                        <td className="text-right p-3 font-medium text-xs text-green-700">{project.info?.profit?.budget && project.info?.income?.budget ? ((project.info.profit.budget / project.info.income.budget) * 100).toFixed(2) : '0.00'}%</td>
+                                        <td className="text-right p-3 font-medium text-xs text-cyan-600">{project.info?.profit?.actual && project.info?.income?.actual ? ((project.info.profit.actual / project.info.income.actual) * 100).toFixed(2) : '0.00'}%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Right Column - Client Information (2 columns) */}
                 <div className="col-span-2 space-y-4">
                     <div className="rounded-lg border bg-card shadow-sm">
                         <div 
@@ -261,58 +305,13 @@ export function DetailSection({
                     </div>
                     
                     {/* Statistics Block */}
-                    <StatisticsBlock stats={stats} />
-                </div>
-
-                {/* Right Column - Financial Summary (3 columns) */}
-                <div className="col-span-3">
                     <div className="rounded-lg border bg-card shadow-sm">
-                        <div 
-                            className="flex justify-between items-center p-4 cursor-pointer"
-                            onClick={() => setIsFinancialSummaryCollapsed(!isFinancialSummaryCollapsed)}
-                        >
-                            <h2 className="text-base font-semibold">Financial Summary</h2>
-                            {isFinancialSummaryCollapsed ? 
-                                <ChevronDown className="h-4 w-4" /> : 
-                                <ChevronUp className="h-4 w-4" />
-                            }
+                        <div className="p-4 border-b">
+                            <h3 className="text-base font-semibold">Stat</h3>
                         </div>
-                        {!isFinancialSummaryCollapsed && (
-                            <div className="rounded-lg border bg-card shadow-sm">
-                     
-                            <table className="w-full text-sm">
-                                <thead>
-                                    <tr className="border-b">
-                                        <th className="text-left p-3 font-semibold"> - </th>
-                                        <th className="text-right p-3 font-semibold">Budget</th>
-                                        <th className="text-right p-3 font-semibold">Actual</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr className="border-b">
-                                        <td className="p-3 text-xs text-green-700">income</td>
-                                        <td className="text-right p-3 font-medium text-xs">{formatCurrency(project.info?.income?.budget || 0)}</td>
-                                        <td className="text-right p-3 font-medium text-xs">{formatCurrency(project.info?.income?.actual || 0)}</td>
-                                    </tr>
-                                    <tr className="border-b">
-                                        <td className="p-3 text-xs text-red-600">expense</td>
-                                        <td className="text-right p-3 font-medium text-xs">{formatCurrency(project.info?.expense?.budget || 0)}</td>
-                                        <td className="text-right p-3 font-medium text-xs">{formatCurrency(project.info?.expense?.actual || 0)}</td>
-                                    </tr>
-                                    <tr className="border-b">
-                                        <td className="p-3 text-xs">profit</td>
-                                        <td className="text-right p-3 font-medium text-xs">{formatCurrency(project.info?.profit?.budget || 0)}</td>
-                                        <td className="text-right p-3 font-medium text-xs">{formatCurrency(project.info?.profit?.actual || 0)}</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="p-3 text-xs">% profit</td>
-                                        <td className="text-right p-3 font-medium text-xs text-green-700">{project.info?.profit?.budget && project.info?.income?.budget ? ((project.info.profit.budget / project.info.income.budget) * 100).toFixed(2) : '0.00'}%</td>
-                                        <td className="text-right p-3 font-medium text-xs text-cyan-600">{project.info?.profit?.actual && project.info?.income?.actual ? ((project.info.profit.actual / project.info.income.actual) * 100).toFixed(2) : '0.00'}%</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            </div>
-                        )}
+                        <div className="p-3">
+                            <StatisticsBlock stats={stats} />
+                        </div>
                     </div>
                 </div>
 

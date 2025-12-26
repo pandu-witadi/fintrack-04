@@ -82,6 +82,7 @@ export default function TrxActualTable({ trxs, onDelete, onAddTrx, onRegisterTrx
                     <Table>
                         <TableHeader>
                             <TableRow>
+                                <TableHead className="w-12 text-center">#</TableHead>
                                 <TableHead><Power className="h-4 w-4 text-cyan-500" /></TableHead>
                                 <TableHead className="text-right">name</TableHead>
                                 <TableHead className="text-right">amount</TableHead>
@@ -93,10 +94,11 @@ export default function TrxActualTable({ trxs, onDelete, onAddTrx, onRegisterTrx
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {sortedTrxs.map((trx) => (
+                            {sortedTrxs.map((trx, index) => (
                                 <TableRow 
                                     key={trx._id}
                                 >
+                                    <TableCell className="w-12 text-center text-sm font-medium text-muted-foreground">{index + 1}</TableCell>
                                     <TableCell>
                                         {IconActive(trx.active)}
                                     </TableCell>
