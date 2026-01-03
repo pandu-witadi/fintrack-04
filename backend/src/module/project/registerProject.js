@@ -4,7 +4,7 @@ const AppError = require('../../util/appError')
 
 const registerProject = async (request, reply) => {
     try {
-        const { code, name, updatedBy, client, ...otherKeys } = request.body
+        const { code, name, updatedBy, client, tags, ...otherKeys } = request.body
 
         // check if name is provided
         if (!name) {
@@ -34,6 +34,11 @@ const registerProject = async (request, reply) => {
         // Add client only if it has meaningful data
         if (client && Object.values(client).some(value => value && String(value).trim() !== '')) {
             projectData.client = client
+        }
+
+        // Add tags only if provided and valid
+        if (tags && Array.isArray(tags) && tags.length > 0) {
+            projectData.tags = tags.filter(tag => tag && String(tag).trim() !== '')
         }
 
         const project = await Project.create(projectData)

@@ -26,6 +26,16 @@ const updateTrx = async (request, reply) => {
             delete updateData.assignee
         }
 
+        // if updateData contains isEq
+        if (updateData.isEq !== undefined) {
+            // isEq is true, set actAmount = amount
+            if (updateData.isEq === true) {
+                updateData.actAmount = updateData.amount
+            }
+            // else proceed with different actAmount
+        }
+        console.log(updateData)
+
         const trx = await Trx.findByIdAndUpdate(
             id,
             { ...updateData, updatedBy: request.user._id },

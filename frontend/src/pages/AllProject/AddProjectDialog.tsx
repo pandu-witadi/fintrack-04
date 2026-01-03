@@ -5,6 +5,7 @@ import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Textarea } from '../../components/ui/textarea';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import {
     Select,
     SelectContent,
@@ -25,6 +26,7 @@ export default function AddProjectDialog({ project, onSubmit, onCancel, isSubmit
         code: project?.code || '',
         name: project?.name || '',
         note: project?.note || '',
+        tags: project?.tags ? project.tags.join(', ') : '',
         active: project?.active ?? true,
         done: project?.done ?? false,
         typ: project?.typ || 'project',
@@ -61,12 +63,31 @@ export default function AddProjectDialog({ project, onSubmit, onCancel, isSubmit
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Validation
+        if (formData.name.length > 50) {
+            toast.error('Name must be less than 50 characters');
+            return;
+        }
+
+        if (formData.code.length > 50) {
+            toast.error('Code must be less than 50 characters');
+            return;
+        }
+
         // Only include client data if at least one field is filled
         const hasClientData = Object.values(formData.client).some(value => value && (typeof value === 'string' && value.trim() !== ''));
         const clientData = hasClientData ? formData.client : undefined;
         
+        // Parse tags from comma-separated string
+        const tags = formData.tags
+            .split(',')
+            .map((tag: string) => tag.trim())
+            .filter((tag: string) => tag !== '');
+        
         const data = {
             ...formData,
+            tags: tags.length > 0 ? tags : undefined,
             client: clientData,
             year: formData.year ? parseInt(formData.year) : undefined,
             stDate: formData.stDate || undefined,
@@ -87,6 +108,7 @@ export default function AddProjectDialog({ project, onSubmit, onCancel, isSubmit
                         onChange={handleChange}
                         required
                         placeholder="Enter project name"
+                        maxLength={50}
                     />
                 </div>
                 
@@ -98,6 +120,7 @@ export default function AddProjectDialog({ project, onSubmit, onCancel, isSubmit
                         value={formData.code}
                         onChange={handleChange}
                         placeholder="Enter project code (optional)"
+                        maxLength={50}
                     />
                 </div>
                   
@@ -150,6 +173,17 @@ export default function AddProjectDialog({ project, onSubmit, onCancel, isSubmit
                         value={formData.note}
                         onChange={handleChange as any}
                         placeholder="Enter project notes"
+                    />
+                </div>
+                
+                <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="tags">tags</Label>
+                    <Input
+                        id="tags"
+                        name="tags"
+                        value={formData.tags}
+                        onChange={handleChange}
+                        placeholder="Enter tags separated by comma (e.g. backend, api, urgent)"
                     />
                 </div>
                 

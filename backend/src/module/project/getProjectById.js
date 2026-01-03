@@ -10,6 +10,7 @@ const getProjectById = async (request, reply) => {
         }
 
         const project = await Project.findById(request.params.id)
+        // Tags are included by default in the lean() response
         .populate({
             path: 'updatedBy',
             select: '_id name email'
@@ -56,6 +57,7 @@ const getProjectById = async (request, reply) => {
             throw new AppError('Project not found', 404)
         }
 
+        // Ensure tags are included in the response
         return {
             success: true,
             pyd: project

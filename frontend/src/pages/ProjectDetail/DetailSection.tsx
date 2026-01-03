@@ -152,6 +152,20 @@ export function DetailSection({
                                         </div>
                                     )}
                                     
+                                    {/* Tags Section */}
+                                    {project.tags && project.tags.length > 0 && (
+                                        <div className="pt-3 border-t">
+                                            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Tags</span>
+                                            <div className="flex flex-wrap gap-2 mt-2">
+                                                {project.tags.map((tag: string, index: number) => (
+                                                    <span key={index} className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-none">
+                                                        {tag}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                    
                                     {/* Metadata Section */}
                                     <div className="pt-3 border-t mt-4">
                                         <div className="grid grid-cols-2 gap-4">

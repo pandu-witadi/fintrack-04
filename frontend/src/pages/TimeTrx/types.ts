@@ -22,9 +22,13 @@ export type Assignee = {
 
 export type MonthData = {
     amount: number;
+    actAmount?: number;
+    isEq?: boolean;
     done: boolean;
     typ: string;
     assignee?: Assignee;
+    img?: string;
+    trxId?: string;
 };
 
 export type TrxsByMonth = Record<string, MonthData[]>;

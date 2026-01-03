@@ -7,6 +7,7 @@ export interface UseTrxReturn {
     error: string | null;
     getAllTrx: () => Promise<Trx[]>;
     getAllTrxByProjectId: (projectId: string) => Promise<Trx[]>;
+    getAllTrxByAssignee: (assigneeId: string) => Promise<Trx[]>;
     getTrxById: (trxId: string) => Promise<Trx>;
     createTrx: (trxData: CreateTrxData) => Promise<Trx>;
     updateTrx: (trxId: string, trxData: Partial<any>) => Promise<Trx>;
@@ -41,6 +42,23 @@ export const useTrx = (): UseTrxReturn => {
             setLoading(true);
             setError(null);
             const data = await trxService.getAllTrxByProjectId(projectId);
+            setTrxsState(data);
+            return data;
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Failed to fetch transactions';
+            setError(errorMessage);
+            console.error(err);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const getAllTrxByAssignee = useCallback(async (assigneeId: string): Promise<Trx[]> => {
+        try {
+            setLoading(true);
+            setError(null);
+            const data = await trxService.getAllTrxByAssignee(assigneeId);
             setTrxsState(data);
             return data;
         } catch (err) {
@@ -117,6 +135,7 @@ export const useTrx = (): UseTrxReturn => {
         error,
         getAllTrx,
         getAllTrxByProjectId,
+        getAllTrxByAssignee,
         getTrxById,
         createTrx,
         updateTrx,

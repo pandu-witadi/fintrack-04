@@ -69,6 +69,11 @@ const resp_200 = {
                         address: { type: 'string' }
                     }
                 },
+                tags: {
+                    type: 'array',
+                    items: { type: 'string' },
+                    description: 'Tags associated with the project'
+                },
                 lBudget: { 
                     type: 'array',
                     items: { 
@@ -267,6 +272,11 @@ async function projectApi(fastify, options) {
                                 description: 'Client address'
                             }
                         }
+                    },
+                    tags: {
+                        type: 'array',
+                        items: { type: 'string' },
+                        description: 'Tags associated with the project (optional)'
                     }
                 }
             },
@@ -356,6 +366,11 @@ async function projectApi(fastify, options) {
                             email: { type: ['string', 'null'] },
                             address: { type: 'string', maxLength: 100 }
                         }
+                    },
+                    tags: {
+                        type: 'array',
+                        items: { type: 'string' },
+                        description: 'Tags associated with the project (optional)'
                     }
                 }
             },

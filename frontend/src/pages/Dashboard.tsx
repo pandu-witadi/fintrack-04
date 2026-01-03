@@ -1,5 +1,3 @@
-//
-//
 import { useAuth } from '../context/AuthContext'
 import { useDashboard } from '../hooks/useDashboard'
 
@@ -7,12 +5,16 @@ export default function Dashboard() {
     const { user } = useAuth();
     const { summary, loading, error } = useDashboard();
 
+    const headerContent = (
+        <div>
+            <p className="text-muted-foreground">Welcome back, {user?.name}!</p>
+        </div>
+    );
+
     if (loading) {
         return (
             <div className="space-y-6">
-                <div>
-                    <p className="text-muted-foreground">Welcome back, {user?.name}!</p>
-                </div>
+                {headerContent}
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     <div className="rounded-lg border bg-card p-6 shadow-sm">
                         <h3 className="text-lg font-semibold">Loading...</h3>
@@ -25,9 +27,7 @@ export default function Dashboard() {
     if (error) {
         return (
             <div className="space-y-6">
-                <div>
-                    <p className="text-muted-foreground">Welcome back, {user?.name}!</p>
-                </div>
+                {headerContent}
                 <div className="rounded-lg border bg-card p-6 shadow-sm">
                     <h3 className="text-lg font-semibold text-red-600">Error</h3>
                     <p>{error}</p>
@@ -38,9 +38,7 @@ export default function Dashboard() {
 
     return (
         <div className="space-y-6">
-            <div>
-                <p className="text-muted-foreground">Welcome back, {user?.name}!</p>
-            </div>
+            {headerContent}
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 <div className="rounded-lg border bg-card p-6 shadow-sm">

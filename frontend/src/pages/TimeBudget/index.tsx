@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardContent } from '../../components/ui/card';
 import { Budget } from '../../services/budgetService';
 import { useBudget } from '../../hooks/useBudget';
@@ -88,13 +88,21 @@ export default function TimeBudget() {
         setEnYm(addMonths(currentYm, newRange));
     };
 
-    // Create a wrapper for getBudgetsByMonth that uses monthRange from state
-    const getBudgetsByMonthWrapper = (budgetList: Budget[]) => {
-        return getBudgetsByMonth(budgetList, monthRange);
-    };
+    // Create memoized wrapper for getBudgetsByMonth that uses monthRange from state
+    const getBudgetsByMonthWrapper = useCallback(
+        (budgetList: Budget[]) => getBudgetsByMonth(budgetList, monthRange),
+        [monthRange]
+    );
 
-    const monthTotals = calculateMonthTotals(groupedBudgets, selectedRows, monthRange);
-    const variableMonthTotals = calculateVariableMonthTotals(groupedBudgets, monthRange);
+    const monthTotals = useMemo(
+        () => calculateMonthTotals(groupedBudgets, selectedRows, monthRange),
+        [groupedBudgets, selectedRows, monthRange]
+    );
+
+    const variableMonthTotals = useMemo(
+        () => calculateVariableMonthTotals(groupedBudgets, monthRange),
+        [groupedBudgets, monthRange]
+    );
 
     return (
         <div className="flex flex-col gap-2 p-6 h-screen">

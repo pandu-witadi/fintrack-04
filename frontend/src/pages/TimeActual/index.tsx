@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardContent } from '../../components/ui/card';
 import { Actual } from '../../services/actualService';
 import { useActual } from '../../hooks/useActual';
@@ -88,13 +88,21 @@ export default function TimeActual() {
         setEnYm(addMonths(currentYm, newRange));
     };
 
-    // Create a wrapper for getActualsByMonth that uses monthRange from state
-    const getActualsByMonthWrapper = (actualList: Actual[]) => {
-        return getActualsByMonth(actualList, monthRange);
-    };
+    // Create memoized wrapper for getActualsByMonth that uses monthRange from state
+    const getActualsByMonthWrapper = useCallback(
+        (actualList: Actual[]) => getActualsByMonth(actualList, monthRange),
+        [monthRange]
+    );
 
-    const monthTotals = calculateMonthTotals(groupedActuals, selectedRows, monthRange);
-    const variableMonthTotals = calculateVariableMonthTotals(groupedActuals, monthRange);
+    const monthTotals = useMemo(
+        () => calculateMonthTotals(groupedActuals, selectedRows, monthRange),
+        [groupedActuals, selectedRows, monthRange]
+    );
+
+    const variableMonthTotals = useMemo(
+        () => calculateVariableMonthTotals(groupedActuals, monthRange),
+        [groupedActuals, monthRange]
+    );
 
     return (
         <div className="flex flex-col gap-2 p-6 h-screen">

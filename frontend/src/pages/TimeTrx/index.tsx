@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardContent } from '../../components/ui/card';
 import { Trx } from '../../services/trxService';
 import { useTrx } from '../../hooks/useTrx';
@@ -88,13 +88,21 @@ export default function TimeTrx() {
         setEnYm(addMonths(currentYm, newRange));
     };
 
-    // Create a wrapper for getTrxsByMonth that uses monthRange from state
-    const getTrxsByMonthWrapper = (trxList: Trx[]) => {
-        return getTrxsByMonth(trxList, monthRange);
-    };
+    // Create memoized wrapper for getTrxsByMonth that uses monthRange from state
+    const getTrxsByMonthWrapper = useCallback(
+        (trxList: Trx[]) => getTrxsByMonth(trxList, monthRange),
+        [monthRange]
+    );
 
-    const monthTotals = calculateMonthTotals(groupedTrxs, selectedRows, monthRange);
-    const variableMonthTotals = calculateVariableMonthTotals(groupedTrxs, monthRange);
+    const monthTotals = useMemo(
+        () => calculateMonthTotals(groupedTrxs, selectedRows, monthRange),
+        [groupedTrxs, selectedRows, monthRange]
+    );
+
+    const variableMonthTotals = useMemo(
+        () => calculateVariableMonthTotals(groupedTrxs, monthRange),
+        [groupedTrxs, monthRange]
+    );
 
     return (
         <div className="flex flex-col gap-2 p-6 h-screen">

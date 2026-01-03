@@ -25,7 +25,9 @@ import {
     Plus, 
     Trash2,
     Eye,
-    ArrowRightToLine
+    ArrowRightToLine,
+    ArrowUp,
+    ArrowDown
 } from 'lucide-react';
 import { Actual } from '@/services/actualService';
 import formatCurrency from '@/utils/formatCurrency';
@@ -53,8 +55,28 @@ export default function ActualTrxTable({ actuals, onDelete, onAddActual, onBatch
     const [actualToDelete, setActualToDelete] = useState<Actual | null>(null);
     const [isCloning, setIsCloning] = useState(false);
     const [cloneDialogOpen, setCloneDialogOpen] = useState(false);
+    const [sortConfig, setSortConfig] = useState<{ key: 'dateEx' | 'assignee'; direction: 'asc' | 'desc' } | null>(null);
+
+    const applySorting = (items: Actual[], config: typeof sortConfig) => {
+        if (!config) return items;
+        
+        const sorted = [...items].sort((a, b) => {
+            if (config.key === 'dateEx') {
+                const dateA = new Date(a.dateEx).getTime();
+                const dateB = new Date(b.dateEx).getTime();
+                return config.direction === 'asc' ? dateA - dateB : dateB - dateA;
+            } else if (config.key === 'assignee') {
+                const nameA = a.assignee?.name || '';
+                const nameB = b.assignee?.name || '';
+                const comparison = nameA.localeCompare(nameB);
+                return config.direction === 'asc' ? comparison : -comparison;
+            }
+            return 0;
+        });
+        return sorted;
+    };
     
-    const sortedActuals = sortRow(actuals);
+    const sortedActuals = applySorting(sortRow(actuals), sortConfig);
 
     const handleSelectAll = () => {
         if (selectedIds.size === actuals.length) {
@@ -74,9 +96,35 @@ export default function ActualTrxTable({ actuals, onDelete, onAddActual, onBatch
         setSelectedIds(newSelected);
     };
 
+    const handleSort = (key: 'dateEx' | 'assignee') => {
+        let direction: 'asc' | 'desc' = 'asc';
+        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
+
+    const renderSortIndicator = (columnKey: 'dateEx' | 'assignee') => {
+        if (!sortConfig || sortConfig.key !== columnKey) return null;
+        return sortConfig.direction === 'asc' 
+            ? <ArrowUp className="h-4 w-4 ml-1 inline" />
+            : <ArrowDown className="h-4 w-4 ml-1 inline" />;
+    };
+
     const handleCloneToTrx = () => {
         if (selectedIds.size === 0) return;
         setCloneDialogOpen(true);
+    };
+
+    const calculateSelectedSum = () => {
+        const selectedActualsList = actuals.filter(a => selectedIds.has(a._id));
+        const incomeSum = selectedActualsList
+            .filter(a => a.typ === 'income')
+            .reduce((sum, a) => sum + a.amount, 0);
+        const expenseSum = selectedActualsList
+            .filter(a => a.typ === 'expense')
+            .reduce((sum, a) => sum + a.amount, 0);
+        return incomeSum - expenseSum;
     };
 
     const confirmCloneToTrx = async () => {
@@ -115,7 +163,12 @@ export default function ActualTrxTable({ actuals, onDelete, onAddActual, onBatch
                             <span className="text-foreground font-semibold">Actual</span>
                             <ArrowRightToLine className="h-4 w-4" />
                             <span className="text-foreground font-semibold">Trx</span>
-                            <span className="text-xs bg-muted px-2 py-1 rounded-full ml-auto">{sortedActuals.length}</span>
+                            <span className="text-xs bg-muted px-2 py-1 rounded-full">{sortedActuals.length}</span>
+                            {selectedIds.size > 0 && (
+                                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-semibold">
+                                    Sum: {formatCurrency(calculateSelectedSum())}
+                                </span>
+                            )}
                         </h2>
                         <div className="flex gap-2">
                             {selectedIds.size > 0 && (
@@ -179,8 +232,24 @@ export default function ActualTrxTable({ actuals, onDelete, onAddActual, onBatch
                                         <TableHead className="text-right">name</TableHead>
                                         <TableHead className="text-right">actual</TableHead>
                                         <TableHead className="text-right">updtBy</TableHead>
-                                        <TableHead className="text-center w-36">dateEx</TableHead>
-                                        <TableHead  className="text-left">assignee</TableHead>
+                                        <TableHead className="text-center w-36">
+                                            <button 
+                                                onClick={() => handleSort('dateEx')}
+                                                className="flex items-center justify-center gap-1 hover:text-blue-600 cursor-pointer w-full"
+                                            >
+                                                dateEx
+                                                {renderSortIndicator('dateEx')}
+                                            </button>
+                                        </TableHead>
+                                        <TableHead className="text-left">
+                                            <button 
+                                                onClick={() => handleSort('assignee')}
+                                                className="flex items-center gap-1 hover:text-blue-600 cursor-pointer"
+                                            >
+                                                assignee
+                                                {renderSortIndicator('assignee')}
+                                            </button>
+                                        </TableHead>
                                         
                                         <TableHead className="text-center">linkTrx</TableHead>
                                         <TableHead className="text-right">Actions</TableHead>

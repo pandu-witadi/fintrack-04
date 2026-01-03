@@ -24,6 +24,8 @@ export interface Trx {
     typ: 'income' | 'expense';
     done: boolean;
     amount: number;
+    actAmount?: number;
+    isEq?: boolean;
     detailedAmount: DetailedAmount;
     project: {
         _id: string;
@@ -56,6 +58,8 @@ export interface UpdateTrxData {
     typ?: 'income' | 'expense';
     done?: boolean;
     amount?: number;
+    actAmount?: number;
+    isEq?: boolean;
     detailedAmount?: DetailedAmount;
     assignee?: string;
     dateEx?: string;
@@ -70,6 +74,8 @@ export interface CreateTrxData {
     typ?: 'income' | 'expense';
     done?: boolean;
     amount: number;
+    actAmount?: number;
+    isEq?: boolean;
     detailedAmount?: DetailedAmount;
     assignee?: string;
     dateEx: string;
@@ -143,6 +149,28 @@ export const trxService = {
         try {
             const response = await axios.get(
                 `${API_BASE_URL}/trx/project/${projectId}`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            if (response.data.success) {
+                return response.data.pyd;
+            } else {
+                throw new Error('Failed to fetch transactions');
+            }
+        } catch (error) {
+            console.error('Error fetching transactions:', error);
+            throw error;
+        }
+    },
+
+    async getAllTrxByAssignee(assigneeId: string): Promise<Trx[]> {
+        const token = userService.getToken();
+        if (!token) {
+            throw new Error('No authentication token found');
+        }
+
+        try {
+            const response = await axios.get(
+                `${API_BASE_URL}/trx/assignee/${assigneeId}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             if (response.data.success) {

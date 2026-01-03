@@ -22,6 +22,7 @@ import { Label } from '@/components/ui/label';
 import { NumberInput } from '@/components/number-input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -56,6 +57,8 @@ export default function TrxDetail() {
         name: string;
         typ: 'income' | 'expense';
         amount: number;
+        actAmount: number;
+        isEq: boolean;
         note: string;
         dateEx: string;
         detailedAmount: {
@@ -80,6 +83,8 @@ export default function TrxDetail() {
         name: '',
         typ: 'expense',
         amount: 0,
+        actAmount: 0,
+        isEq: true,
         note: '',
         dateEx: '',
         detailedAmount: {
@@ -140,6 +145,8 @@ export default function TrxDetail() {
                 name: trxData.name,
                 typ: trxData.typ,
                 amount: trxData.amount,
+                actAmount: trxData.actAmount || 0,
+                isEq: trxData.isEq !== undefined ? trxData.isEq : true,
                 note: trxData.note || '',
                 dateEx: trxData.dateEx ? new Date(trxData.dateEx).toISOString().split('T')[0] : '',
                 detailedAmount: trxData.detailedAmount || {
@@ -197,6 +204,8 @@ export default function TrxDetail() {
                 name: editTrx.name,
                 typ: editTrx.typ,
                 amount: editTrx.amount,
+                actAmount: !editTrx.isEq ? editTrx.actAmount : undefined,
+                isEq: editTrx.isEq,
                 note: editTrx.note,
                 dateEx: editTrx.dateEx,
                 assignee: editTrx.assignee || undefined,
@@ -246,6 +255,8 @@ export default function TrxDetail() {
                 done: trx.done !== undefined ? trx.done : false,
                 typ: trx.typ,
                 amount: trx.amount,
+                actAmount: trx.actAmount || 0,
+                isEq: trx.isEq !== undefined ? trx.isEq : true,
                 note: trx.note || '',
                 dateEx: trx.dateEx ? new Date(trx.dateEx).toISOString().split('T')[0] : '',
                 detailedAmount: trx.detailedAmount || {
@@ -490,6 +501,27 @@ export default function TrxDetail() {
                                                             thousandSeparator=","
                                                         />
                                                     </div>
+                                                    <div className="flex items-center space-x-2">
+                                                        <Checkbox
+                                                            id="isEq"
+                                                            checked={editTrx.isEq}
+                                                            onCheckedChange={(checked) => handleEditFormChange('isEq', checked)}
+                                                        />
+                                                        <Label htmlFor="isEq" className="font-normal cursor-pointer">Is Equal (actAmount = amount)</Label>
+                                                    </div>
+                                                    {!editTrx.isEq && (
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor="actAmount">Actual Amount</Label>
+                                                            <NumberInput
+                                                                id="actAmount"
+                                                                value={editTrx.actAmount}
+                                                                onValueChange={(value) => handleEditFormChange('actAmount', value || 0)}
+                                                                decimalScale={0}
+                                                                fixedDecimalScale={true}
+                                                                thousandSeparator=","
+                                                            />
+                                                        </div>
+                                                    )}
                                                     <button
                                                         type="button"
                                                         onClick={() => setExpandedAmountDetails(!expandedAmountDetails)}
@@ -681,6 +713,18 @@ export default function TrxDetail() {
                                                             <div className="text-sm text-muted-foreground">Amount</div>
                                                             <div className="font-medium">{formatCurrency(trx?.amount || 0)}</div>
                                                         </div>
+                                                        {trx?.isEq === false && trx?.actAmount !== undefined && (
+                                                            <div className="flex justify-between">
+                                                                <div className="text-sm text-muted-foreground">Actual Amount</div>
+                                                                <div className="font-medium">{formatCurrency(trx?.actAmount || 0)}</div>
+                                                            </div>
+                                                        )}
+                                                        {trx?.isEq !== undefined && (
+                                                            <div className="flex justify-between">
+                                                                <div className="text-sm text-muted-foreground">Is Equal</div>
+                                                                <div className="font-medium">{trx?.isEq ? 'Yes' : 'No'}</div>
+                                                            </div>
+                                                        )}
                                                         <button
                                                             type="button"
                                                             onClick={() => setExpandedAmountDetailsView(!expandedAmountDetailsView)}

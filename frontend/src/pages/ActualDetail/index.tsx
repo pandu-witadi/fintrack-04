@@ -190,7 +190,7 @@ export default function ActualDetail() {
                     value: 0,
                     exRate: 1
                 },
-                assignee: actual.assignee ? actual.assignee._id : null, // Reset assignee
+                assignee: actual.assignee ? actual.assignee._id : null,
             });
         }
         setIsEditing(false);

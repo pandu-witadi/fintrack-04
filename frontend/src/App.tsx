@@ -26,6 +26,7 @@ const TimeBudget = lazy(() => import('./pages/TimeBudget'))
 const TimeActual = lazy(() => import('./pages/TimeActual'))
 const TimeTrx = lazy(() => import('./pages/TimeTrx'))
 const CurrentUserTimeActual = lazy(() => import('./pages/CurrentUserTimeActual'))
+const CurrentUserTimeTrx = lazy(() => import('./pages/CurrentUserTimeTrx'))
 
 function AppRoutes() {
     return (
@@ -43,6 +44,7 @@ function AppRoutes() {
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/cu/time-actual" element={<CurrentUserTimeActual />} />
+                    <Route path="/cu/time-trx" element={<CurrentUserTimeTrx />} />
                         
                     {/* manage sub-routes */}
                     <Route path="/manage/allUser" element={

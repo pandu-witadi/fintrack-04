@@ -16,6 +16,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { CreateTrxData } from '@/services/trxService';
 import { NumberInput } from '../../components/number-input';
 
@@ -34,6 +35,8 @@ export function AddTrxDialog({ open, onOpenChange, onSubmit, isSubmitting, proje
         note: '',
         typ: 'expense' as 'income' | 'expense',
         amount: 0,
+        actAmount: 0,
+        isEq: true,
         dateEx: new Date().toISOString().split('T')[0],
         active: true,
         done: false,
@@ -64,6 +67,8 @@ export function AddTrxDialog({ open, onOpenChange, onSubmit, isSubmitting, proje
                 note: formData.note.trim(),
                 typ: formData.typ,
                 amount: Number(formData.amount),
+                actAmount: !formData.isEq ? Number(formData.actAmount) : undefined,
+                isEq: formData.isEq,
                 dateEx: new Date(formData.dateEx).toISOString(),
                 active: formData.active,
                 done: formData.done,
@@ -75,6 +80,8 @@ export function AddTrxDialog({ open, onOpenChange, onSubmit, isSubmitting, proje
                 note: '',
                 typ: 'expense',
                 amount: 0,
+                actAmount: 0,
+                isEq: true,
                 dateEx: new Date().toISOString().split('T')[0],
                 active: true,
                 done: false,
@@ -107,10 +114,24 @@ export function AddTrxDialog({ open, onOpenChange, onSubmit, isSubmitting, proje
         }));
     };
 
+    const handleActAmountChange = (value: number | null | undefined) => {
+        setFormData(prev => ({
+            ...prev,
+            actAmount: value || 0
+        }));
+    };
+
     const handleTypeChange = (value: string) => {
         setFormData(prev => ({
             ...prev,
             typ: value as 'income' | 'expense'
+        }));
+    };
+
+    const handleIsEqChange = (checked: boolean) => {
+        setFormData(prev => ({
+            ...prev,
+            isEq: checked
         }));
     };
 
@@ -174,6 +195,32 @@ export function AddTrxDialog({ open, onOpenChange, onSubmit, isSubmitting, proje
                             thousandSeparator=","
                         />
                     </div>
+
+                    <div className="space-y-2">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <Checkbox
+                                checked={formData.isEq}
+                                onCheckedChange={handleIsEqChange}
+                                disabled={isSubmitting}
+                            />
+                            <span className="text-sm">Is Equal (actAmount = amount)</span>
+                        </label>
+                    </div>
+
+                    {!formData.isEq && (
+                        <div className="space-y-2">
+                            <Label htmlFor="actAmount">Actual Amount</Label>
+                            <NumberInput
+                                id="actAmount"
+                                value={formData.actAmount}
+                                onValueChange={handleActAmountChange}
+                                disabled={isSubmitting}
+                                decimalScale={0}
+                                fixedDecimalScale={true}
+                                thousandSeparator=","
+                            />
+                        </div>
+                    )}
 
                     <div className="space-y-2">
                         <Label htmlFor="note">Notes</Label>

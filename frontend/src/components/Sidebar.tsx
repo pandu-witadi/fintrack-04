@@ -2,16 +2,18 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
     Home, 
-    FileText, 
     ChevronLeft,
     ChevronRight,
     Menu,
     Users,
     User,
-    WalletMinimal,
     ChevronDown,
     ChevronUp,
-    Briefcase
+    Timer,
+    FolderKanban,
+    PiggyBank,
+    History,
+    ArrowLeftRight
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { useAuth } from '../context/AuthContext';
@@ -25,11 +27,12 @@ import {
 } from './ui/dialog';
 
 interface NavItem {
-    title: string;
+    title?: string;
     href?: string;
-    icon: React.ReactNode;
-    roles?: string[]; // Add roles property for role-based access control
-    submenu?: NavItem[]; // Add submenu property
+    icon?: React.ReactNode;
+    roles?: string[]; 
+    submenu?: NavItem[]; 
+    isSeparator?: boolean;
 }
 
 export default function Sidebar() {
@@ -58,40 +61,19 @@ export default function Sidebar() {
 
     const navItems: NavItem[] = [
         { title: 'Dashboard', href: '/dashboard', icon: <Home className="h-5 w-5" /> },
-        { 
-            title: 'Work', 
-            icon: <Briefcase className="h-5 w-5" />,
-            submenu: [
-                { title: 'Time Actual', href: '/cu/time-actual', icon: <FileText className="h-5 w-5" /> }
-            ]
-        },
-        { 
-            title: 'Finance', 
-            icon: <WalletMinimal className="h-5 w-5" />, 
-            roles: ['admin', 'finance'],
-            submenu: [
-   
-                { title: 'All Projects', href: '/finance/allProject', icon: <FileText className="h-5 w-5" /> },
-                { title: 'Time Budget', href: '/finance/time-budget', icon: <FileText className="h-5 w-5" /> },
-                { title: 'Time Actual', href: '/finance/time-actual', icon: <FileText className="h-5 w-5" /> },
-                { title: 'Time Trx', href: '/finance/time-trx', icon: <FileText className="h-5 w-5" /> },
-                
-            ]
-        },
-        { 
-            title: 'Manage', 
-            icon: <Users className="h-5 w-5" />,
-            roles: ['admin'],
-            submenu: [
-                { title: 'All User', href: '/manage/allUser', icon: <Users className="h-5 w-5" /> },
-            ]
-        },
-        { 
-            title: 'Profile', 
-            icon: <User className="h-5 w-5" />,
-            href: '/profile'
-        },
-
+        { isSeparator: true },
+        { title: 'Work', isSeparator: true },
+        { title: 'Time Actual', href: '/cu/time-actual', icon: <Timer className="h-5 w-5" /> },
+        { title: 'Time Trx', href: '/cu/time-trx', icon: <ArrowLeftRight className="h-5 w-5" /> },
+        { title: 'Finance', isSeparator: true, roles: ['admin', 'finance'] },
+        { title: 'All Projects', href: '/finance/allProject', icon: <FolderKanban className="h-5 w-5" />, roles: ['admin', 'finance'] },
+        { title: 'Time Budget', href: '/finance/time-budget', icon: <PiggyBank className="h-5 w-5" />, roles: ['admin', 'finance'] },
+        { title: 'Time Actual', href: '/finance/time-actual', icon: <History className="h-5 w-5" />, roles: ['admin', 'finance'] },
+        { title: 'Time Trx', href: '/finance/time-trx', icon: <ArrowLeftRight className="h-5 w-5" />, roles: ['admin', 'finance'] },
+        { title: 'Manage', isSeparator: true, roles: ['admin'] },
+        { title: 'All User', href: '/manage/allUser', icon: <Users className="h-5 w-5" />, roles: ['admin'] },
+        { title: 'Account', isSeparator: true },
+        { title: 'Profile', href: '/profile', icon: <User className="h-5 w-5" /> },
     ];
 
     const handleLogout = () => {
@@ -121,6 +103,17 @@ export default function Sidebar() {
     const renderNavItem = (item: NavItem, isSubItem: boolean = false) => {
         if (!hasRequiredRole(item.roles)) return null;
 
+        // If item is a separator, render as a divider
+        if (item.isSeparator) {
+            return (
+                <div className={`divider divider-start before:bg-blue-400/50 after:bg-blue-400/50 text-blue-600/70 py-4 my-1 ${isCollapsed ? 'px-2' : ''}`}>
+                    {!isCollapsed && item.title && (
+                        <span className="text-[10px] font-bold uppercase tracking-wider pl-2">{item.title}</span>
+                    )}
+                </div>
+            );
+        }
+
         // If item has a href, render as a link
         if (item.href) {
             return (
@@ -139,12 +132,12 @@ export default function Sidebar() {
         }
 
         // If item has submenu, render as a toggle
-        if (item.submenu) {
+        if (item.submenu && item.title) {
             const isOpen = openMenus[item.title];
             return (
                 <div>
                     <button
-                        onClick={() => toggleSubMenu(item.title)}
+                        onClick={() => toggleSubMenu(item.title!)}
                         className={`flex items-center justify-between w-full rounded-lg px-3 py-2 text-sm font-medium transition-colors text-muted-foreground hover:bg-accent hover:text-accent-foreground`}
                     >
                         <div className="flex items-center">

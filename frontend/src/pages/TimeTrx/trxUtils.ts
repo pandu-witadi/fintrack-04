@@ -51,13 +51,17 @@ export const getTrxsByMonth = (
                 }
                 result[itemYm].push({
                     amount: trx.amount || 0,
+                    actAmount: trx.actAmount,
+                    isEq: trx.isEq,
                     done: trx.done || false,
                     typ: trx.typ || 'expense',
                     assignee: trx.assignee ? {
                         _id: trx.assignee._id,
                         name: trx.assignee.name,
                         email: trx.assignee.email
-                    } : undefined
+                    } : undefined,
+                    img: trx.img,
+                    trxId: trx._id
                 });
             }
         }
@@ -80,10 +84,11 @@ export const calculateMonthTotals = (
             const monthData = getTrxsByMonth(group.items, monthRange);
             Object.entries(monthData).forEach(([month, dataList]) => {
                 dataList.forEach((data) => {
+                    const displayAmount = data.actAmount !== undefined ? data.actAmount : data.amount;
                     if (data.typ === 'income') {
-                        totals[month] += data.amount;
+                        totals[month] += displayAmount;
                     } else {
-                        totals[month] -= data.amount;
+                        totals[month] -= displayAmount;
                     }
                 });
             });
@@ -106,10 +111,11 @@ export const calculateVariableMonthTotals = (
         const monthData = getTrxsByMonth(group.items, monthRange);
         Object.entries(monthData).forEach(([month, dataList]) => {
             dataList.forEach((data) => {
+                const displayAmount = data.actAmount !== undefined ? data.actAmount : data.amount;
                 if (data.typ === 'income') {
-                    totals[month] += data.amount;
+                    totals[month] += displayAmount;
                 } else {
-                    totals[month] -= data.amount;
+                    totals[month] -= displayAmount;
                 }
             });
         });

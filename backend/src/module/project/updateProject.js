@@ -17,6 +17,22 @@ const updateProject = async (request, reply) => {
             }
         }
 
+        // Handle tags field - only include if valid
+        if (updateData.tags) {
+            if (Array.isArray(updateData.tags)) {
+                const validTags = updateData.tags.filter(tag => tag && String(tag).trim() !== '')
+                if (validTags.length > 0) {
+                    updateData.tags = validTags
+                } else {
+                    // If tags array is empty after filtering, unset it
+                    updateData.tags = undefined
+                }
+            } else {
+                // If tags is not an array, unset it
+                updateData.tags = undefined
+            }
+        }
+
         const project = await Project.findByIdAndUpdate(
             request.params.id,
             updateData,

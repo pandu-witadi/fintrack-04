@@ -25,7 +25,9 @@ import {
     Plus, 
     Trash2,
     Eye,
-    ArrowRightToLine
+    ArrowRightToLine,
+    ArrowUp,
+    ArrowDown
 } from 'lucide-react';
 import { Budget } from '@/services/budgetService';
 import formatCurrency from '@/utils/formatCurrency';
@@ -54,10 +56,39 @@ export default function BudgetActualTable({ budgets, onDelete, onAddBudget, onSp
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [budgetToDelete, setBudgetToDelete] = useState<Budget | null>(null);
     const [cloneDialogOpen, setCloneDialogOpen] = useState(false);
-    
+    const [sortConfig, setSortConfig] = useState<{ key: 'dateEx'; direction: 'asc' | 'desc' } | null>(null);
+
+    const applySorting = (items: Budget[], config: typeof sortConfig) => {
+        if (!config) return items;
+        
+        const sorted = [...items].sort((a, b) => {
+            if (config.key === 'dateEx') {
+                const dateA = new Date(a.dateEx).getTime();
+                const dateB = new Date(b.dateEx).getTime();
+                return config.direction === 'asc' ? dateA - dateB : dateB - dateA;
+            }
+            return 0;
+        });
+        return sorted;
+    };
 
      // const sortedBudgets = sortRow(budgets);
-    const sortedBudgets = sortRow(budgets);
+    const sortedBudgets = applySorting(sortRow(budgets), sortConfig);
+
+    const handleSort = (key: 'dateEx') => {
+        let direction: 'asc' | 'desc' = 'asc';
+        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
+
+    const renderSortIndicator = (columnKey: 'dateEx') => {
+        if (!sortConfig || sortConfig.key !== columnKey) return null;
+        return sortConfig.direction === 'asc' 
+            ? <ArrowUp className="h-4 w-4 ml-1 inline" />
+            : <ArrowDown className="h-4 w-4 ml-1 inline" />;
+    };
 
     const handleSelectAll = () => {
         if (selectedIds.size === budgets.length) {
@@ -108,6 +139,17 @@ export default function BudgetActualTable({ budgets, onDelete, onAddBudget, onSp
             onRegisterActual(selectedBudgetsList);
         }
     };
+
+    const calculateSelectedSum = () => {
+        const selectedBudgetsList = budgets.filter(b => selectedIds.has(b._id));
+        const incomeSum = selectedBudgetsList
+            .filter(b => b.typ === 'income')
+            .reduce((sum, b) => sum + b.amount, 0);
+        const expenseSum = selectedBudgetsList
+            .filter(b => b.typ === 'expense')
+            .reduce((sum, b) => sum + b.amount, 0);
+        return incomeSum - expenseSum;
+    };
     if (sortedBudgets.length === 0) {
         return (
             <div className="text-center py-8">
@@ -129,7 +171,12 @@ export default function BudgetActualTable({ budgets, onDelete, onAddBudget, onSp
                     <span className="text-foreground font-semibold">Budget</span>
                     <ArrowRightToLine className="h-4 w-4" />
                     <span className="text-foreground font-semibold">Actual</span>
-                    <span className="text-xs bg-muted px-2 py-1 rounded-full ml-auto">{sortedBudgets.length}</span>
+                    <span className="text-xs bg-muted px-2 py-1 rounded-full">{sortedBudgets.length}</span>
+                    {selectedIds.size > 0 && (
+                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-semibold">
+                            Sum: {formatCurrency(calculateSelectedSum())}
+                        </span>
+                    )}
                 </h2>
                 <div className="flex gap-2">
                     {selectedIds.size > 0 && (
@@ -193,7 +240,15 @@ export default function BudgetActualTable({ budgets, onDelete, onAddBudget, onSp
                                 <TableHead className="text-right">name</TableHead>
                                 <TableHead className="text-right">budget</TableHead>
                                 <TableHead className="text-right">updtBy</TableHead>
-                                <TableHead className="text-center w-36">dateEx</TableHead>
+                                <TableHead className="text-center w-36">
+                                    <button 
+                                        onClick={() => handleSort('dateEx')}
+                                        className="flex items-center justify-center gap-1 hover:text-blue-600 cursor-pointer w-full"
+                                    >
+                                        dateEx
+                                        {renderSortIndicator('dateEx')}
+                                    </button>
+                                </TableHead>
 
                                 <TableHead  className="text-center">linkActual</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>

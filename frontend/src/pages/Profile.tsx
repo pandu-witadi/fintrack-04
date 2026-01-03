@@ -97,6 +97,18 @@ export default function ProfilePage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Validation
+        if (formData.name.length > 50) {
+            toast.error('Name must be less than 50 characters');
+            return;
+        }
+
+        if (formData.password && formData.password.length < 8) {
+            toast.error('Password must be at least 8 characters');
+            return;
+        }
+
         setIsLoading(true);
         
         try {
@@ -181,6 +193,7 @@ export default function ProfilePage() {
                                     value={formData.name}
                                     onChange={handleInputChange}
                                     required
+                                    maxLength={50}
                                 />
                             </div>
                             <div>
@@ -226,6 +239,7 @@ export default function ProfilePage() {
                                 placeholder="Leave empty to keep current password"
                                 value={formData.password}
                                 onChange={handleInputChange}
+                                minLength={8}
                             />
                             <button
                                 type="button"
@@ -370,30 +384,30 @@ export default function ProfilePage() {
                         <CardContent>
                             {displayUser.bankInfo && (displayUser.bankInfo.bankName || displayUser.bankInfo.accName || displayUser.bankInfo.accNo) ? (
                                 <div className="space-y-4">
-                                {displayUser.bankInfo.bankName && (
-                                    <div>
-                                    <label className="text-sm font-medium">Bank Name</label>
-                                    <div className="mt-1 p-2 bg-muted rounded-md">
-                                        {displayUser.bankInfo.bankName}
-                                    </div>
-                                    </div>
-                                )}
-                                {displayUser.bankInfo.accName && (
-                                    <div>
-                                    <label className="text-sm font-medium">Account Name</label>
-                                    <div className="mt-1 p-2 bg-muted rounded-md">
-                                        {displayUser.bankInfo.accName}
-                                    </div>
-                                    </div>
-                                )}
-                                {displayUser.bankInfo.accNo && (
-                                    <div>
-                                    <label className="text-sm font-medium">Account Number</label>
-                                    <div className="mt-1 p-2 bg-muted rounded-md">
-                                        {displayUser.bankInfo.accNo}
-                                    </div>
-                                    </div>
-                                )}
+                                    {displayUser.bankInfo.bankName && (
+                                        <div>
+                                            <label className="text-sm font-medium">Bank Name</label>
+                                            <div className="mt-1 p-2 bg-muted rounded-md">
+                                                {displayUser.bankInfo.bankName}
+                                            </div>
+                                        </div>
+                                    )}
+                                    {displayUser.bankInfo.accName && (
+                                        <div>
+                                            <label className="text-sm font-medium">Account Name</label>
+                                            <div className="mt-1 p-2 bg-muted rounded-md">
+                                                {displayUser.bankInfo.accName}
+                                            </div>
+                                        </div>
+                                    )}
+                                    {displayUser.bankInfo.accNo && (
+                                        <div>
+                                            <label className="text-sm font-medium">Account Number</label>
+                                            <div className="mt-1 p-2 bg-muted rounded-md">
+                                                {displayUser.bankInfo.accNo}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             ) : (
                                 <p className="text-muted-foreground">No bank information provided</p>

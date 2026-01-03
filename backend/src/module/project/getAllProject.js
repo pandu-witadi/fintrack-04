@@ -3,6 +3,8 @@ const AppError = require('../../util/appError')
 
 const getAllProject = async (request, reply) => {
     try {
+        // Fetch all projects with populated references
+        // Tags are included by default in the lean() response
         const projects = await Project.find({})
             .sort({ stDate: 1 })
             .populate({
@@ -49,6 +51,7 @@ const getAllProject = async (request, reply) => {
 
         projects.forEach(project => {
             project._id = project._id.toString()
+            // Tags are included in the response
         })
 
         return {

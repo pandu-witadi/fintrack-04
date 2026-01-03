@@ -15,6 +15,15 @@ const registerTrx = async (request, reply) => {
             throw new AppError('Project not found', 404)
         }
 
+        // if otherKeys contains isEq
+        if (otherKeys.isEq !== undefined) {
+            // isEq is true, set actAmount = amount
+            if (otherKeys.isEq === true) {
+                otherKeys.actAmount = amount
+            } 
+            // else proceed with different actAmount
+        }
+
         const trx = await Trx.create({
             name: name,
             project: projectId,

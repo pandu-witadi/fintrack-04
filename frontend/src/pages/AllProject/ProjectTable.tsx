@@ -72,6 +72,7 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView, proje
         direction: 'desc'
     });
     const [searchTerm, setSearchTerm] = useState<string>('');
+    const [searchByTags, setSearchByTags] = useState<string>('');
     const [typeFilter, setTypeFilter] = useState<string>('all');
     const [yearFilter, setYearFilter] = useState<string>('all');
     const [activeFilter, setActiveFilter] = useState<string>('all');
@@ -136,6 +137,7 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView, proje
         codename: true,
         // name: true,
         typ: true,
+        tags: true,
         year: false,
         stDate: true,
         client: true,
@@ -165,6 +167,12 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView, proje
                     onCheckedChange={() => handleToggleColumn('codename')}
                 >
                     code/name
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem 
+                    checked={visibleColumns.tags}
+                    onCheckedChange={() => handleToggleColumn('tags')}
+                >
+                    tags
                 </DropdownMenuCheckboxItem>
                 {/* <DropdownMenuCheckboxItem 
                     checked={visibleColumns.name}
@@ -255,6 +263,16 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView, proje
             );
         }
         
+        // Filter by tags if search term provided
+        if (searchByTags) {
+            const searchTagsLower = searchByTags.toLowerCase();
+            filteredProjects = filteredProjects.filter(project =>
+                project.tags && project.tags.some((tag: string) => 
+                    tag.toLowerCase().includes(searchTagsLower)
+                )
+            );
+        }
+        
         // Then filter by type if not 'all'
         if (typeFilter !== 'all') {
             filteredProjects = filteredProjects.filter(project => project.typ === typeFilter);
@@ -341,7 +359,7 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView, proje
               ? String(aValue).localeCompare(String(bValue)) 
               : String(bValue).localeCompare(String(aValue));
         });
-    }, [projects, sortConfig, searchTerm, typeFilter, yearFilter, activeFilter]);
+    }, [projects, sortConfig, searchTerm, searchByTags, typeFilter, yearFilter, activeFilter]);
 
     const getTypeProjectBadge = (type: string) => {
         switch (type) {
@@ -506,6 +524,16 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView, proje
                         />
                     </div>
 
+                    <div className="relative w-56">
+                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Search by tags..."
+                            value={searchByTags}
+                            onChange={(e) => setSearchByTags(e.target.value)}
+                            className="pl-8"
+                        />
+                    </div>
+
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" className="flex items-center gap-2">
@@ -604,6 +632,9 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView, proje
                                         {renderSortIndicator('code')}
                                     </div>
                                 </TableHead>
+                            )}
+                            {visibleColumns.tags && (
+                                <TableHead>tags</TableHead>
                             )}
                             {/* {visibleColumns.name && (
                                 <TableHead className="cursor-pointer" onClick={() => handleSort('name')}>
@@ -710,6 +741,21 @@ export default function ProjectTable({ projects, onEdit, onDelete, onView, proje
                                                 {project.name}
                                             </button>
                                             <div className="text-xs text-muted-foreground">{project.code || '-'}</div>
+                                        </TableCell>
+                                    )}
+                                    {visibleColumns.tags && (
+                                        <TableCell>
+                                            {project.tags && project.tags.length > 0 ? (
+                                                <div className="flex flex-col gap-1">
+                                                    {project.tags.map((tag: string, index: number) => (
+                                                        <span key={index} className="bg-blue-50 text-red-800 text-xs px-2 py-1 rounded-none w-fit">
+                                                            {tag}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <span className="text-xs text-muted-foreground">-</span>
+                                            )}
                                         </TableCell>
                                     )}
                                     {/* {visibleColumns.name && (

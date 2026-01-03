@@ -9,6 +9,8 @@ import { IconDone } from '../../components/IconDone';
 import { IconType } from '../../components/IconType';
 import { GroupedTrxs, TrxsByMonth, MonthTotals, SelectedRows } from './types';
 import { getSortedGroupedTrxs } from './trxUtils';
+import { Link2 } from 'lucide-react';
+import { uploadService } from '../../services/uploadService';
 
 interface TrxTableProps {
     groupedTrxs: GroupedTrxs;
@@ -114,9 +116,29 @@ export const TrxTable: React.FC<TrxTableProps> = ({
                                                     {filteredMonthDataList.map((monthData, idx) => (
                                                         <div key={`${key}-${month}-${idx}`} className="flex flex-col items-end gap-1">
                                                             <div className="flex items-center justify-end gap-1">
-                                                                <span className="font-semibold text-gray-800">{formatCurrency(monthData.amount)}</span>
+                                                                <span className="font-semibold text-gray-800">
+                                                                    {formatCurrency(monthData.actAmount !== undefined ? monthData.actAmount : monthData.amount)}
+                                                                </span>
                                                                 <div>{IconType(monthData.typ)}</div>
                                                                 <div>{IconDone(monthData.done)}</div>
+                                                            </div>
+                                                            <div className="flex items-center justify-end gap-1">
+                                                                {monthData.isEq === false && monthData.amount !== undefined && (
+                                                                    <div className="text-xs text-muted-foreground border-t pt-1">
+                                                                        <span className="text-gray-600">{formatCurrency(monthData.amount)}</span>
+                                                                    </div>
+                                                                )}
+                                                                {monthData.img && (
+                                                                    <a
+                                                                        href={uploadService.viewImage(monthData.img)}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="text-blue-500 hover:text-blue-700 transition-colors"
+                                                                        title="View transaction image"
+                                                                    >
+                                                                        <Link2 className="h-3 w-3" />
+                                                                    </a>
+                                                                )}
                                                             </div>
                                                             {monthData.assignee && (
                                                                 <span className="text-gray-500 text-xs">{monthData.assignee.name}</span>

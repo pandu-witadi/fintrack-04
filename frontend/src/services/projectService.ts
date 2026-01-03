@@ -32,6 +32,7 @@ export interface Project {
     active: boolean;
     done: boolean;
     typ: 'project' | 'routine' | 'other';
+    tags?: string[];
     info: ProjectInfo;
     client?: ClientInfo;
     updatedBy?: {
@@ -64,6 +65,7 @@ interface CreateProjectData {
     note?: string;
     active?: boolean;
     typ?: 'project' | 'routine' | 'other';
+    tags?: string[];
     year?: number;
     stDate?: string;
     enDate?: string;
@@ -76,6 +78,7 @@ interface UpdateProjectData {
     note?: string;
     active?: boolean;
     typ?: 'project' | 'routine' | 'other';
+    tags?: string[];
     year?: number;
     stDate?: string;
     enDate?: string;

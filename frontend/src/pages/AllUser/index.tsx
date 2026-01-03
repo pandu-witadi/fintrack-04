@@ -302,7 +302,6 @@ export default function AllUser() {
             <div className="flex justify-between items-center">
               <div>
                 <h1 className="text-3xl font-bold">All Users</h1>
-                {/* <p className="text-muted-foreground">Manage and view all users in the system</p> */}
               </div>
               {canAddUsers && (
                 <Button onClick={handleAddUser}>
@@ -313,10 +312,6 @@ export default function AllUser() {
 
             <Card>
               <CardHeader>
-                {/* <CardTitle>Users</CardTitle> */}
-                {/* <CardDescription>
-                  A list of all users in the system
-                </CardDescription> */}
               </CardHeader>
               <CardContent>
                 <UsersTable

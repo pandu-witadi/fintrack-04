@@ -19,9 +19,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { 
-    Power, 
-    Trash2,
-    ArrowRightToLine
+    Power
 } from 'lucide-react';
 import { Actual } from '@/services/actualService';
 import formatCurrency from '@/utils/formatCurrency';
@@ -82,11 +80,8 @@ export default function ActualTable({ actuals, onDelete }: ActualTableProps) {
                     <Button 
                         variant="destructive"
                         size="sm"
-                        onClick={() => {
-                            if (window.confirm(`Are you sure you want to delete ${selectedIds.size} actual(s)?`)) {
-                                // Handle bulk delete if needed
-                            }
-                        }}
+                        disabled
+                        title="Bulk delete functionality not yet implemented"
                     >
                         Delete Selected
                     </Button>
@@ -109,9 +104,6 @@ export default function ActualTable({ actuals, onDelete }: ActualTableProps) {
                             <TableHead className="text-right">amount</TableHead>
                             <TableHead>dateEx</TableHead>
                             <TableHead>assignee</TableHead>
-                            
-                            {/* <TableHead className="text-center">linkTrx</TableHead> */}
-                            {/* <TableHead className="text-right">Actions</TableHead> */}
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -164,41 +156,6 @@ export default function ActualTable({ actuals, onDelete }: ActualTableProps) {
                                         <span className="text-muted-foreground">-</span>
                                     )}
                                 </TableCell>
-                               
-                                {/*
-                                <TableCell className="text-sm min-w-fit">
-                                    {actual.trx ? (
-                                        <div className="space-y-1">
-                                            <div className="border-l-2 border-muted-foreground pl-2 py-0.5">
-                                                <div className="flex items-center justify-between gap-2">
-                                                    <button
-                                                        onClick={() => navigate(`/finance/trx/${(actual.trx as any)._id}`)}
-                                                        className="font-medium text-xs text-blue-600 hover:text-blue-800 hover:underline cursor-pointer truncate"
-                                                        title={(actual.trx as any).name}
-                                                    >
-                                                        {(actual.trx as any).name}
-                                                    </button>
-                                                    <span className="font-semibold text-xs whitespace-nowrap">{formatCurrency((actual.trx as any).amount)}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <span className="text-xs text-muted-foreground">No trx</span>
-                                    )}
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => {
-                                            setActualToDelete(actual);
-                                            setDeleteDialogOpen(true);
-                                        }}
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                </TableCell> 
-                                */}
                             </TableRow>
                         ))}
                     </TableBody>

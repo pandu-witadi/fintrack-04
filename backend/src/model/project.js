@@ -69,10 +69,9 @@ const projectSchema = new mongoose.Schema({
         enum: ['project', 'routine', 'other'],
         default: 'project',
     },
-    // year: {
-    //     type: Number,
-    //     default: new Date().getFullYear(),
-    // },
+    tags: [{ 
+        type: String,
+    }],
     stDate: {
         type: Date,
         default: new Date(),

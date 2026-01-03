@@ -47,6 +47,14 @@ const trxSchema = new mongoose.Schema({
             default: 1
         }
     },
+    isEq: {
+        type: Boolean,
+        default: true,
+    },
+    actAmount: {
+        type: Number,
+        default: 0
+    },
     project: {
          type: mongoose.Schema.Types.ObjectId,
          ref: 'Project',

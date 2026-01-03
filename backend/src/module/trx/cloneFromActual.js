@@ -28,6 +28,8 @@ const cloneFromActual = async (request, reply) => {
             dateEx: actual.dateEx,
             typ: actual.typ,
             updatedBy: request.user._id,
+            isEq: true,
+            actAmount: actual.amount,
             ...otherKeys
         })
 

@@ -1,6 +1,7 @@
 const {
     getAllTrx,
     getAllTrxByProjectId,
+    getAllTrxByAssignee,
     getTrxById,
     getTrxByActualId,
     updateTrx,
@@ -30,6 +31,8 @@ const resp_200 = {
                         exRate: { type: 'number' }
                     }
                 },
+                isEq: { type: 'boolean' },
+                actAmount: { type: 'number' },
                 project: {
                     type: 'object',
                     properties: {
@@ -268,6 +271,47 @@ async function trxApi(fastify, options) {
             }
         },
     })
+
+    // Get all trxs by assignee
+    fastify.route({
+        method: 'GET',
+        url: '/assignee/:assigneeId',
+        preHandler: [protect, restrictTo(['admin', 'finance', 'project_manager'])],
+        handler: getAllTrxByAssignee,
+        schema: {
+            tags: ['trx'],
+            summary: 'Get all trxs by assignee ID',
+            description: 'Retrieve all trxs for a specific assignee',
+            security: [{
+                bearerAuth: []
+            }],
+            params: {
+                type: 'object',
+                properties: {
+                    assigneeId: { type: 'string', description: 'Assignee ID' }
+                },
+                required: ['assigneeId']
+            },
+            response: {
+                200: {
+                    type: 'object',
+                    properties: {
+                        success: { type: 'boolean' },
+                        pyd: {
+                            type: 'array',
+                            items: {
+                                type: 'object',
+                                properties: resp_200.properties.pyd.properties
+                            }
+                        }
+                    }
+                },
+                400: resp_400,
+                401: resp_400,
+                403: resp_400
+            }
+        }
+    });
 
     // Get trx by Actual ID (only accessible by admin/finance roles)
     fastify.route({
