@@ -7,7 +7,8 @@ const {
     deleteActual,
     cloneFromBudget,
     registerActual,
-    attachToTrx
+    attachToTrx,
+    unAttachFromTrx
 } = require('../module/actual')
 
 const resp_200 = {
@@ -72,7 +73,8 @@ const resp_200 = {
                         amount: { type: 'number' },
                         typ: { type: 'string', enum: ['income', 'expense'] },
                         done: { type: 'boolean' },
-                        projectName: { type: 'string' }
+                        projectName: { type: 'string' },
+                        projectId: { type: 'string' }
                     }
                 },
                 dateEx: { type: 'string', format: 'date-time' },
@@ -393,6 +395,37 @@ async function actualApi(fastify, options) {
                     trxId: { type: 'string' }
                 },
                 required: ['allActualId', 'trxId']
+            },
+            response: {
+                200: resp_200,
+                400: resp_400,
+                401: resp_400,
+                403: resp_400,
+                404: resp_400
+            }
+        }
+    });
+
+    // Unattach actual from transaction
+    fastify.route({
+        method: 'POST',
+        url: '/unAttachFromTrx',
+        preHandler: [protect, restrictTo(['finance', 'admin'])],
+        handler: unAttachFromTrx,
+        schema: {
+            tags: ['actual'],
+            summary: 'Unattach actual from transaction',
+            description: 'Unattach an actual record from a transaction and update the transaction\'s lActual array',
+            security: [{
+                bearerAuth: []
+            }],
+            body: {
+                type: 'object',
+                properties: {
+                    actualId: { type: 'string' },
+                    trxId: { type: 'string' }
+                },
+                required: ['actualId', 'trxId']
             },
             response: {
                 200: resp_200,

@@ -24,7 +24,9 @@ const ActualDetail = lazy(() => import('./pages/ActualDetail'))
 const TrxDetail = lazy(() => import('./pages/TrxDetail'))
 const TimeBudget = lazy(() => import('./pages/TimeBudget'))
 const TimeActual = lazy(() => import('./pages/TimeActual'))
+const TimeActualByAssignee = lazy(() => import('./pages/TimeActualByAssignee'))
 const TimeTrx = lazy(() => import('./pages/TimeTrx'))
+const TimeTrxByAssignee = lazy(() => import('./pages/TimeTrxByAssignee'))
 const CurrentUserTimeActual = lazy(() => import('./pages/CurrentUserTimeActual'))
 const CurrentUserTimeTrx = lazy(() => import('./pages/CurrentUserTimeTrx'))
 
@@ -91,9 +93,19 @@ function AppRoutes() {
                             <TimeActual />
                         </ProtectedRoute>
                     } />
+                    <Route path="/finance/time-actual-by-assignee" element={
+                        <ProtectedRoute roles={['admin', 'finance']}>
+                            <TimeActualByAssignee />
+                        </ProtectedRoute>
+                    } />
                     <Route path="/finance/time-trx" element={
                         <ProtectedRoute roles={['admin', 'finance']}>
                             <TimeTrx />
+                        </ProtectedRoute>
+                    } />
+                    <Route path="/finance/time-trx-by-assignee" element={
+                        <ProtectedRoute roles={['admin', 'finance']}>
+                            <TimeTrxByAssignee />
                         </ProtectedRoute>
                     } />
                     

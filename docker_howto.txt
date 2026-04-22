@@ -1,0 +1,31 @@
+# --- Usage ---
+
+# Start the application
+docker compose up -d
+
+# Initialize the database (create admin user)
+docker compose exec app node src/config/db_init.js
+
+# View logs
+docker compose logs -f
+
+# Stop the application
+docker compose down
+
+# Stop and remove volumes (full reset)
+docker compose down -v
+
+
+
+
+# --- Backer & Restore ---
+
+# MongoDB backup/restore
+./docker-fintrack.sh --backup --file db-2026-04-22
+./docker-fintrack.sh --restore --file fintrack_mongodb_db-2026-04-22.tgz
+./docker-fintrack.sh --list
+
+# Upload backup/restore
+./docker-fintrack-upload.sh --backup --file db-2026-04-22
+./docker-fintrack-upload.sh --restore --file fintrack_upload_db-2026-04-22.tgz
+./docker-fintrack-upload.sh --list

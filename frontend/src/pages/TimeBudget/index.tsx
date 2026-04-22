@@ -31,7 +31,7 @@ export default function TimeBudget() {
     const [budgets, setBudgets] = useState<Budget[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [selectedRows, setSelectedRows] = useState<Record<string, boolean>>({});
-    const [nRangeMonth, setNRangeMonth] = useState<number>(2);
+    const [nRangeMonth, setNRangeMonth] = useState<number>(1);
     const [filterType, setFilterType] = useState<'view all' | 'income' | 'expense'>('view all');
 
     const currentYm = getCurrentYearMonth();
@@ -45,7 +45,8 @@ export default function TimeBudget() {
             setError(null);
             const allBudgets = await getAllBudget();
             const filtered = filterBudgetsByDateRange(allBudgets, startYm, endYm);
-            setBudgets(sortRow(filtered));
+            // setBudgets(sortRow(filtered));
+            setBudgets(filtered);
         } catch (err) {
             console.error('Error fetching budgets:', err);
             setError(err instanceof Error ? err.message : 'Failed to fetch budgets');

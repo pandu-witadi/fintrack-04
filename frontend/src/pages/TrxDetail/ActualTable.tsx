@@ -43,6 +43,11 @@ export default function ActualTable({ actuals, onDelete }: ActualTableProps) {
     
     const sortedActuals = sortRow(actuals);
 
+    // Calculate sum of amounts for selected actuals
+    const selectedTotal = sortedActuals
+        .filter(actual => selectedIds.has(actual._id))
+        .reduce((sum, actual) => sum + actual.amount, 0);
+
     const handleSelectAll = () => {
         if (selectedIds.size === actuals.length) {
             setSelectedIds(new Set());
@@ -75,17 +80,12 @@ export default function ActualTable({ actuals, onDelete }: ActualTableProps) {
                 <h2 className="text-base font-medium text-muted-foreground flex items-center gap-2">
                     <span className="text-foreground font-semibold">Linked Actuals</span>
                     <span className="text-xs bg-muted px-2 py-1 rounded-full">{actuals.length}</span>
+                    {selectedIds.size > 0 && (
+                        <span className="text-sm text-muted-foreground ml-2">
+                            Sum: <span className="font-semibold text-foreground">{formatCurrency(selectedTotal)}</span>
+                        </span>
+                    )}
                 </h2>
-                {selectedIds.size > 0 && (
-                    <Button 
-                        variant="destructive"
-                        size="sm"
-                        disabled
-                        title="Bulk delete functionality not yet implemented"
-                    >
-                        Delete Selected
-                    </Button>
-                )}
             </div>
             
             <div className="rounded-md border">

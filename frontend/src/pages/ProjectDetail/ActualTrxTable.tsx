@@ -27,7 +27,8 @@ import {
     Eye,
     ArrowRightToLine,
     ArrowUp,
-    ArrowDown
+    ArrowDown,
+    Link2Off
 } from 'lucide-react';
 import { Actual } from '@/services/actualService';
 import formatCurrency from '@/utils/formatCurrency';
@@ -42,18 +43,22 @@ interface ActualTableProps {
     onDelete: (actual: Actual) => void;
     onAddActual: () => void;
     onBatchAttachToTrx?: (selectedActuals: Actual[]) => void;
+    onUnAttachFromTrx?: (actualId: string, trxId: string) => Promise<void>;
     onCloneToTrx?: (actualIds: string[]) => void;
     onRefreshTrx?: () => Promise<void>;
     onRefreshBudget?: () => Promise<void>;
 }
 
-export default function ActualTrxTable({ actuals, onDelete, onAddActual, onBatchAttachToTrx, onCloneToTrx, onRefreshTrx, onRefreshBudget }: ActualTableProps) {
+export default function ActualTrxTable({ actuals, onDelete, onAddActual, onBatchAttachToTrx, onUnAttachFromTrx, onCloneToTrx, onRefreshTrx, onRefreshBudget }: ActualTableProps) {
     const navigate = useNavigate();
 
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [unAttachDialogOpen, setUnAttachDialogOpen] = useState(false);
     const [actualToDelete, setActualToDelete] = useState<Actual | null>(null);
+    const [actualToUnAttach, setActualToUnAttach] = useState<Actual | null>(null);
     const [isCloning, setIsCloning] = useState(false);
+    const [isUnAttaching, setIsUnAttaching] = useState(false);
     const [cloneDialogOpen, setCloneDialogOpen] = useState(false);
     const [sortConfig, setSortConfig] = useState<{ key: 'dateEx' | 'assignee'; direction: 'asc' | 'desc' } | null>(null);
 
@@ -116,6 +121,15 @@ export default function ActualTrxTable({ actuals, onDelete, onAddActual, onBatch
         setCloneDialogOpen(true);
     };
 
+    const handleUnAttachFromTrx = () => {
+        if (selectedIds.size !== 1) return;
+        const selectedActual = actuals.find(a => selectedIds.has(a._id));
+        if (selectedActual && selectedActual.trx) {
+            setActualToUnAttach(selectedActual);
+            setUnAttachDialogOpen(true);
+        }
+    };
+
     const calculateSelectedSum = () => {
         const selectedActualsList = actuals.filter(a => selectedIds.has(a._id));
         const incomeSum = selectedActualsList
@@ -145,6 +159,24 @@ export default function ActualTrxTable({ actuals, onDelete, onAddActual, onBatch
         }
     };
 
+    const confirmUnAttachFromTrx = async () => {
+        if (!actualToUnAttach || !actualToUnAttach.trx) return;
+        
+        try {
+            setIsUnAttaching(true);
+            if (onUnAttachFromTrx) {
+                await onUnAttachFromTrx(actualToUnAttach._id, actualToUnAttach.trx._id);
+            }
+            setSelectedIds(new Set());
+        } catch (error) {
+            console.error('Unattach failed:', error);
+        } finally {
+            setIsUnAttaching(false);
+            setUnAttachDialogOpen(false);
+            setActualToUnAttach(null);
+        }
+    };
+
     if (sortedActuals.length === 0) {
         return (
             <div className="text-center py-8">
@@ -157,7 +189,7 @@ export default function ActualTrxTable({ actuals, onDelete, onAddActual, onBatch
         );
     } else {
         return (
-                <div className="rounded-lg border bg-card p-6 shadow-sm">
+                <div className="rounded-lg border bg-rose-50 p-6 shadow-sm">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-base font-medium text-muted-foreground flex items-center gap-2">
                             <span className="text-foreground font-semibold">Actual</span>
@@ -173,6 +205,18 @@ export default function ActualTrxTable({ actuals, onDelete, onAddActual, onBatch
                         <div className="flex gap-2">
                             {selectedIds.size > 0 && (
                                 <>
+                                    {selectedIds.size === 1 && actuals.find(a => selectedIds.has(a._id))?.trx && (
+                                        <Button 
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={handleUnAttachFromTrx}
+                                            disabled={isUnAttaching}
+                                            className="text-orange-600 border-orange-200 hover:bg-orange-50"
+                                        >
+                                            <Link2Off className="h-4 w-4 mr-2" />
+                                            Unattach
+                                        </Button>
+                                    )}
                                     <Button 
                                         variant="default"
                                         size="sm"
@@ -231,7 +275,6 @@ export default function ActualTrxTable({ actuals, onDelete, onAddActual, onBatch
                                         <TableHead><Power className="h-4 w-4 text-cyan-500" /></TableHead>
                                         <TableHead className="text-right">name</TableHead>
                                         <TableHead className="text-right">actual</TableHead>
-                                        <TableHead className="text-right">updtBy</TableHead>
                                         <TableHead className="text-center w-36">
                                             <button 
                                                 onClick={() => handleSort('dateEx')}
@@ -252,7 +295,8 @@ export default function ActualTrxTable({ actuals, onDelete, onAddActual, onBatch
                                         </TableHead>
                                         
                                         <TableHead className="text-center">linkTrx</TableHead>
-                                        <TableHead className="text-right">Actions</TableHead>
+                                        <TableHead className="text-right">updtBy</TableHead>
+                                        <TableHead className="text-right">Del</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -286,15 +330,6 @@ export default function ActualTrxTable({ actuals, onDelete, onAddActual, onBatch
                                                     {IconDone(actual.done)}
                                                 </div>
                                             </TableCell>
-                                            <TableCell className="text-right text-sm">
-                                                {actual.updatedBy?.name && (
-                                                    <div className="text-xs text-muted-foreground">{actual.updatedBy.name}</div>
-                                                )}
-                                                {/* {budget.updatedBy?.email && (
-                                                    <div className="text-xs text-muted-foreground">{budget.updatedBy.email}</div>
-                                                )} */}
-                                            </TableCell>
-
                                             <TableCell className="text-center text=sm w-36">
                                                 {formatDate(actual.dateEx)}
                                             </TableCell>
@@ -302,13 +337,13 @@ export default function ActualTrxTable({ actuals, onDelete, onAddActual, onBatch
                                                 {actual.assignee ? (
                                                     <div>
                                                         <div className="font-text-xs text-muted-foreground">{actual.assignee.name}</div>
-                                                        {/* <div className="text-xs text-muted-foreground">{actual.assignee.email}</div>     */}
+                                                        {/* <div className="text-xs text-muted-foreground">{actual.assignee.email}</div>    */}
                                                     </div>
                                                 ) : (
                                                     <span className="text-muted-foreground">-</span>
                                                 )}
                                             </TableCell>
-                                        
+                                                                                    
                                             <TableCell className="text-sm min-w-fit">
                                                 {actual.trx !== undefined && actual.trx !== null ? (
                                                     <div className="border-l-2 border-muted-foreground pl-2">
@@ -323,7 +358,7 @@ export default function ActualTrxTable({ actuals, onDelete, onAddActual, onBatch
                                                                 </button>
                                                                 {actual.trx.projectName && (
                                                                     <button
-                                                                        onClick={() => navigate(`/finance/project/${actual.project._id}`)}
+                                                                        onClick={() => actual.trx?.projectId && navigate(`/finance/project/${actual.trx.projectId}`)}
                                                                         className="font-medium text-xs text-red-400 hover:text-blue-800 hover:underline cursor-pointer truncate text-left"
                                                                         title={actual.trx.projectName}
                                                                     >
@@ -341,6 +376,14 @@ export default function ActualTrxTable({ actuals, onDelete, onAddActual, onBatch
                                                 ) : (
                                                     <span className="text-xs text-muted-foreground">No trx</span>
                                                 )}
+                                            </TableCell>
+                                            <TableCell className="text-right text-sm">
+                                                {actual.updatedBy?.name && (
+                                                    <div className="text-xs text-muted-foreground">{actual.updatedBy.name}</div>
+                                                )}
+                                                {/* {budget.updatedBy?.email && (
+                                                    <div className="text-xs text-muted-foreground">{budget.updatedBy.email}</div>
+                                                )} */}
                                             </TableCell>
                                             <TableCell className="text-right">
                                                 <Button
@@ -420,6 +463,34 @@ export default function ActualTrxTable({ actuals, onDelete, onAddActual, onBatch
                                     disabled={isCloning}
                                 >
                                     {isCloning ? 'Cloning...' : 'Clone'}
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+
+                    <Dialog open={unAttachDialogOpen} onOpenChange={setUnAttachDialogOpen}>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Unattach from Transaction</DialogTitle>
+                                <DialogDescription>
+                                    Are you sure you want to unattach <strong>{actualToUnAttach?.name}</strong> from its linked transaction? 
+                                    The transaction amount will be updated.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <DialogFooter>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setUnAttachDialogOpen(false)}
+                                    disabled={isUnAttaching}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    variant="destructive"
+                                    onClick={confirmUnAttachFromTrx}
+                                    disabled={isUnAttaching}
+                                >
+                                    {isUnAttaching ? 'Unattaching...' : 'Unattach'}
                                 </Button>
                             </DialogFooter>
                         </DialogContent>

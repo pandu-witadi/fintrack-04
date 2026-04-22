@@ -1,0 +1,66 @@
+services:
+  # =============================================================
+  # MongoDB Database
+  # =============================================================
+  mongodb:
+    image: mongo:7
+    container_name: fintrack-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: fintrack-04
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - fintrack-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # =============================================================
+  # FinTrack Application (Backend + Frontend)
+  # =============================================================
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fintrack-app
+    restart: unless-stopped
+    ports:
+      - "5200:5200"
+    environment:
+      - NODE_ENV=production
+      - PORT=5200
+      - HOST=0.0.0.0
+      - MONGODB_URI=mongodb://mongodb:27017/fintrack-04
+      - JWT_SECRET=${JWT_SECRET:-r91uwfeuoges02bgq2mo}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-2d}
+      - COOKIE_SECRET=${COOKIE_SECRET:-fintrack-cookie-secret-key}
+      - CLIENT_URL=${CLIENT_URL:-http://localhost:5200}
+    volumes:
+      - upload_data:/app/backend/upload
+    networks:
+      - fintrack-network
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
+# =============================================================
+# Volumes
+# =============================================================
+volumes:
+  mongodb_data:
+    driver: local
+  upload_data:
+    driver: local
+
+# =============================================================
+# Networks
+# =============================================================
+networks:
+  fintrack-network:
+    driver: bridge

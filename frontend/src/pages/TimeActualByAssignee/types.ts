@@ -25,6 +25,7 @@ export type MonthData = {
     done: boolean;
     typ: string;
     assignee?: Assignee;
+    trxId?: string;
 };
 
 export type ActualsByMonth = Record<string, MonthData[]>;

@@ -503,6 +503,23 @@ export default function ProjectDetail() {
         }
     };
 
+    const handleUnAttachFromTrx = async (actualId: string, trxId: string) => {
+        try {
+            await actualService.unAttachFromTrx(actualId, trxId);
+            toast.success('Unattached actual from transaction');
+            
+            // Refresh all tables after unattachment
+            if (projectId) {
+                await getAllBudgetByProjectId(projectId);
+                await getAllActualByProjectId(projectId);
+                await getAllTrxByProjectId(projectId);
+            }
+        } catch (error) {
+            toast.error('Failed to unattach actual from transaction');
+            console.error(error);
+        }
+    };
+
     const handleRegisterTrxSubmit = async (actualId: string, trxData: any) => {
         try {
             setIsRegisteringTrx(true);
@@ -669,6 +686,7 @@ export default function ProjectDetail() {
                 onDelete={handleDeleteActual}
                 onAddActual={handleAddActual}
                 onBatchAttachToTrx={handleOpenBatchAttachDialog}
+                onUnAttachFromTrx={handleUnAttachFromTrx}
                 onCloneToTrx={handleCloneFromActuals}
                 onRefreshTrx={async () => {
                     if (projectId) {

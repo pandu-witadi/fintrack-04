@@ -37,6 +37,7 @@ const resp_200 = {
                 active: { type: 'boolean' },
                 lastAccess: { type: 'string', format: 'date-time' },
                 phone: { type: 'string' },
+                note: { type: 'string' },
                 bankInfo: bankInfo,
                 createdAt: { type: 'string', format: 'date-time' },
                 updatedAt: { type: 'string', format: 'date-time' }
@@ -133,7 +134,7 @@ async function userApi(fastify, options) {
     fastify.route({
         method: 'GET',
         url: '/me',
-        preHandler: [protect, restrictTo(['guest', 'vendor', 'user', 'finance', 'admin'])],
+        preHandler: [protect, restrictTo(['guest', 'tax', 'vendor', 'user', 'project_manager', 'finance', 'admin'])],
         handler: getMe,
         schema: {
             tags: ['user'],
@@ -167,7 +168,7 @@ async function userApi(fastify, options) {
     fastify.route({
         method: 'GET',
         url: '/:id',
-        preHandler: [protect, restrictTo(['guest', 'vendor', 'user', 'finance', 'admin'])],
+        preHandler: [protect, restrictTo(['guest', 'tax', 'vendor', 'user', 'project_manager', 'finance', 'admin'])],
         handler: getUserById,
         schema: {
             tags: ['user'],
@@ -215,6 +216,7 @@ async function userApi(fastify, options) {
                     role: { type: 'string' },
                     active: { type: 'boolean' },
                     phone: { type: 'string' },
+                    note: { type: 'string' },
                     bankInfo: bankInfo
                 }
             },
@@ -231,7 +233,7 @@ async function userApi(fastify, options) {
     fastify.route({
         method: 'PATCH',
         url: '/:id',
-        preHandler: [protect, restrictTo(['guest', 'vendor', 'user', 'finance', 'admin'])],
+        preHandler: [protect, restrictTo(['guest', 'tax', 'vendor', 'user', 'project_manager', 'finance', 'admin'])],
         handler: updateUser,
         schema: {
             tags: ['user'],

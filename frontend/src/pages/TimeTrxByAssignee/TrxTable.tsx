@@ -1,5 +1,5 @@
 /**
- * Transaction table component for TimeTrx
+ * Transaction table component for TimeTrxByAssignee
  */
 
 import React from 'react';
@@ -17,6 +17,7 @@ interface TrxTableProps {
     monthRange: string[];
     monthTotals: MonthTotals;
     variableMonthTotals: MonthTotals;
+    doneMonthTotals: MonthTotals;
     selectedRows: SelectedRows;
     getTrxsByMonth: (trxList: any[]) => TrxsByMonth;
     onRowSelect: (key: string) => void;
@@ -30,6 +31,7 @@ export const TrxTable: React.FC<TrxTableProps> = ({
     monthRange,
     monthTotals,
     variableMonthTotals,
+    doneMonthTotals,
     selectedRows,
     getTrxsByMonth,
     onRowSelect,
@@ -60,7 +62,7 @@ export const TrxTable: React.FC<TrxTableProps> = ({
                                     className="rounded border-gray-300 cursor-pointer"
                                     title="Select all rows"
                                 />
-                                <span>Transaction Name</span>
+                                <span>Transaction Name ({Object.values(selectedRows).filter(Boolean).length})</span>
                             </div>
                         </th>
                         {monthRange.map(month => (
@@ -70,6 +72,7 @@ export const TrxTable: React.FC<TrxTableProps> = ({
                             >
                                 <div className="text-sm">{month}</div>
                                 <div className="text-xs text-cyan-700 font-normal mt-1">{formatCurrency(variableMonthTotals[month])}</div>
+                                <div className="text-xs text-emerald-700 font-normal">{formatCurrency(doneMonthTotals[month])}</div>
                                 <div className="text-xs text-gray-500 font-normal">{formatCurrency(monthTotals[month])}</div>
                             </th>
                         ))}
@@ -128,6 +131,9 @@ export const TrxTable: React.FC<TrxTableProps> = ({
                                                                         <span className="text-gray-600">{formatCurrency(monthData.amount)}</span>
                                                                     </div>
                                                                 )}
+                                                                {monthData.assignee && (
+                                                                    <span className="text-gray-500 text-xs">{monthData.assignee.name}</span>
+                                                                )}
                                                                 {monthData.img && (
                                                                     <a
                                                                         href={uploadService.viewImage(monthData.img)}
@@ -140,9 +146,7 @@ export const TrxTable: React.FC<TrxTableProps> = ({
                                                                     </a>
                                                                 )}
                                                             </div>
-                                                            {monthData.assignee && (
-                                                                <span className="text-gray-500 text-xs">{monthData.assignee.name}</span>
-                                                            )}
+                                                           
                                                         </div>
                                                     ))}
                                                 </div>

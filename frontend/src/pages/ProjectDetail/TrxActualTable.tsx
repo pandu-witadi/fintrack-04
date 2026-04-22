@@ -107,16 +107,16 @@ export default function TrxActualTable({ trxs, onDelete, onAddTrx, onRegisterTrx
         setSelectedIds(newSelected);
     };
 
-    const calculateSelectedSum = () => {
+    const calculateSelectedSum = (field: 'amount' | 'actAmount' = 'amount') => {
         const selectedTrxsList = Array.from(selectedIds)
             .map(id => trxs.find(t => t._id === id))
             .filter((t): t is Trx => t !== undefined);
         const incomeSum = selectedTrxsList
             .filter(t => t.typ === 'income')
-            .reduce((sum, t) => sum + (t.actAmount || 0), 0);
+            .reduce((sum, t) => sum + (t[field] || 0), 0);
         const expenseSum = selectedTrxsList
             .filter(t => t.typ === 'expense')
-            .reduce((sum, t) => sum + (t.actAmount || 0), 0);
+            .reduce((sum, t) => sum + (t[field] || 0), 0);
         return incomeSum - expenseSum;
     };
 
@@ -133,7 +133,7 @@ export default function TrxActualTable({ trxs, onDelete, onAddTrx, onRegisterTrx
     }
 
     return (
-        <div className="rounded-lg border bg-card p-6 shadow-sm">
+        <div className="rounded-lg border bg-lime-50 p-6 shadow-sm">
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-base font-medium text-muted-foreground flex items-center gap-2">
                     <span className="text-foreground font-semibold">Trx</span>
@@ -141,9 +141,14 @@ export default function TrxActualTable({ trxs, onDelete, onAddTrx, onRegisterTrx
                     <span className="text-foreground font-semibold">Actual</span>
                     <span className="text-xs bg-muted px-2 py-1 rounded-full">{sortedTrxs.length}</span>
                     {selectedIds.size > 0 && (
-                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-semibold">
-                            Sum: {formatCurrency(calculateSelectedSum())}
-                        </span>
+                        <div className="flex flex-col gap-0.5">
+                            <span className="text-[10px] bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-semibold whitespace-nowrap">
+                                Sum (amount): {formatCurrency(calculateSelectedSum('amount'))}
+                            </span>
+                            <span className="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-semibold whitespace-nowrap">
+                                Sum (actAmount): {formatCurrency(calculateSelectedSum('actAmount'))}
+                            </span>
+                        </div>
                     )}
                 </h2>
                 <div className="flex gap-2">
@@ -186,7 +191,6 @@ export default function TrxActualTable({ trxs, onDelete, onAddTrx, onRegisterTrx
                                 <TableHead><Power className="h-4 w-4 text-cyan-500" /></TableHead>
                                 <TableHead className="text-right">name</TableHead>
                                 <TableHead className="text-right">amount</TableHead>
-                                <TableHead className="text-right">updtBy</TableHead>
                                 <TableHead className="text-center w-36">
                                     <button 
                                         onClick={() => handleSort('dateEx')}
@@ -206,7 +210,8 @@ export default function TrxActualTable({ trxs, onDelete, onAddTrx, onRegisterTrx
                                     </button>
                                 </TableHead>
                                 <TableHead className="text-center">linkActual</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
+                                <TableHead className="text-right">updtBy</TableHead>
+                                <TableHead className="text-right">Del</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -262,13 +267,6 @@ export default function TrxActualTable({ trxs, onDelete, onAddTrx, onRegisterTrx
                                             </div>
                                         </div>
                                     </TableCell>
-                                    <TableCell className="text-right text-sm">
-                                        {trx.updatedBy && trx.updatedBy.name ? (
-                                            <div className="text-xs">{trx.updatedBy.name}</div>
-                                        ) : (
-                                            <span className="text-xs text-muted-foreground">-</span>
-                                        )}
-                                    </TableCell>
                                     <TableCell className="text-center text=sm w-36">
                                         {formatDate(trx.dateEx)}
                                     </TableCell>
@@ -318,6 +316,13 @@ export default function TrxActualTable({ trxs, onDelete, onAddTrx, onRegisterTrx
                                             </div>
                                         ) : (
                                             <span className="text-xs text-muted-foreground">No actuals</span>
+                                        )}
+                                    </TableCell>
+                                    <TableCell className="text-right text-sm">
+                                        {trx.updatedBy && trx.updatedBy.name ? (
+                                            <div className="text-xs">{trx.updatedBy.name}</div>
+                                        ) : (
+                                            <span className="text-xs text-muted-foreground">-</span>
                                         )}
                                     </TableCell>
                                     <TableCell className="text-right">

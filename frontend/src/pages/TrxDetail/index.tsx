@@ -30,6 +30,7 @@ import { toast } from 'sonner';
 import { trxService, Trx } from '@/services/trxService.ts';
 import { actualService } from '@/services/actualService';
 import { uploadService } from '@/services/uploadService';
+import { userService } from '@/services/userService.ts';
 import formatCurrency from '@/utils/formatCurrency';
 import { IconType } from '@/components/IconType';
 import { IconActive } from '@/components/IconActive';
@@ -133,6 +134,34 @@ export default function TrxDetail() {
             clearError();
         }
     }, [uploadError, clearError]);
+
+    const handleAssigneeChange = async (assigneeId: string | null) => {
+        // Update assignee first
+        setEditTrx(prev => ({
+            ...prev,
+            assignee: assigneeId
+        }));
+
+        // If assignee is selected, fetch user details and auto-fill receiver fields
+        if (assigneeId) {
+            try {
+                const selectedUser = await userService.getUserById(assigneeId);
+                if (selectedUser?.bankInfo) {
+                    setEditTrx(prev => ({
+                        ...prev,
+                        assignee: assigneeId,
+                        recv: {
+                            bankName: selectedUser.bankInfo?.bankName || '',
+                            accNo: selectedUser.bankInfo?.accNo || '',
+                            accName: selectedUser.bankInfo?.accName || ''
+                        }
+                    }));
+                }
+            } catch (err) {
+                console.error('Failed to fetch user details:', err);
+            }
+        }
+    };
 
     const fetchTrxDetails = async (trxId: string) => {
         try {
@@ -481,7 +510,7 @@ export default function TrxDetail() {
                                         {/* Assignee Field */}
                                         <AssigneeSelector
                                             selectedAssignee={editTrx.assignee}
-                                            onAssigneeChange={(assigneeId) => handleEditFormChange('assignee', assigneeId)}
+                                            onAssigneeChange={handleAssigneeChange}
                                             isEditing={isEditing}
                                         />
 

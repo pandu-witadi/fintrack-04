@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['guest', 'vendor', 'user', 'finance', 'admin'],
+        enum: ['guest', 'tax', 'vendor', 'user', 'finance', 'admin'],
         default: 'user',
     },
     active: {
@@ -45,6 +45,10 @@ const userSchema = new mongoose.Schema({
         trim: true,
     },
     bankInfo: bankInfo,
+    note: {
+        type: String,
+        trim: true,
+    },
 
 }, {
     timestamps: true,

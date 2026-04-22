@@ -9,28 +9,10 @@ const updateUser = async (request, reply) => {
             throw new AppError('User not found', 404)
         }
 
-        if (['admin'].includes(request.user.role) && ['guest', 'user', 'finance', 'admin'].includes(user.role)) {
-            let updateData = { ...request.body }
+        const isAdmin = request.user.role === 'admin';
+        const isSelf = request.user._id.toString() === user._id.toString();
 
-            // if update password, hash the password
-            const { password } = request.body
-            if (password) {
-                let newPassword = await hashPassword(password)
-                updateData.password = newPassword
-            }
-            // updateData.role = user.role
-            const updatedUser = await User.updateOne(
-                { _id: user._id },
-                updateData,
-                { new: true, runValidators: true }
-            ).select('-password -__v')
-
-            return {
-                success: true,
-                pyd: updatedUser,
-                message: 'User updated successfully'
-            }
-        } else if (['guest', 'user', 'finance'].includes(request.user.role) && request.user._id.toString() === user._id.toString()) {
+        if (isAdmin || isSelf) {
             let updateData = { ...request.body }
 
             // if update password, hash the password
@@ -40,10 +22,14 @@ const updateUser = async (request, reply) => {
                 updateData.password = newPassword
             }
 
-            // cannot change role
-            updateData.role = user.role
-            const updatedUser = await User.updateOne(
-                { _id: user._id },
+            // if not admin, cannot change role or active status
+            if (!isAdmin) {
+                delete updateData.role;
+                delete updateData.active;
+            }
+
+            const updatedUser = await User.findByIdAndUpdate(
+                user._id,
                 updateData,
                 { new: true, runValidators: true }
             ).select('-password -__v')

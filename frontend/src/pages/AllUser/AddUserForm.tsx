@@ -5,7 +5,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Eye, EyeOff, Lock } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { User } from '@/services/userService';
+import { User } from './index';
+import { UserRole } from '@/services/userService';
+import { format } from 'date-fns';
 
 interface UserFormProps {
     user?: User;
@@ -22,6 +24,7 @@ export default function AddUserForm({ user, onSubmit, onCancel, isSubmitting }: 
     const [role, setRole] = useState(user?.role || 'user');
     const [active, setactive] = useState(user?.active !== undefined ? user.active : true);
     const [phone, setPhone] = useState(user?.phone || '');
+    const [note, setNote] = useState(user?.note || '');
     const [bankName, setBankName] = useState(user?.bankInfo?.bankName || '');
     const [accNo, setAccNo] = useState(user?.bankInfo?.accNo || '');
     const [accName, setAccName] = useState(user?.bankInfo?.accName || '');
@@ -35,6 +38,7 @@ export default function AddUserForm({ user, onSubmit, onCancel, isSubmitting }: 
             role,
             active,
             phone,
+            note,
             bankInfo: {
               bankName,
               accNo,
@@ -97,15 +101,17 @@ export default function AddUserForm({ user, onSubmit, onCancel, isSubmitting }: 
                 
                 <div className="space-y-2">
                     <Label htmlFor="role">Role</Label>
-                    <Select value={role} onValueChange={setRole}>
+                    <Select value={role} onValueChange={(value) => setRole(value as UserRole)}>
                         <SelectTrigger>
                             <SelectValue placeholder="Select role" />
                         </SelectTrigger>
                       <SelectContent>
                           <SelectItem value="guest">guest</SelectItem>
+                          <SelectItem value="tax">tax</SelectItem>
                           <SelectItem value="vendor">vendor</SelectItem>
                           <SelectItem value="user">user</SelectItem>
                           <SelectItem value="finance">finance</SelectItem>
+                          <SelectItem value="admin">admin</SelectItem>
                       </SelectContent>
                     </Select>
                 </div>
@@ -116,6 +122,15 @@ export default function AddUserForm({ user, onSubmit, onCancel, isSubmitting }: 
                         id="phone"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
+                    />
+                </div>
+                
+                <div className="space-y-2">
+                    <Label htmlFor="note">Note</Label>
+                    <Input
+                        id="note"
+                        value={note}
+                        onChange={(e) => setNote(e.target.value)}
                     />
                 </div>
                 
@@ -160,6 +175,29 @@ export default function AddUserForm({ user, onSubmit, onCancel, isSubmitting }: 
                     />
                 </div>
             </div>
+            
+            {user && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t pt-4">
+                    <div className="space-y-2">
+                        <Label>Created At</Label>
+                        <div className="p-2 bg-muted rounded-md text-sm text-muted-foreground">
+                            {user.createdAt ? format(new Date(user.createdAt), 'yyyy-MM-dd HH:mm:ss') : '-'}
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Updated At</Label>
+                        <div className="p-2 bg-muted rounded-md text-sm text-muted-foreground">
+                            {user.updatedAt ? format(new Date(user.updatedAt), 'yyyy-MM-dd HH:mm:ss') : '-'}
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Last Access</Label>
+                        <div className="p-2 bg-muted rounded-md text-sm text-muted-foreground">
+                            {user.lastAccess ? format(new Date(user.lastAccess), 'yyyy-MM-dd HH:mm:ss') : '-'}
+                        </div>
+                    </div>
+                </div>
+            )}
             
             <div className="flex justify-end space-x-2 pt-4">
                 <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>

@@ -1,0 +1,46 @@
+# Node modules
+**/node_modules
+**/npm-debug.log
+
+# Build output
+frontend/dist
+
+# Environment files
+**/.env
+
+# Upload directories
+backend/upload
+backend/uploads
+
+# Backup directories
+mongodb_backups
+upload_backups
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Qoder
+.qoder
+
+# Docker
+Dockerfile
+docker-compose.yml
+docker-*.sh
+
+# Misc
+*.md
+github.txt
+mongodb_backups
+upload_backups
+frontend/example

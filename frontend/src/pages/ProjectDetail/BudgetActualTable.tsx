@@ -165,7 +165,7 @@ export default function BudgetActualTable({ budgets, onDelete, onAddBudget, onSp
    
 
     return (
-        <div className="rounded-lg border bg-card p-6 shadow-sm">
+        <div className="rounded-lg border bg-teal-50 p-6 shadow-sm">
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-base font-medium text-muted-foreground flex items-center gap-2">
                     <span className="text-foreground font-semibold">Budget</span>
@@ -239,7 +239,6 @@ export default function BudgetActualTable({ budgets, onDelete, onAddBudget, onSp
                                 <TableHead><Power className="h-3 w-3 text-cyan-500" /></TableHead>
                                 <TableHead className="text-right">name</TableHead>
                                 <TableHead className="text-right">budget</TableHead>
-                                <TableHead className="text-right">updtBy</TableHead>
                                 <TableHead className="text-center w-36">
                                     <button 
                                         onClick={() => handleSort('dateEx')}
@@ -251,7 +250,8 @@ export default function BudgetActualTable({ budgets, onDelete, onAddBudget, onSp
                                 </TableHead>
 
                                 <TableHead  className="text-center">linkActual</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
+                                <TableHead className="text-right">updtBy</TableHead>
+                                <TableHead className="text-right">Del</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -280,14 +280,6 @@ export default function BudgetActualTable({ budgets, onDelete, onAddBudget, onSp
                                             {budget.typ && IconType(budget.typ)}
                                             {IconDone(budget.done)}
                                         </div>
-                                    </TableCell>
-                                    <TableCell className="text-right text-sm">
-                                        {budget.updatedBy?.name && (
-                                            <div className="text-xs text-muted-foreground">{budget.updatedBy.name}</div>
-                                        )}
-                                            {/* {budget.updatedBy?.email && (
-                                                <div className="text-xs text-muted-foreground">{budget.updatedBy.email}</div>
-                                            )} */}
                                     </TableCell>
                                     <TableCell className="text-center text-sm w-36">    
                                         {formatDate(budget.dateEx)}
@@ -331,6 +323,14 @@ export default function BudgetActualTable({ budgets, onDelete, onAddBudget, onSp
                                         ) : (
                                             <span className="text-xs text-muted-foreground">No actuals</span>
                                         )}
+                                    </TableCell>
+                                    <TableCell className="text-right text-sm">
+                                        {budget.updatedBy?.name && (
+                                            <div className="text-xs text-muted-foreground">{budget.updatedBy.name}</div>
+                                        )}
+                                            {/* {budget.updatedBy?.email && (
+                                                <div className="text-xs text-muted-foreground">{budget.updatedBy.email}</div>
+                                            )} */}
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <Button

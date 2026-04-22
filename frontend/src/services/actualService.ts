@@ -45,10 +45,16 @@ export interface Actual {
         typ?: 'income' | 'expense';
         done?: boolean;
         projectName?: string;
+        projectId?: string;
     };
     dateEx: string;
     createdAt: string;
     updatedAt: string;
+    // Flattened fields from backend transform
+    projectId?: string;
+    projectName?: string;
+    assigneeId?: string;
+    assigneeName?: string;
 }
 
 export interface UpdateActualData {
@@ -254,6 +260,29 @@ export const actualService = {
             }
         } catch (error) {
             console.error('Error attaching actuals to transaction:', error);
+            throw error;
+        }
+    },
+
+    async unAttachFromTrx(actualId: string, trxId: string): Promise<Actual[]> {
+        const token = userService.getToken();
+        if (!token) {
+            throw new Error('No authentication token found');
+        }
+
+        try {
+            const response = await axios.post(
+                `${API_BASE_URL}/actual/unAttachFromTrx`,
+                { actualId, trxId },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            if (response.data.success) {
+                return response.data.pyd;
+            } else {
+                throw new Error('Failed to unattach actual from transaction');
+            }
+        } catch (error) {
+            console.error('Error unattaching actual from transaction:', error);
             throw error;
         }
     }

@@ -8,4 +8,5 @@ module.exports = {
     cloneFromBudget: require('./cloneFromBudget'),
     registerActual: require('./registerActual'),
     attachToTrx: require('./attachToTrx'),
+    unAttachFromTrx: require('./unAttachFromTrx'),
 }

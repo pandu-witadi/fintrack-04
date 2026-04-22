@@ -4,7 +4,7 @@ const User = require('../../model/user')
 
 const registerUser = async (request, reply) => {
     try {
-        let { name, email, password, role, active, phone, bankInfo } = request.body
+        let { name, email, password, role, active, phone, note, bankInfo } = request.body
         
         // Check if user already exists
         const existingUser = await User.findOne({ email: email })
@@ -20,6 +20,7 @@ const registerUser = async (request, reply) => {
             role: role || 'user',
             active: active !== undefined ? active : true,
             phone: phone || '',
+            note: note || '',
             bankInfo: bankInfo || {
                 bankName: '',
                 accNo: '',

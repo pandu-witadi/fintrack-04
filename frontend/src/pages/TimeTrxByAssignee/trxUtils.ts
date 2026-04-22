@@ -124,6 +124,34 @@ export const calculateVariableMonthTotals = (
     return totals;
 };
 
+export const calculateDoneMonthTotals = (
+    groupedTrxs: GroupedTrxs,
+    monthRange: string[]
+): MonthTotals => {
+    const totals: MonthTotals = {};
+    monthRange.forEach((month: string) => {
+        totals[month] = 0;
+    });
+    
+    Object.entries(groupedTrxs).forEach(([_key, group]: [string, GroupedTrxGroup]) => {
+        const monthData = getTrxsByMonth(group.items, monthRange);
+        Object.entries(monthData).forEach(([month, dataList]) => {
+            dataList.forEach((data) => {
+                if (data.done) {
+                    const displayAmount = data.actAmount !== undefined ? data.actAmount : data.amount;
+                    if (data.typ === 'income') {
+                        totals[month] += displayAmount;
+                    } else {
+                        totals[month] -= displayAmount;
+                    }
+                }
+            });
+        });
+    });
+    
+    return totals;
+};
+
 export const filterTrxsByDateRange = (
     trxs: Trx[],
     startYm: string,
@@ -153,15 +181,26 @@ export const getSortedGroupedTrxs = (groupedTrxs: GroupedTrxs): Array<[string, G
         const dateA = getProjectStDate(groupA);
         const dateB = getProjectStDate(groupB);
 
-        // First, sort by project.stDate descending
-        if (dateA !== dateB) {
-            return dateB - dateA; // descending
+        // 1. Group by project._id (keep items of the same project together)
+        if (groupA.projectId !== groupB.projectId) {
+            return groupA.projectId.localeCompare(groupB.projectId);
         }
 
-        // If same project stDate, sort by typ: income first, then expense
+        // 2. Sort project groups by their stDate (descending)
+        if (dateA !== dateB) {
+            return dateB - dateA;
+        }
+
+        // 3. Inside each project group, sort by typ: income first, then expense
         const typeOrder: Record<string, number> = { 'income': 0, 'expense': 1 };
         const typA = typeOrder[groupA.items[0]?.typ] ?? 2;
         const typB = typeOrder[groupB.items[0]?.typ] ?? 2;
-        return typA - typB;
+        
+        if (typA !== typB) {
+            return typA - typB;
+        }
+
+        // Final tie-breaker: sort by name
+        return groupA.name.localeCompare(groupB.name);
     });
 };

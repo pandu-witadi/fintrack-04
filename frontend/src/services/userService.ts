@@ -11,14 +11,17 @@ export interface LoginCredentials {
     password: string;
 }
 
+export type UserRole = 'guest' | 'tax' | 'vendor' | 'user' | 'finance' | 'admin';
+
 export interface User {
     _id: string;
     name: string;
     email: string;
-    role: string;
+    role: UserRole;
     active: boolean;
     lastAccess?: string;
     phone?: string;
+    note?: string;
     bankInfo?: bankInfoPopulate;
 }
 
@@ -26,6 +29,7 @@ export interface UpdateProfileData {
     name?: string;
     email?: string;
     phone?: string;
+    note?: string;
     bankInfo?: bankInfoPopulate;
 }
 
@@ -36,6 +40,7 @@ export interface RegisterUserData {
     role?: string;
     active?: boolean;
     phone?: string;
+    note?: string;
     bankInfo?: bankInfoPopulate;
 }
 

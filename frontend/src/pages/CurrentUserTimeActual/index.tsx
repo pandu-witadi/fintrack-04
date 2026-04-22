@@ -1,4 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Link2 } from 'lucide-react';
+
 import { Card, CardContent } from '../../components/ui/card';
 import { Actual } from '../../services/actualService';
 import formatCurrency from '../../utils/formatCurrency';
@@ -23,6 +26,7 @@ import {
 
 
 export default function CurrentUserTimeActual() {
+    const navigate = useNavigate();
     const { user } = useAuth();
     const { getAllActualByAssignee, loading, error: hookError } = useActual();
     const [actuals, setActuals] = useState<Actual[]>([]);
@@ -136,8 +140,8 @@ export default function CurrentUserTimeActual() {
 
     // Extract month from dateEx and return amount info
     // Aggregates all actuals in the same month (sums amounts, checks done status)
-    const getActualsByMonth = (actualList: Actual[]): { [key: string]: { amount: number; done: boolean; typ: string } } => {
-        const result: { [key: string]: { amount: number; done: boolean; typ: string } } = {};
+    const getActualsByMonth = (actualList: Actual[]): { [key: string]: { amount: number; done: boolean; typ: string; trxId?: string } } => {
+        const result: { [key: string]: { amount: number; done: boolean; typ: string; trxId?: string } } = {};
         actualList.forEach((actual: Actual) => {
             if (actual.dateEx) {
                 const actualYm = getYearMonthFromDate(actual.dateEx);
@@ -146,7 +150,8 @@ export default function CurrentUserTimeActual() {
                         result[actualYm] = {
                             amount: 0,
                             done: false,
-                            typ: actual.typ || 'expense'
+                            typ: actual.typ || 'expense',
+                            trxId: actual.trx?._id
                         };
                     }
                     // Sum amounts
@@ -249,6 +254,17 @@ export default function CurrentUserTimeActual() {
                                                                         <div>{IconType(monthData.typ)}</div>
                                                                         <div>{IconDone(monthData.done)}</div>
                                                                     </div>
+                                                                    {monthData.trxId && (
+                                                                        <div className="flex items-center justify-end gap-1 mt-1">
+                                                                            <button
+                                                                                onClick={() => navigate(`/finance/trx/${monthData.trxId}`)}
+                                                                                className="text-blue-500 hover:text-blue-700 transition-colors"
+                                                                                title="View linked transaction"
+                                                                            >
+                                                                                <Link2 className="h-3 w-3" />
+                                                                            </button>
+                                                                        </div>
+                                                                    )}
                                                                 </div>
                                                             ) : (
                                                                 <span className="text-gray-300">—</span>

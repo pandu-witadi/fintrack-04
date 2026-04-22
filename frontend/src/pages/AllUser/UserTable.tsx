@@ -1,3 +1,4 @@
+import { useState, useMemo } from 'react';
 import { 
     Table, 
     TableBody, 
@@ -6,10 +7,10 @@ import {
     TableHeader, 
     TableRow 
 } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
 // ... existing code ...
-import { Power, Eye, Trash2, Edit } from 'lucide-react';
+import { Power, Eye, Trash2, Edit, Search } from 'lucide-react';
 import { User as AuthUser } from '@/services/userService';
 import { IconActive } from '@/components/IconActive';
 import { format } from 'date-fns';
@@ -47,6 +48,9 @@ export function UsersTable({
     sortOrder,
     onSort,
 }: UsersTableProps) {
+    const [searchByName, setSearchByName] = useState<string>('');
+    const [searchByNote, setSearchByNote] = useState<string>('');
+    
     const formatLastAccess = (dateString?: string) => {
         if (!dateString) return 'Never';
         const date = new Date(dateString);
@@ -69,8 +73,56 @@ export function UsersTable({
         onSort?.(field);
     };
 
+    // Filter users based on search terms
+    const filteredUsers = useMemo(() => {
+        let filtered = users;
+
+        // Filter by name if search term provided
+        if (searchByName) {
+            const searchNameLower = searchByName.toLowerCase();
+            filtered = filtered.filter(user =>
+                user.name.toLowerCase().includes(searchNameLower)
+            );
+        }
+
+        // Filter by note if search term provided
+        if (searchByNote) {
+            const searchNoteLower = searchByNote.toLowerCase();
+            filtered = filtered.filter(user =>
+                user.note && user.note.toLowerCase().includes(searchNoteLower)
+            );
+        }
+
+        return filtered;
+    }, [users, searchByName, searchByNote]);
+
     return (
-        <div className="rounded-md border">
+        <div className="flex flex-col gap-4">
+            {/* Search controls */}
+            <div className="flex items-center gap-2 flex-wrap">
+                <div className="relative w-64">
+                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        placeholder="Search by name..."
+                        value={searchByName}
+                        onChange={(e) => setSearchByName(e.target.value)}
+                        className="pl-8"
+                    />
+                </div>
+
+                <div className="relative w-56">
+                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        placeholder="Search by note..."
+                        value={searchByNote}
+                        onChange={(e) => setSearchByNote(e.target.value)}
+                        className="pl-8"
+                    />
+                </div>
+            </div>
+
+            {/* Table */}
+            <div className="rounded-md border">
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -92,6 +144,7 @@ export function UsersTable({
                             name{getSortIndicator('name')}
                         </TableHead>
                         <TableHead>email</TableHead>
+                        <TableHead>note</TableHead>
                         <TableHead className={`cursor-pointer hover:bg-muted transition-colors ${
                             sortField === 'role' ? 'bg-blue-100 dark:bg-blue-900' : 'hover:bg-blue-50 dark:hover:bg-blue-950'
                         }`} onClick={() => handleSort('role')}>
@@ -107,7 +160,7 @@ export function UsersTable({
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {users.map((user, index) => (
+                    {filteredUsers.map((user, index) => (
                         <TableRow key={user._id} className={`hover:bg-muted/50 ${
                             selectedIds.includes(user._id) ? 'bg-blue-50 dark:bg-blue-950' : ''
                         }`}>
@@ -119,8 +172,17 @@ export function UsersTable({
                                 />
                             </TableCell>
                             <TableCell>{IconActive(user.active)}</TableCell>
-                            <TableCell className="font-medium">{user.name}</TableCell>
+                            <TableCell className="font-medium">
+                                <button
+                                    onClick={() => canAddUsers ? onEditUser(user) : onViewDetails(user)}
+                                    className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left font-medium"
+                                    title={`${canAddUsers ? "Edit User" : "View Details"}\nCreated: ${formatDate(user.createdAt)}\nUpdated: ${formatDate(user.updatedAt)}\nLast Access: ${formatLastAccess(user.lastAccess)}`}
+                                >
+                                    {user.name}
+                                </button>
+                            </TableCell>
                             <TableCell>{user.email}</TableCell>
+                            <TableCell className="max-w-xs truncate" title={user.note || ''}>{user.note || '-'}</TableCell>
                             <TableCell>
                                 <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-secondary text-secondary-foreground">
                                     {user.role}
@@ -130,29 +192,13 @@ export function UsersTable({
                             <TableCell>{formatDate(user.updatedAt)}</TableCell>
                             <TableCell className="text-right">
                                 <div className="flex justify-end gap-2">
-                                    <button
-                                        onClick={() => onViewDetails(user)}
-                                        className="hover:opacity-70 transition-opacity"
-                                        title="View Details"
-                                    >
-                                        <Eye className="h-4 w-4 text-gray-500" />
-                                    </button>
-                                    {canAddUsers && (
-                                        <button
-                                            onClick={() => onEditUser(user)}
-                                            className="hover:opacity-70 transition-opacity"
-                                            title="Edit"
-                                        >
-                                            <Edit className="h-4 w-4 text-gray-500" />
-                                        </button>
-                                    )}
                                     {canAddUsers && (
                                         <button
                                             onClick={() => onDeleteUser(user)}
                                             className="hover:opacity-70 transition-opacity"
                                             title="Delete"
                                         >
-                                            <Trash2 className="h-4 w-4 text-gray-500" />
+                                            <Trash2 className="h-4 w-4 text-red-500" />
                                         </button>
                                     )}
                                 </div>
@@ -161,6 +207,14 @@ export function UsersTable({
                     ))}
                 </TableBody>
             </Table>
+        </div>
+        
+        {/* Result count */}
+        <div className="text-sm text-muted-foreground">
+            {filteredUsers.length > 0 
+                ? `${filteredUsers.length} of ${users.length} user(s)` 
+                : `No users found`}
+        </div>
         </div>
     );
 }

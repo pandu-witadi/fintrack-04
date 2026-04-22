@@ -1,5 +1,5 @@
 /**
- * Actual table component for TimeActual
+ * Actual table component for TimeActualByAssignee
  */
 
 import React from 'react';
@@ -9,12 +9,15 @@ import { IconDone } from '../../components/IconDone';
 import { IconType } from '../../components/IconType';
 import { GroupedActuals, ActualsByMonth, MonthTotals, SelectedRows } from './types';
 import { getSortedGroupedActuals } from './actualUtils';
+import { Link2 } from 'lucide-react';
+
 
 interface ActualTableProps {
     groupedActuals: GroupedActuals;
     monthRange: string[];
     monthTotals: MonthTotals;
     variableMonthTotals: MonthTotals;
+    doneMonthTotals: MonthTotals;
     selectedRows: SelectedRows;
     getActualsByMonth: (actualList: any[]) => ActualsByMonth;
     onRowSelect: (key: string) => void;
@@ -28,6 +31,7 @@ export const ActualTable: React.FC<ActualTableProps> = ({
     monthRange,
     monthTotals,
     variableMonthTotals,
+    doneMonthTotals,
     selectedRows,
     getActualsByMonth,
     onRowSelect,
@@ -58,7 +62,7 @@ export const ActualTable: React.FC<ActualTableProps> = ({
                                     className="rounded border-gray-300 cursor-pointer"
                                     title="Select all rows"
                                 />
-                                <span>Actual Name</span>
+                                <span>Actual Name ({Object.values(selectedRows).filter(Boolean).length})</span>
                             </div>
                         </th>
                         {monthRange.map(month => (
@@ -68,6 +72,7 @@ export const ActualTable: React.FC<ActualTableProps> = ({
                             >
                                 <div className="text-sm">{month}</div>
                                 <div className="text-xs text-cyan-700 font-normal mt-1">{formatCurrency(variableMonthTotals[month])}</div>
+                                <div className="text-xs text-emerald-700 font-normal">{formatCurrency(doneMonthTotals[month])}</div>
                                 <div className="text-xs text-gray-500 font-normal">{formatCurrency(monthTotals[month])}</div>
                             </th>
                         ))}
@@ -118,9 +123,22 @@ export const ActualTable: React.FC<ActualTableProps> = ({
                                                                 <div>{IconType(monthData.typ)}</div>
                                                                 <div>{IconDone(monthData.done)}</div>
                                                             </div>
-                                                            {monthData.assignee && (
-                                                                <span className="text-gray-500 text-xs">{monthData.assignee.name}</span>
-                                                            )}
+                                                            <div className="flex items-center justify-end gap-1">
+                                                                {monthData.assignee && (
+                                                                    <span className="text-gray-500 text-xs">{monthData.assignee.name}</span>
+                                                                )}
+                                                                {monthData.trxId && (
+                                                                    <div className="flex items-center justify-end gap-1">
+                                                                        <button
+                                                                            onClick={() => navigate(`/finance/trx/${monthData.trxId}`)}
+                                                                            className="text-blue-500 hover:text-blue-700 transition-colors"
+                                                                            title="View linked transaction"
+                                                                        >
+                                                                            <Link2 className="h-3 w-3" />
+                                                                        </button>
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     ))}
                                                 </div>

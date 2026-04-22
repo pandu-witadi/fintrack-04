@@ -1,5 +1,5 @@
 /**
- * Type definitions for TimeTrx component
+ * Type definitions for TimeTrxByAssignee component
  */
 
 import { Trx } from '../../services/trxService';

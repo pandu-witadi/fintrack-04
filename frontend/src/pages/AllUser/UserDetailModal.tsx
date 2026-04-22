@@ -12,7 +12,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useAuth } from '@/context/AuthContext';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import type { User } from './index';
 
 interface UserDetailsModalProps {
@@ -28,6 +28,7 @@ export function UserDetailModal({ user, open, onOpenChange, onUpdate }: UserDeta
     name: '',
     email: '',
     phone: '',
+    note: '',
     bankName: '',
     accNo: '',
     accName: '',
@@ -40,7 +41,8 @@ export function UserDetailModal({ user, open, onOpenChange, onUpdate }: UserDeta
       setFormData({
         name: user.name || '',
         email: user.email || '',
-        phone: user.phone || '',  
+        phone: user.phone || '',
+        note: user.note || '',
         bankName: user.bankInfo?.bankName || '',
         accNo: user.bankInfo?.accNo || '',
         accName: user.bankInfo?.accName || ''
@@ -71,6 +73,7 @@ export function UserDetailModal({ user, open, onOpenChange, onUpdate }: UserDeta
           name: formData.name,
           email: formData.email,
           phone: formData.phone,
+          note: formData.note,
           bankInfo: {
             bankName: formData.bankName,
             accNo: formData.accNo,
@@ -84,6 +87,7 @@ export function UserDetailModal({ user, open, onOpenChange, onUpdate }: UserDeta
           name: formData.name,
           email: formData.email,
           phone: formData.phone,
+          note: formData.note,
           bankInfo: {
             bankName: formData.bankName,
             accNo: formData.accNo,
@@ -109,6 +113,7 @@ export function UserDetailModal({ user, open, onOpenChange, onUpdate }: UserDeta
         name: user.name || '',
         email: user.email || '',
         phone: user.phone || '',
+        note: user.note || '',
         bankName: user.bankInfo?.bankName || '',
         accNo: user.bankInfo?.accNo || '',
         accName: user.bankInfo?.accName || '',
@@ -182,6 +187,15 @@ export function UserDetailModal({ user, open, onOpenChange, onUpdate }: UserDeta
                   id="phone"
                   name="phone"
                   value={formData.phone}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div>
+                <Label htmlFor="note">Note</Label>
+                <Input
+                  id="note"
+                  name="note"
+                  value={formData.note}
                   onChange={handleInputChange}
                 />
               </div>
@@ -299,6 +313,12 @@ export function UserDetailModal({ user, open, onOpenChange, onUpdate }: UserDeta
                 <Label>Phone</Label>
                 <div className="mt-1 p-2 bg-muted rounded-md">
                   {user.phone || 'Not provided'}
+                </div>
+              </div>
+              <div>
+                <Label>Note</Label>
+                <div className="mt-1 p-2 bg-muted rounded-md">
+                  {user.note || 'Not provided'}
                 </div>
               </div>
               <div>

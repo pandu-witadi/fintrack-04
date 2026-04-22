@@ -68,8 +68,16 @@ export default function Sidebar() {
         { title: 'Finance', isSeparator: true, roles: ['admin', 'finance'] },
         { title: 'All Projects', href: '/finance/allProject', icon: <FolderKanban className="h-5 w-5" />, roles: ['admin', 'finance'] },
         { title: 'Time Budget', href: '/finance/time-budget', icon: <PiggyBank className="h-5 w-5" />, roles: ['admin', 'finance'] },
-        { title: 'Time Actual', href: '/finance/time-actual', icon: <History className="h-5 w-5" />, roles: ['admin', 'finance'] },
-        { title: 'Time Trx', href: '/finance/time-trx', icon: <ArrowLeftRight className="h-5 w-5" />, roles: ['admin', 'finance'] },
+
+        // { title: 'Time Actual', href: '/finance/time-actual', icon: <History className="h-5 w-5" />, roles: ['admin', 'finance'] },
+        // { title: 'Time Actual By Assignee', href: '/finance/time-actual-by-assignee', icon: <Users className="h-5 w-5" />, roles: ['admin', 'finance'] },
+        { title: 'Time Actual', href: '/finance/time-actual-by-assignee', icon: <History className="h-5 w-5" />, roles: ['admin', 'finance'] },
+        
+        // { title: 'Time Trx', href: '/finance/time-trx', icon: <ArrowLeftRight className="h-5 w-5" />, roles: ['admin', 'finance'] },
+        // { title: 'Time Trx By Assignee', href: '/finance/time-trx-by-assignee', icon: <Users className="h-5 w-5" />, roles: ['admin', 'finance'] },
+        { title: 'Time Trx', href: '/finance/time-trx-by-assignee', icon: <ArrowLeftRight className="h-5 w-5" />, roles: ['admin', 'finance'] },
+        
+        
         { title: 'Manage', isSeparator: true, roles: ['admin'] },
         { title: 'All User', href: '/manage/allUser', icon: <Users className="h-5 w-5" />, roles: ['admin'] },
         { title: 'Account', isSeparator: true },

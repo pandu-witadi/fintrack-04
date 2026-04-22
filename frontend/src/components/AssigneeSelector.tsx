@@ -82,7 +82,7 @@ export default function AssigneeSelector({ selectedAssignee, onAssigneeChange, i
 
     return (
         <div className="space-y-2" data-assignee-selector>
-            <Label>Assignee</Label>
+            {/* <Label>Assignee</Label> */}
             <div className="relative">
                 {/* Show selected assignee or search input */}
                 {selectedAssignee ? (
