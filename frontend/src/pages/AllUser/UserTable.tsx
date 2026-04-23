@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
     Table, 
     TableBody, 
@@ -96,6 +97,8 @@ export function UsersTable({
         return filtered;
     }, [users, searchByName, searchByNote]);
 
+    const navigate = useNavigate();
+
     return (
         <div className="flex flex-col gap-4">
             {/* Search controls */}
@@ -174,9 +177,9 @@ export function UsersTable({
                             <TableCell>{IconActive(user.active)}</TableCell>
                             <TableCell className="font-medium">
                                 <button
-                                    onClick={() => canAddUsers ? onEditUser(user) : onViewDetails(user)}
+                                    onClick={() => navigate(`/manage/user/${user._id}`)}
                                     className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left font-medium"
-                                    title={`${canAddUsers ? "Edit User" : "View Details"}\nCreated: ${formatDate(user.createdAt)}\nUpdated: ${formatDate(user.updatedAt)}\nLast Access: ${formatLastAccess(user.lastAccess)}`}
+                                    title={`View User Details\nCreated: ${formatDate(user.createdAt)}\nUpdated: ${formatDate(user.updatedAt)}\nLast Access: ${formatLastAccess(user.lastAccess)}`}
                                 >
                                     {user.name}
                                 </button>

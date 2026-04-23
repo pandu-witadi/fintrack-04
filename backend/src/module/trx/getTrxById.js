@@ -56,8 +56,6 @@ const getTrxById = async (request, reply) => {
         })
         .lean({ virtuals: true })
 
-        console.log(trx)
-
         if (!trx) {
             throw new AppError('Transaction not found', 404)
         }

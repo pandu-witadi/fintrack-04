@@ -16,7 +16,8 @@ const app = require('fastify')({ logger: true })
 const API_PTH = '/api'
 
 // Register Helmet for security headers
-app.register(fastifyHelmet, {
+// app.register(fastifyHelmet, {
+    // hsts: false, // Disable HSTS - server runs HTTP only, prevents ERR_SSL_PROTOCOL_ERROR
     // contentSecurityPolicy: {
     //     directives: {
     //         defaultSrc: ["'self'"],
@@ -27,16 +28,16 @@ app.register(fastifyHelmet, {
     // },
     // crossOriginEmbedderPolicy: false, // Disable for frontend assets
     // crossOriginResourcePolicy: { policy: 'cross-origin' },
-    // hsts: {
+    // hsts: { 
     //     maxAge: 31536000, // 1 year in seconds
     //     includeSubDomains: true,
     //     preload: true
     // },
-    frameguard: {
-        action: 'deny' // Prevent clickjacking
-    },
-    noSniff: true, // Prevent MIME type sniffing
-    xssFilter: true, // Enable XSS filter
+    // frameguard: {
+        // action: 'deny' // Prevent clickjacking
+    // },
+    // noSniff: true, // Prevent MIME type sniffing
+    // xssFilter: true, // Enable XSS filter
     // referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
     // permissionsPolicy: {
     //     features: {
@@ -45,7 +46,7 @@ app.register(fastifyHelmet, {
     //         camera: ["'none'"]
     //     }
     // }
-})
+// })
 
 // Register plugins
 app.register(fastifyCors, {

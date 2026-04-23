@@ -112,6 +112,7 @@ export default function AddUserForm({ user, onSubmit, onCancel, isSubmitting }: 
                           <SelectItem value="user">user</SelectItem>
                           <SelectItem value="finance">finance</SelectItem>
                           <SelectItem value="admin">admin</SelectItem>
+                          <SelectItem value="other">other</SelectItem>
                       </SelectContent>
                     </Select>
                 </div>

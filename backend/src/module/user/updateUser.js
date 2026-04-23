@@ -36,7 +36,7 @@ const updateUser = async (request, reply) => {
 
             return {
                 success: true,
-                pyd: updatedUser,
+                pyd: updatedUser.toJSON(),
                 message: 'User updated successfully'
             }
         } else {

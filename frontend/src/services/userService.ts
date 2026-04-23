@@ -11,7 +11,14 @@ export interface LoginCredentials {
     password: string;
 }
 
-export type UserRole = 'guest' | 'tax' | 'vendor' | 'user' | 'finance' | 'admin';
+export type UserRole = 'guest' | 'tax' | 'vendor' | 'user' | 'finance' | 'admin' | 'other';
+
+export interface DepositTrx {
+    _id: string;
+    amount: number;
+    date: string;
+    note: string;
+}
 
 export interface User {
     _id: string;
@@ -23,6 +30,8 @@ export interface User {
     phone?: string;
     note?: string;
     bankInfo?: bankInfoPopulate;
+    total?: number;
+    deposit?: DepositTrx[];
 }
 
 export interface UpdateProfileData {
@@ -42,6 +51,7 @@ export interface RegisterUserData {
     phone?: string;
     note?: string;
     bankInfo?: bankInfoPopulate;
+    deposit?: DepositTrx[];
 }
 
 export interface RegisterUserResponse {

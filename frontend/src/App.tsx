@@ -23,12 +23,13 @@ const BudgetDetail = lazy(() => import('./pages/BudgetDetail'))
 const ActualDetail = lazy(() => import('./pages/ActualDetail'))
 const TrxDetail = lazy(() => import('./pages/TrxDetail'))
 const TimeBudget = lazy(() => import('./pages/TimeBudget'))
-const TimeActual = lazy(() => import('./pages/TimeActual'))
+// const TimeActual = lazy(() => import('./pages/TimeActual'))
 const TimeActualByAssignee = lazy(() => import('./pages/TimeActualByAssignee'))
-const TimeTrx = lazy(() => import('./pages/TimeTrx'))
+// const TimeTrx = lazy(() => import('./pages/TimeTrx'))
 const TimeTrxByAssignee = lazy(() => import('./pages/TimeTrxByAssignee'))
 const CurrentUserTimeActual = lazy(() => import('./pages/CurrentUserTimeActual'))
 const CurrentUserTimeTrx = lazy(() => import('./pages/CurrentUserTimeTrx'))
+const UserDetail = lazy(() => import('./pages/UserDetail'))
 
 function AppRoutes() {
     return (
@@ -50,8 +51,13 @@ function AppRoutes() {
                         
                     {/* manage sub-routes */}
                     <Route path="/manage/allUser" element={
-                        <ProtectedRoute roles={['admin']}>
+                        <ProtectedRoute roles={['admin', 'finance']}>
                             <AllUser />
+                        </ProtectedRoute>
+                    } />
+                    <Route path="/manage/user/:id" element={
+                        <ProtectedRoute roles={['admin', 'finance']}>
+                            <UserDetail />
                         </ProtectedRoute>
                     } />
                                    
@@ -88,21 +94,21 @@ function AppRoutes() {
                             <TimeBudget />
                         </ProtectedRoute>
                     } />
-                    <Route path="/finance/time-actual" element={
+                    {/* <Route path="/finance/time-actual" element={
                         <ProtectedRoute roles={['admin', 'finance']}>
                             <TimeActual />
                         </ProtectedRoute>
-                    } />
+                    } /> */}
                     <Route path="/finance/time-actual-by-assignee" element={
                         <ProtectedRoute roles={['admin', 'finance']}>
                             <TimeActualByAssignee />
                         </ProtectedRoute>
                     } />
-                    <Route path="/finance/time-trx" element={
+                    {/* <Route path="/finance/time-trx" element={
                         <ProtectedRoute roles={['admin', 'finance']}>
                             <TimeTrx />
                         </ProtectedRoute>
-                    } />
+                    } /> */}
                     <Route path="/finance/time-trx-by-assignee" element={
                         <ProtectedRoute roles={['admin', 'finance']}>
                             <TimeTrxByAssignee />

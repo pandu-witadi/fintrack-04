@@ -8,7 +8,6 @@ const getAllTrxByAssignee = async (request, reply) => {
         if (!assigneeId) {
             throw new AppError('Assignee ID is required', 400)
         }
-        console.log(assigneeId)
 
         const trxs = await Trx.find({ assignee: assigneeId })
         .sort({ createdAt: -1 })

@@ -1,0 +1,1 @@
+import{j as t}from"./index-CG6olIr-.js";const x=e=>e=="income"?t.jsx("button",{className:"bg-green-100 text-cyan-600 text-xs px-1 py-1 rounded-none",title:`type: ${e}`,children:"in"}):t.jsx("button",{className:"bg-pink-100 text-cyan-700 text-xs px-1 py-1 rounded-none",title:`type: ${e}`,children:"ex"});export{x as I};

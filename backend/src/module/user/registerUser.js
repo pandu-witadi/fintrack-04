@@ -12,7 +12,7 @@ const registerUser = async (request, reply) => {
             throw new AppError('Email already in use', 400)
         }
 
-        // Create new user
+        // Create new user with empty deposit array
         const user = await User.create({
             name: name,
             email: email,
@@ -25,7 +25,8 @@ const registerUser = async (request, reply) => {
                 bankName: '',
                 accNo: '',
                 accName: ''
-            }
+            },
+            deposit: []
         })
         
         // Remove password from response
@@ -33,7 +34,7 @@ const registerUser = async (request, reply) => {
 
         reply.send({
             success: true,
-            pyd: user
+            pyd: user.toJSON()
         })
     } catch (error) {
         throw new AppError(error.message || 'Failed to register user', error.statusCode || 500)

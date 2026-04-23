@@ -1,7 +1,6 @@
 const AppError = require('../../util/appError')
 const User = require('../../model/user')
 
-
 const deleteUser = async (request, reply) => {
     try {
         const user = await User.findByIdAndDelete(request.params.id)

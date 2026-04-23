@@ -3,7 +3,8 @@ const User = require('../../model/user')
 
 const getUserById = async (request, reply) => {
     try {
-        const user = await User.findById(request.params.id).select('-password -__v')
+        const user = await User.findById(request.params.id)
+            .select('-password -__v')
 
         if (!user) {
             throw new AppError('User not found', 404)
@@ -11,7 +12,7 @@ const getUserById = async (request, reply) => {
 
         return {
             success: true,
-            pyd: user
+            pyd: user.toJSON()
         }
     } catch (error) {
         if (error.kind === 'ObjectId') {

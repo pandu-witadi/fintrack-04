@@ -10,7 +10,7 @@ const getAllUser = async (request, reply) => {
 
         return {
             success: true,
-            pyd: users
+            pyd: users.map(user => user.toJSON())
         }
     } catch (error) {
         throw new AppError('Failed to fetch users', 500)

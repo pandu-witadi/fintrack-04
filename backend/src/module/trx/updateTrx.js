@@ -34,7 +34,6 @@ const updateTrx = async (request, reply) => {
             }
             // else proceed with different actAmount
         }
-        console.log(updateData)
 
         const trx = await Trx.findByIdAndUpdate(
             id,

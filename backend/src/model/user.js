@@ -1,7 +1,23 @@
-//
 const mongoose = require('mongoose')
 
 const { bankInfo } = require('./constant')
+
+const depositTrx = {
+    amount: { 
+        type: Number, 
+        trim: true,
+        default: 0 
+    },
+    date: { 
+        type: Date, 
+        default: Date.now 
+    },
+    note: { 
+        type: String, 
+        trim: true,
+        default: '' 
+    },
+}
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -29,7 +45,7 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['guest', 'tax', 'vendor', 'user', 'finance', 'admin'],
+        enum: ['guest', 'tax', 'vendor', 'user', 'finance', 'admin', 'other'],
         default: 'user',
     },
     active: {
@@ -49,10 +65,47 @@ const userSchema = new mongoose.Schema({
         type: String,
         trim: true,
     },
+    deposit: {
+        type: [depositTrx],
+        default: []
+    }
 
 }, {
     timestamps: true,
     collection: 'user'
+})
+
+// Virtual to calculate total deposit on the fly
+userSchema.virtual('total').get(function () {
+    return (this.deposit || []).reduce((sum, d) => sum + (d.amount || 0), 0)
+})
+
+userSchema.set('toJSON', {
+    virtuals: true,
+    transform: (doc, ret) => {
+        if (ret._id) ret._id = ret._id.toString()
+        if (ret.deposit && Array.isArray(ret.deposit)) {
+            ret.deposit.forEach((d, i) => {
+                if (d._id) ret.deposit[i]._id = d._id.toString()
+            })
+        }
+        delete ret.__v
+        return ret
+    }
+})
+
+userSchema.set('toObject', {
+    virtuals: true,
+    transform: (doc, ret) => {
+        if (ret._id) ret._id = ret._id.toString()
+        if (ret.deposit && Array.isArray(ret.deposit)) {
+            ret.deposit.forEach((d, i) => {
+                if (d._id) ret.deposit[i]._id = d._id.toString()
+            })
+        }
+        delete ret.__v
+        return ret
+    }
 })
 
 // Check if model already exists to prevent OverwriteModelError

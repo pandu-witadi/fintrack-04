@@ -23,6 +23,21 @@ const bankInfo = {
     }
 }
 
+const depositTrx = {
+    type: 'object',
+    properties: {
+        _id: { type: 'string' },
+        amount: { type: 'number' },
+        date: { type: 'string', format: 'date-time' },
+        note: { type: 'string' }
+    }
+}
+
+const deposit = {
+    type: 'array',
+    items: depositTrx
+}
+
 const resp_200 = {
     type: 'object',
     properties: {
@@ -39,6 +54,8 @@ const resp_200 = {
                 phone: { type: 'string' },
                 note: { type: 'string' },
                 bankInfo: bankInfo,
+                total: { type: 'number' },
+                deposit: deposit,
                 createdAt: { type: 'string', format: 'date-time' },
                 updatedAt: { type: 'string', format: 'date-time' }
             }
@@ -134,7 +151,7 @@ async function userApi(fastify, options) {
     fastify.route({
         method: 'GET',
         url: '/me',
-        preHandler: [protect, restrictTo(['guest', 'tax', 'vendor', 'user', 'project_manager', 'finance', 'admin'])],
+        preHandler: [protect, restrictTo(['guest', 'tax', 'vendor', 'user', 'project_manager', 'finance', 'admin', 'other'])],
         handler: getMe,
         schema: {
             tags: ['user'],
@@ -168,7 +185,7 @@ async function userApi(fastify, options) {
     fastify.route({
         method: 'GET',
         url: '/:id',
-        preHandler: [protect, restrictTo(['guest', 'tax', 'vendor', 'user', 'project_manager', 'finance', 'admin'])],
+        preHandler: [protect, restrictTo(['guest', 'tax', 'vendor', 'user', 'project_manager', 'finance', 'admin', 'other'])],
         handler: getUserById,
         schema: {
             tags: ['user'],
@@ -233,7 +250,7 @@ async function userApi(fastify, options) {
     fastify.route({
         method: 'PATCH',
         url: '/:id',
-        preHandler: [protect, restrictTo(['guest', 'tax', 'vendor', 'user', 'project_manager', 'finance', 'admin'])],
+        preHandler: [protect, restrictTo(['guest', 'tax', 'vendor', 'user', 'project_manager', 'finance', 'admin', 'other'])],
         handler: updateUser,
         schema: {
             tags: ['user'],
@@ -248,6 +265,20 @@ async function userApi(fastify, options) {
                     id: { type: 'string', description: 'User ID' }
                 },
                 required: ['id']
+            },
+            body: {
+                type: 'object',
+                properties: {
+                    name: { type: 'string' },
+                    email: { type: 'string' },
+                    password: { type: 'string' },
+                    role: { type: 'string' },
+                    active: { type: 'boolean' },
+                    phone: { type: 'string' },
+                    note: { type: 'string' },
+                    bankInfo: bankInfo,
+                    deposit: deposit
+                }
             },
             response: {
                 200: resp_200,

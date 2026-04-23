@@ -46,7 +46,6 @@ const deleteActual = async (request, reply) => {
                     }
                 }
             })
-            console.log(trx)
 
             if (!trx) {
                 throw new AppError('Trx not found', 404)
@@ -71,7 +70,6 @@ const deleteActual = async (request, reply) => {
         if (error.kind === 'ObjectId') {
             throw new AppError('Invalid actual ID', 400)
         }
-        console.log(error)
         throw new AppError(error.message || 'Failed to delete actual', error.statusCode || 500)
     }
 }

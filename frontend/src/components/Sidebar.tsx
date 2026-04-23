@@ -78,8 +78,8 @@ export default function Sidebar() {
         { title: 'Time Trx', href: '/finance/time-trx-by-assignee', icon: <ArrowLeftRight className="h-5 w-5" />, roles: ['admin', 'finance'] },
         
         
-        { title: 'Manage', isSeparator: true, roles: ['admin'] },
-        { title: 'All User', href: '/manage/allUser', icon: <Users className="h-5 w-5" />, roles: ['admin'] },
+        { title: 'Manage', isSeparator: true, roles: ['admin', 'finance'] },
+        { title: 'All User', href: '/manage/allUser', icon: <Users className="h-5 w-5" />, roles: ['admin', 'finance'] },
         { title: 'Account', isSeparator: true },
         { title: 'Profile', href: '/profile', icon: <User className="h-5 w-5" /> },
     ];

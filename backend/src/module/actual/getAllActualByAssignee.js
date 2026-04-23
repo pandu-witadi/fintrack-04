@@ -8,7 +8,6 @@ const getAllActualByAssignee = async (request, reply) => {
         if (!assigneeId) {
             throw new AppError('Assignee ID is required', 400)
         }
-        console.log(assigneeId)
 
         const actuals = await Actual.find({ assignee: assigneeId })
         .sort({ createdAt: -1 })
@@ -64,7 +63,6 @@ const getAllActualByAssignee = async (request, reply) => {
             pyd: actuals
         }
     } catch (error) {
-        console.log(error)
         throw new AppError('Failed to fetch actuals for assignee', 500)
     }
 }

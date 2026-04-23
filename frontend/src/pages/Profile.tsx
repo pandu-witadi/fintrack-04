@@ -31,7 +31,6 @@ export default function ProfilePage() {
             try {
                 if (user?._id) {
                 const userData = await userService.getUserById(user._id);
-                console.log('User Data:', userData);
                 setProfileData(userData);
                 setFormData({
                     name: userData.name || '',
